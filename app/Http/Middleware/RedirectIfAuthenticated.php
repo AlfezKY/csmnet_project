@@ -21,7 +21,14 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                $role = Auth::user()->role;
+
+                // Biar gak salah alamat pas user udah login tapi coba buka halaman login lagi
+                if ($role === 'Admin' || $role === 'Owner') {
+                    return redirect('/dashboard');
+                }
+
+                return redirect('/client-portal');
             }
         }
 
