@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ClientController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Client\ClientController;
 
 // 1. GUEST (Orang yang belum login)
 Route::middleware('guest')->group(function () {
@@ -24,6 +26,8 @@ Route::middleware('auth')->group(function () {
     // Khusus Admin & Owner
     Route::middleware(['checkRole:Admin,Owner'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('users', UserController::class);
+        Route::resource('pelanggan', PelangganController::class);
     });
 
     // Khusus Pelanggan

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Pelanggan;
@@ -22,6 +23,6 @@ class DashboardController extends Controller
             'pendapatan'     => '12.500.000',
         ];
 
-        return view('dashboard.index', $data);
+        return view('admin.dashboard', $data);
     }
 }
