@@ -43,39 +43,46 @@
         <table class="w-full text-left text-gray-600 border-collapse">
             <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
                 <tr>
-                    <th class="px-4 py-4">
+                    <th class="px-6 py-4">
                         <div class="flex items-center gap-1 cursor-pointer hover:text-gray-900 transition-colors">
                             Nama Lengkap
                             <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 15 4 4 4-4m0-6-4-4-4 4"/></svg>
                         </div>
                     </th>
-                    <th class="px-4 py-4">Username</th>
-                    <th class="px-4 py-4 text-center">Role</th>
-                    <th class="px-4 py-4 text-center">Created Date</th>
-                    <th class="px-4 py-4 text-center">Update Date</th>
-                    <th class="px-4 py-4 text-center">Created By</th>
-                    <th class="px-4 py-4 text-center">Updated By</th>
-                    <th class="px-4 py-4 text-right">Aksi</th>
+                    <th class="px-6 py-4">Username</th>
+                    <th class="px-6 py-4 text-center">Role</th>
+                    <th class="px-6 py-4 text-center">Dibuat Pada</th>
+                    <th class="px-6 py-4 text-center">Update Terakhir</th>
+                    <th class="px-6 py-4 text-right">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse($users as $user)
                 <tr class="hover:bg-gray-50/50 transition-colors group">
-                    <td class="px-4 py-4 text-sm font-bold text-gray-900">{{ $user->fullname }}</td>
-                    <td class="px-4 py-4 text-sm text-gray-500 font-medium">{{ $user->username }}</td>
-                    <td class="px-4 py-4 text-center">
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900">{{ $user->fullname }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $user->username }}</td>
+                    <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 rounded-md text-xs font-bold uppercase border
                             {{ $user->role == 'Owner' ? 'bg-purple-50 text-purple-700 border-purple-100' : ($user->role == 'Admin' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-gray-50 text-gray-600 border-gray-200') }}">
                             {{ $user->role }}
                         </span>
                     </td>
-                    <td class="px-4 py-4 text-[11px] text-gray-500 text-center font-bold">{{ $user->created_at->format('d/m/y') }}</td>
-                    <td class="px-4 py-4 text-[11px] text-gray-500 text-center font-bold">
-                        {{ $user->updated_by ? $user->updated_at->format('d/m/y') : '-' }}
+                    
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-500 font-bold">{{ $user->created_at->format('d M Y') }}</span>
+                            <span class="text-[10px] text-gray-400 uppercase font-medium">{{ $user->created_by ?? 'SYSTEM' }}</span>
+                        </div>
                     </td>
-                    <td class="px-4 py-4 text-[10px] text-gray-400 font-bold uppercase text-center">{{ $user->created_by ?? 'SYSTEM' }}</td>
-                    <td class="px-4 py-4 text-[10px] text-gray-400 font-bold uppercase text-center">{{ $user->updated_by ?? '-' }}</td>
-                    <td class="px-4 py-4 text-right">
+
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-500 font-bold">{{ $user->updated_by ? $user->updated_at->format('d M Y') : '-' }}</span>
+                            <span class="text-[10px] text-gray-400 uppercase font-medium">{{ $user->updated_by ?? '-' }}</span>
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-1">
                             <button @click="openEdit = true; editData = { id: '{{ $user->id }}', fullname: '{{ $user->fullname }}', role: '{{ $user->role }}' }" 
                                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
@@ -90,7 +97,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-400 font-medium">Belum ada data pengguna.</td>
+                    <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-400 font-medium">Belum ada data pengguna.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -98,9 +105,9 @@
     </div>
 
     <div x-show="openAdd" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
-            <h4 class="text-lg font-bold text-gray-900 mb-1 text-center">Tambah User Baru</h4>
-            <p class="text-sm text-gray-500 mb-6 text-center">Isi data akun administrator, pelanggan atau owner baru</p>
+        <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
+            <h4 class="text-xl font-bold text-gray-900 mb-1">Tambah User Baru</h4>
+            <p class="text-sm text-gray-500 mb-6">Isi data akun administrator, pelanggan atau owner baru</p>
             
             <form action="{{ route('users.store') }}" method="POST" class="space-y-4" 
                   x-data="{ 
@@ -114,40 +121,46 @@
                   }" 
                   @submit="isSubmitting = true">
                 @csrf
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Lengkap</label>
-                    <input type="text" name="fullname" placeholder="Contoh: Risky Alfarez" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium transition-all" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username</label>
-                    <input type="text" name="username" placeholder="username" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium transition-all" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Role / Hak Akses</label>
-                    <select name="role" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-pointer">
-                        <option value="Admin">Admin</option>
-                        <option value="Owner">Owner</option>
-                        <option value="Pelanggan">Pelanggan</option>
-                    </select>
-                </div>
                 
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
-                    <div class="relative">
-                        <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" placeholder="Buat password aman" 
-                               class="w-full text-sm p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium transition-all" 
-                               :class="(password.length > 0 && !isPasswordValid) ? 'border-red-400 focus:ring-red-500' : 'border-gray-100'" required>
-                        <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                            <svg x-show="showPassword" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
-                        </button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Lengkap</label>
+                        <input type="text" name="fullname" placeholder="Contoh: Risky Alfarez" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium transition-all" required>
                     </div>
-                    <p class="text-[10px] mt-1.5 font-medium transition-colors duration-200" :class="(password.length > 0 && !isPasswordValid) ? 'text-red-500' : 'text-gray-400'">
-                        * Minimal 8 karakter, wajib kombinasi huruf & angka
-                    </p>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username</label>
+                        <input type="text" name="username" placeholder="username" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium transition-all" required>
+                    </div>
                 </div>
 
-                <div class="flex gap-3 pt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Role / Hak Akses</label>
+                        <select name="role" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-pointer">
+                            <option value="Admin">Admin</option>
+                            <option value="Owner">Owner</option>
+                            <option value="Pelanggan">Pelanggan</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+                        <div class="relative">
+                            <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" placeholder="Buat password aman" 
+                                   class="w-full text-sm p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium transition-all" 
+                                   :class="(password.length > 0 && !isPasswordValid) ? 'border-red-400 focus:ring-red-500' : 'border-gray-100'" required>
+                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                                <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg x-show="showPassword" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
+                            </button>
+                        </div>
+                        <p class="text-[10px] mt-1.5 font-medium transition-colors duration-200" :class="(password.length > 0 && !isPasswordValid) ? 'text-red-500' : 'text-gray-400'">
+                            * Min. 8 karakter, wajib huruf & angka
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-gray-100">
                     <button type="button" @click="openAdd = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
                     <button type="submit" x-bind:disabled="!isPasswordValid || isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!isSubmitting">Simpan Akun</span>
@@ -162,9 +175,9 @@
     </div>
 
     <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-8" @click.away="openEdit = false">
-            <h4 class="text-lg font-bold text-gray-900 mb-1 text-center">Edit Data User</h4>
-            <p class="text-sm text-gray-500 mb-6 text-center">Perbarui informasi akun pengguna</p>
+        <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl p-8" @click.away="openEdit = false">
+            <h4 class="text-xl font-bold text-gray-900 mb-1">Edit Data User</h4>
+            <p class="text-sm text-gray-500 mb-6">Perbarui informasi akun pengguna</p>
 
             <form :action="'/users/' + editData.id" method="POST" class="space-y-4" 
                   x-data="{ 
@@ -172,29 +185,32 @@
                       password: '',
                       showPassword: false,
                       get isPasswordValid() {
-                          if(this.password.length === 0) return true; // Optional saat edit
+                          if(this.password.length === 0) return true;
                           return this.password.length >= 8 && /[a-zA-Z]/.test(this.password) && /[0-9]/.test(this.password);
                       }
                   }" 
                   @submit="isSubmitting = true">
                 @csrf @method('PUT')
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Lengkap</label>
-                    <input type="text" name="fullname" x-model="editData.fullname" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Role / Hak Akses</label>
-                    <select name="role" x-model="editData.role" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-pointer">
-                        <option value="Admin">Admin</option>
-                        <option value="Owner">Owner</option>
-                        <option value="Pelanggan">Pelanggan</option>
-                    </select>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Lengkap</label>
+                        <input type="text" name="fullname" x-model="editData.fullname" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Role / Hak Akses</label>
+                        <select name="role" x-model="editData.role" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-pointer">
+                            <option value="Admin">Admin</option>
+                            <option value="Owner">Owner</option>
+                            <option value="Pelanggan">Pelanggan</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="pt-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Ganti Password (Opsional)</label>
                     <div class="relative">
-                        <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" placeholder="Ketik sandi baru..." 
+                        <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" placeholder="Ketik sandi baru jika ingin mengubah..." 
                                class="w-full text-sm p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                :class="(password.length > 0 && !isPasswordValid) ? 'border-red-400 focus:ring-red-500' : 'border-gray-100'">
                         <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -207,8 +223,8 @@
                     </p>
                 </div>
 
-                <div class="flex gap-3 pt-4">
-                    <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg">Batal</button>
+                <div class="flex gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
                     <button type="submit" x-bind:disabled="!isPasswordValid || isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!isSubmitting">Update Perubahan</span>
                         <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">

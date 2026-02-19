@@ -70,8 +70,8 @@
 
                 <div class="mb-8">
                     <p class="px-4 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">MASTER</p>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 transition-all mb-1">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    <a href="{{ route('paket.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('paket.*') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-500' }} hover:bg-gray-50 transition-all mb-1">
+                        <svg class="w-5 h-5 {{ request()->routeIs('paket.*') ? 'text-blue-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                         <span>Paket</span>
                     </a>
                     <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('users.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-500' }} hover:bg-gray-50 transition-all">
