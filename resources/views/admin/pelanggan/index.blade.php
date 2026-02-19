@@ -68,7 +68,7 @@
                     
                     <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $plg->no_wa }}</td>
                     
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold">Tgl {{ $plg->jatuh_tempo }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 font-bold">Tanggal {{ $plg->jatuh_tempo }}</td>
                     
                     <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border 

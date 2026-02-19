@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PaketController;
+use App\Http\Controllers\Admin\TransaksiController;
+use App\Http\Controllers\Admin\ApprovalController;
 
 use App\Http\Controllers\Client\ClientController;
 
@@ -32,6 +34,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('pelanggan', PelangganController::class);
         Route::resource('paket', PaketController::class);
+        Route::resource('transaksi', TransaksiController::class);
+        Route::get('/approval', [ApprovalController::class, 'index'])->name('approval.index');
+        Route::put('/approval/{id}', [ApprovalController::class, 'action'])->name('approval.action');
+        Route::post('/approval/bulk', [ApprovalController::class, 'bulkAction'])->name('approval.bulk');
     });
 
     // Khusus Pelanggan
