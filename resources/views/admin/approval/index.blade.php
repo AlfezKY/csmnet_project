@@ -90,11 +90,11 @@
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
                             <button @click="openConfirm = true; confirmUrl = '{{ route('approval.action', $plg->id) }}'; confirmAction = 'approve'; confirmText = 'Setujui pemasangan internet untuk {{ $plg->nama_pelanggan }}?'" 
-                                    class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-100 hover:bg-green-500 hover:text-white rounded text-[11px] font-bold transition-all" title="Setujui">
+                                    class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-100 hover:bg-green-500 hover:text-white rounded text-[12px] font-bold transition-all" title="Setujui">
                                 Approve
                             </button>
                             <button @click="openConfirm = true; confirmUrl = '{{ route('approval.action', $plg->id) }}'; confirmAction = 'reject'; confirmText = 'Tolak pendaftaran {{ $plg->nama_pelanggan }}?'" 
-                                    class="px-2.5 py-1 bg-red-50 text-red-700 border border-red-100 hover:bg-red-500 hover:text-white rounded text-[11px] font-bold transition-all" title="Tolak">
+                                    class="px-2.5 py-1 bg-red-50 text-red-700 border border-red-100 hover:bg-red-500 hover:text-white rounded text-[12px] font-bold transition-all" title="Tolak">
                                 Reject
                             </button>
                         </div>
