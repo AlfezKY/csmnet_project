@@ -7,19 +7,26 @@
     openAdd: {{ $errors->any() ? 'true' : 'false' }}, 
     openEdit: false, 
     openDelete: false, 
-    editData: {}, 
+    editData: { is_show: false }, 
     deleteUrl: '' 
 }">
     <div class="flex justify-between items-end mb-6 px-1">
         <div>
             <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Master Paket</h3>
-            <p class="text-sm text-gray-500 font-medium mt-1">Kelola daftar layanan paket internet dan harganya</p>
+            <p class="text-sm text-gray-500 font-medium mt-1">Kelola layanan paket internet yang tampil di landing page</p>
         </div>
         <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             Tambah Paket
         </button>
     </div>
+
+    @if($tampilCount < 3)
+        <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm font-bold rounded-lg flex items-center gap-3">
+            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <p><strong>Peringatan Landing Page:</strong> Saat ini hanya ada {{ $tampilCount }} paket yang ditampilkan. Pastikan menampilkan minimal 3 paket agar desain web tidak terlihat kosong.</p>
+        </div>
+    @endif
 
     @if ($errors->any())
         <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 text-sm font-bold rounded-lg">
@@ -43,6 +50,7 @@
         <table class="w-full text-left text-gray-600 border-collapse">
             <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
                 <tr>
+                    <th class="px-6 py-4 w-16 text-center" title="Tampil di Landing Page">Landing</th>
                     <th class="px-6 py-4">Nama Paket</th>
                     <th class="px-6 py-4">Kecepatan</th>
                     <th class="px-6 py-4">Harga / Bulan</th>
@@ -54,13 +62,24 @@
             <tbody class="divide-y divide-gray-100">
                 @forelse($pakets as $paket)
                 <tr class="hover:bg-gray-50/50 transition-colors group">
+                    <td class="px-6 py-4 text-center">
+                        @if($paket->is_show)
+                            <div class="w-8 h-8 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center shadow-sm" title="Tampil di Website">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            </div>
+                        @else
+                            <div class="w-8 h-8 mx-auto bg-gray-100 text-gray-400 rounded-full flex items-center justify-center" title="Sembunyi">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
+                            </div>
+                        @endif
+                    </td>
                     <td class="px-6 py-4">
                         <span class="text-sm font-bold text-gray-900">{{ $paket->nama_paket }}</span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold">{{ $paket->kecepatan }} Mbps</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 font-bold">{{ $paket->kecepatan }}</td>
                     <td class="px-6 py-4 text-sm text-blue-600 font-bold">Rp {{ number_format($paket->harga, 0, ',', '.') }}</td>
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 rounded-md text-xs font-bold uppercase border 
+                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border 
                             {{ $paket->status == 'Active' ? 'bg-green-50 text-green-700 border-green-100' : ($paket->status == 'Pending' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-50 text-gray-600 border-gray-200') }}">
                             {{ $paket->status }}
                         </span>
@@ -73,7 +92,7 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <button @click="openEdit = true; editData = {{ json_encode($paket) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
+                            <button @click="openEdit = true; editData = { ...{{ json_encode($paket) }}, is_show: {{ $paket->is_show ? 'true' : 'false' }} }" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
                             <button @click="openDelete = true; deleteUrl = '{{ route('paket.destroy', $paket->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Paket">
@@ -84,7 +103,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-400 font-medium">Belum ada data paket internet.</td>
+                    <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-400 font-medium">Belum ada data paket internet.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -96,7 +115,7 @@
             <h4 class="text-xl font-bold text-gray-900 mb-1">Tambah Paket Baru</h4>
             <p class="text-sm text-gray-500 mb-6">Buat paket internet baru yang akan ditawarkan ke pelanggan</p>
             
-            <form action="{{ route('paket.store') }}" method="POST" class="space-y-4" x-data="{ isSubmitting: false }" @submit="isSubmitting = true"> 
+            <form action="{{ route('paket.store') }}" method="POST" class="space-y-4" x-data="{ isSubmitting: false, isShow: false }" @submit="isSubmitting = true"> 
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -130,7 +149,16 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Keypoint / Kelebihan (Opsional)</label>
-                    <textarea name="keypoint" rows="2" placeholder="Cth: Pemasangan Gratis, Modem Dipinjamkan" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium"></textarea>
+                    <textarea name="keypoint" rows="2" placeholder="Pisahkan dengan koma. Cth: Gratis Pemasangan, Modem Dipinjamkan" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium"></textarea>
+                </div>
+
+                <div class="pt-2 pb-1">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_show" value="1" class="sr-only peer" x-model="isShow">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ml-3 text-sm font-bold text-gray-700">Tampilkan di Landing Page Website</span>
+                    </label>
+                    <p class="text-[10px] text-gray-400 mt-1.5 ml-[56px]">* Hanya maksimal 4 paket yang bisa ditampilkan</p>
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-gray-100">
@@ -187,6 +215,15 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Keypoint / Kelebihan (Opsional)</label>
                     <textarea name="keypoint" x-model="editData.keypoint" rows="2" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium"></textarea>
+                </div>
+
+                <div class="pt-2 pb-1">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_show" value="1" class="sr-only peer" x-model="editData.is_show">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ml-3 text-sm font-bold text-gray-700">Tampilkan di Landing Page Website</span>
+                    </label>
+                    <p class="text-[10px] text-gray-400 mt-1.5 ml-[56px]">* Hanya maksimal 4 paket yang bisa ditampilkan</p>
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-gray-100">

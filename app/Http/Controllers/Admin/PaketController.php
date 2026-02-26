@@ -11,7 +11,10 @@ class PaketController extends Controller
     public function index()
     {
         $pakets = Paket::latest()->get();
-        return view('admin.paket.index', compact('pakets'));
+        // Hitung berapa paket yang lagi tayang di depan buat nampilin alert "Minimal 3"
+        $tampilCount = Paket::where('is_show', true)->count();
+
+        return view('admin.paket.index', compact('pakets', 'tampilCount'));
     }
 
     public function store(Request $request)
@@ -25,6 +28,18 @@ class PaketController extends Controller
             'keypoint'   => 'nullable|string',
         ]);
 
+        // Cek toggle (kalau dicentang nilainya 1, kalau nggak 0)
+        $isShow = $request->has('is_show') ? 1 : 0;
+
+        // VALIDASI MAKSIMAL 4 PAKET
+        if ($isShow) {
+            $currentShowCount = Paket::where('is_show', true)->count();
+            if ($currentShowCount >= 4) {
+                return back()->withErrors(['is_show' => 'Maksimal hanya 4 paket yang bisa ditampilkan di halaman depan!'])->withInput();
+            }
+        }
+
+        $data['is_show']    = $isShow;
         $data['created_by'] = auth()->user()->username ?? 'SYSTEM';
         Paket::create($data);
 
@@ -42,6 +57,17 @@ class PaketController extends Controller
             'keypoint'   => 'nullable|string',
         ]);
 
+        $isShow = $request->has('is_show') ? 1 : 0;
+
+        if ($isShow && !$paket->is_show) {
+            // Cek paket lain yang is_show = true (exclude paket ini sendiri)
+            $currentShowCount = Paket::where('is_show', true)->where('id', '!=', $paket->id)->count();
+            if ($currentShowCount >= 4) {
+                return back()->withErrors(['is_show' => 'Maksimal hanya 4 paket yang bisa ditampilkan di halaman depan!'])->withInput();
+            }
+        }
+
+        $data['is_show']    = $isShow;
         $data['updated_by'] = auth()->user()->username ?? 'SYSTEM';
         $paket->update($data);
 

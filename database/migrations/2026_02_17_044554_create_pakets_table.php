@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text('keypoint')->nullable();
 
             $table->enum('status', ['Active', 'Non Active', 'Pending'])->default('Active');
+            $table->boolean('is_show')->default(false);
 
             $table->string('created_by')->default('SYSTEM');
             $table->string('updated_by')->nullable();
