@@ -59,7 +59,7 @@
             <div class="hidden md:flex items-center gap-10">
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-brand-600">Beranda</a>
                 {{-- Gunakan # jika route about belum ada --}}
-                <a href="#about" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Tentang</a>
+                <a href="{{ url('/about') }}" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Tentang</a>
                 <a href="#paket" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Paket Layanan</a>
             </div>
 
@@ -88,7 +88,7 @@
         <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 p-6 flex flex-col gap-4 shadow-xl md:hidden">
             <a href="{{ url('/') }}" class="block py-2 text-base font-medium text-brand-600">Beranda</a>
             <a href="#about" class="block py-2 text-base font-medium text-slate-600">Tentang</a>
-            <a href="#paket" class="block py-2 text-base font-medium text-slate-600">Paket Layanan</a>
+            <a href="{{ url('/about') }}" class="block py-2 text-base font-medium text-slate-600">Paket Layanan</a>
             <hr class="border-slate-100">
             
             @auth
@@ -114,7 +114,7 @@
 
         <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 p-6 flex flex-col gap-4 shadow-xl md:hidden">
             <a href="{{ url('/') }}" class="block py-2 text-base font-medium text-brand-600">Beranda</a>
-            <a href="#about" class="block py-2 text-base font-medium text-slate-600">Tentang</a>
+            <a href="{{ url('/about') }}" class="block py-2 text-base font-medium text-slate-600">Tentang</a>
             <a href="#paket" class="block py-2 text-base font-medium text-slate-600">Paket Layanan</a>
             <hr class="border-slate-100">
             @guest

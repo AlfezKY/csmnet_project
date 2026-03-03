@@ -25,6 +25,11 @@ Route::middleware('guest')->group(function () {
         return view('client.index', compact('pakets'));
     })->name('home');
 
+    // --- ROUTE ABOUT (TENTANG KAMI) ---
+    Route::get('/about', function () {
+        return view('client.about');
+    })->name('about');
+
 
     // --- 2. GUEST (Khusus orang yang BELUM login) ---
     Route::middleware('guest')->group(function () {
