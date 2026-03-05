@@ -32,6 +32,54 @@
         </button>
     </div>
 
+    <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-6">
+        <form action="{{ route('pelanggan.index') }}" method="GET" class="flex flex-col lg:flex-row gap-3">
+            
+            <div class="flex-1 relative min-w-[200px]">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama pelanggan atau alamat..." class="w-full text-sm pl-9 p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+            </div>
+
+            <div class="flex gap-3 overflow-x-auto no-scrollbar shrink-0">
+                
+                <select name="paket_id" class="text-sm p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600 transition-all cursor-pointer">
+                    <option value="">-- Semua Paket --</option>
+                    @foreach($pakets as $paket)
+                        <option value="{{ $paket->id }}" {{ request('paket_id') == $paket->id ? 'selected' : '' }}>{{ $paket->nama_paket }}</option>
+                    @endforeach
+                </select>
+
+                <select name="status" class="text-sm p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600 transition-all cursor-pointer">
+                    <option value="">-- Semua Status --</option>
+                    <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="Non Active" {{ request('status') == 'Non Active' ? 'selected' : '' }}>Non Active</option>
+                </select>
+
+                <select name="status_pembayaran" class="text-sm p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600 transition-all cursor-pointer">
+                    <option value="">-- Pembayaran --</option>
+                    <option value="Lunas" {{ request('status_pembayaran') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
+                    <option value="Belum Lunas" {{ request('status_pembayaran') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                </select>
+
+                <div class="flex gap-2 shrink-0">
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center justify-center whitespace-nowrap">
+                        Filter
+                    </button>
+                    
+                    @if(request('q') || request('paket_id') || request('status') || request('status_pembayaran'))
+                        <a href="{{ route('pelanggan.index') }}" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 px-3 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center" title="Reset Pencarian">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </a>
+                    @endif
+                </div>
+            </div>
+            
+        </form>
+    </div>
+
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 text-sm font-bold rounded-lg flex items-center gap-3">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -107,7 +155,13 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-400 font-medium">Belum ada data pelanggan.</td>
+                    <td colspan="7" class="px-6 py-8 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-10 h-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <p class="text-sm text-gray-500 font-bold">Pencarian Tidak Ditemukan</p>
+                            <p class="text-xs text-gray-400 mt-1">Coba ubah kata kunci atau reset filter pencarian Anda.</p>
+                        </div>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>

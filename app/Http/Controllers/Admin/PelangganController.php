@@ -12,10 +12,39 @@ use Illuminate\Support\Facades\DB;
 
 class PelangganController extends Controller
 {
-    public function index()
+    public function index(Request $request) // Tambahin Request disini
     {
-        // Tambahin 'user' di dalam with() biar bisa narik data username lamanya
-        $pelanggans = Pelanggan::with(['paket', 'user'])->latest()->get();
+        // 1. Siapkan kerangka query dasar
+        $query = Pelanggan::with(['paket', 'user'])->latest();
+
+        // 2. Filter Search Box (Berdasarkan Nama ATAU Alamat)
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_pelanggan', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%");
+            });
+        }
+
+        // 3. Filter Berdasarkan Paket Data (Dinamis dari ID)
+        if ($request->filled('paket_id')) {
+            $query->where('paket_id', $request->paket_id);
+        }
+
+        // 4. Filter Status Pelanggan (Active / Pending / Non Active)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // 5. Filter Status Pembayaran (Lunas / Belum Lunas)
+        if ($request->filled('status_pembayaran')) {
+            $query->where('status_pembayaran', $request->status_pembayaran);
+        }
+
+        // Eksekusi data setelah difilter
+        $pelanggans = $query->get();
+
+        // Tarik data paket untuk opsi dropdown di Filter & Modal
         $pakets = Paket::where('status', 'Active')->get();
 
         return view('admin.pelanggan.index', compact('pelanggans', 'pakets'));
@@ -82,16 +111,13 @@ class PelangganController extends Controller
             'alamat'            => 'required|string',
         ];
 
-        // LOGIKA TAMBAHAN UNTUK EDIT AKUN
         if ($request->has('edit_account')) {
             $userId = $pelanggan->user_id;
 
-            // Jika sudah punya akun, abaikan username miliknya sendiri saat cek unique
             $rules['username'] = $userId
                 ? "required|string|max:255|unique:users,username,{$userId}"
                 : "required|string|max:255|unique:users,username";
 
-            // Jika pelanggan belum punya akun, ATAU password diisi saat edit
             if (!$userId || $request->filled('password')) {
                 $rules['password'] = 'required|string|min:8';
             }
@@ -100,20 +126,16 @@ class PelangganController extends Controller
         $data = $request->validate($rules);
 
         DB::transaction(function () use ($data, $request, $pelanggan) {
-            // Urusin Akunnya dulu
             if ($request->has('edit_account')) {
                 if ($pelanggan->user_id) {
-                    // KONDISI 1: Update Akun Lama
                     $user = User::find($pelanggan->user_id);
                     $user->username = $data['username'];
-                    // Update password cuma kalau diisi
                     if ($request->filled('password')) {
                         $user->password = Hash::make($data['password']);
                     }
                     $user->updated_by = auth()->user()->username ?? 'SYSTEM';
                     $user->save();
                 } else {
-                    // KONDISI 2: Bikinin Akun Baru
                     $user = User::create([
                         'fullname'   => $data['nama_pelanggan'],
                         'username'   => $data['username'],
@@ -122,14 +144,12 @@ class PelangganController extends Controller
                         'status'     => 'Active',
                         'created_by' => auth()->user()->username ?? 'SYSTEM',
                     ]);
-                    // Tautkan ID user baru ke pelanggan ini
                     $pelanggan->user_id = $user->id;
                 }
             }
 
-            // Urusin Update Profil Pelanggannya
             $pelanggan->update([
-                'user_id'           => $pelanggan->user_id, // Biar tetep nempel
+                'user_id'           => $pelanggan->user_id,
                 'paket_id'          => $data['paket_id'],
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
