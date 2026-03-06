@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -45,20 +48,33 @@
         }
         .faq-content[aria-expanded="false"] { grid-template-rows: 0fr; }
         .faq-content[aria-expanded="true"] { grid-template-rows: 1fr; }
+        
+        /* Cegah elemen kedip saat Alpine loading */
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-white text-slate-800 antialiased selection:bg-brand-600 selection:text-white">
+<body class="bg-white text-slate-800 antialiased selection:bg-brand-600 selection:text-white" x-data="{ showPendingAlert: false }">
+
+    <div x-show="showPendingAlert" x-cloak x-transition.opacity.duration.500ms 
+         class="fixed top-24 right-5 z-50 max-w-sm w-full bg-orange-500 text-white p-4 rounded-xl shadow-2xl flex items-start gap-3">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <div class="flex-1">
+            <h4 class="font-bold text-sm">Menunggu Persetujuan Admin</h4>
+            <p class="text-xs mt-1 opacity-90 leading-relaxed">Pendaftaran Anda sedang ditinjau. Tim kami akan segera menghubungi Anda atau Anda dapat menghubungi WhatsApp kami.</p>
+        </div>
+        <button @click="showPendingAlert = false" class="text-white hover:text-orange-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
 
     <nav class="fixed w-full top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            {{-- Ganti route('home') ke url('/') jika route home belum didefinisikan --}}
             <a href="{{ url('/') }}" class="text-2xl font-extrabold tracking-tighter text-slate-900">
                 CSM<span class="text-brand-600">.TV</span>
             </a>
 
             <div class="hidden md:flex items-center gap-10">
                 <a href="{{ url('/') }}" class="text-sm font-semibold text-brand-600">Beranda</a>
-                {{-- Gunakan # jika route about belum ada --}}
                 <a href="{{ url('/about') }}" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Tentang</a>
                 <a href="#paket" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Paket Layanan</a>
             </div>
@@ -87,8 +103,8 @@
 
         <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 p-6 flex flex-col gap-4 shadow-xl md:hidden">
             <a href="{{ url('/') }}" class="block py-2 text-base font-medium text-brand-600">Beranda</a>
-            <a href="#about" class="block py-2 text-base font-medium text-slate-600">Tentang</a>
-            <a href="{{ url('/about') }}" class="block py-2 text-base font-medium text-slate-600">Paket Layanan</a>
+            <a href="{{ url('/about') }}" class="block py-2 text-base font-medium text-slate-600">Tentang</a>
+            <a href="#paket" class="block py-2 text-base font-medium text-slate-600">Paket Layanan</a>
             <hr class="border-slate-100">
             
             @auth
@@ -105,22 +121,6 @@
                 <a href="{{ route('login') }}" class="block w-full py-3 text-center border border-slate-200 rounded-lg font-bold text-slate-700">Login</a>
                 <a href="{{ url('/register') }}" class="block w-full py-3 text-center bg-brand-600 text-white rounded-lg font-bold">Daftar Sekarang</a>
             @endauth
-        </div>
-
-            <button class="md:hidden p-2 text-slate-900" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
-        </div>
-
-        <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 p-6 flex flex-col gap-4 shadow-xl md:hidden">
-            <a href="{{ url('/') }}" class="block py-2 text-base font-medium text-brand-600">Beranda</a>
-            <a href="{{ url('/about') }}" class="block py-2 text-base font-medium text-slate-600">Tentang</a>
-            <a href="#paket" class="block py-2 text-base font-medium text-slate-600">Paket Layanan</a>
-            <hr class="border-slate-100">
-            @guest
-                <a href="{{ route('login') }}" class="block w-full py-3 text-center border border-slate-200 rounded-lg font-bold text-slate-700">Masuk</a>
-                <a href="{{ url('/register') }}" class="block w-full py-3 text-center bg-brand-600 text-white rounded-lg font-bold">Daftar Sekarang</a>
-            @endguest
         </div>
     </nav>
 
@@ -162,7 +162,6 @@
 
                     <div class="relative order-1 lg:order-2">
                          <div class="absolute -inset-4 bg-gradient-to-tr from-brand-100 to-purple-50 rounded-full blur-3xl opacity-60 -z-10"></div>
-                        {{-- Pastikan gambar ini ada di folder public/assets --}}
                         <img src="{{ asset('assets/dummy-card.jpg') }}" alt="Internet Cepat" class="relative w-full rounded-2xl shadow-2xl shadow-slate-200 transform hover:-translate-y-2 transition duration-500" onerror="this.src='https://placehold.co/600x400?text=CSM+Internet'">
                         
                         <div class="absolute -bottom-6 -left-6 bg-white p-5 rounded-xl shadow-xl border border-slate-100 flex items-center gap-4 animate-bounce-slow max-w-xs">
@@ -219,12 +218,9 @@
                         
                         @foreach($pakets as $paket)
                             @php
-                                // Logika untuk nentuin mana paket yang di-Highlight (Warna Gelap)
                                 $isFeatured = false;
                                 if ($pakets->count() <= 3 && $loop->iteration == 2) $isFeatured = true;
                                 if ($pakets->count() == 4 && $loop->iteration == 3) $isFeatured = true;
-
-                                // Format harga dari 150000 jadi 150
                                 $hargaRibuan = floor($paket->harga / 1000);
                             @endphp
 
@@ -254,7 +250,15 @@
                                         </ul>
                                     @endif
 
-                                    <a href="{{ url('/register') }}" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</a>
+                                    @auth
+                                        @if(Auth::user()->status !== 'Active')
+                                            <button @click="showPendingAlert = true" type="button" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</button>
+                                        @else
+                                            <a href="{{ route('client-portal') }}" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</a>
+                                        @endif
+                                    @else
+                                        <a href="{{ url('/register') }}" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</a>
+                                    @endauth
                                 </div>
                             @else
                                 {{-- CARD STANDAR (PUTIH) --}}
@@ -281,14 +285,21 @@
                                         </ul>
                                     @endif
 
-                                    <a href="{{ url('/register') }}" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</a>
+                                    @auth
+                                        @if(Auth::user()->status !== 'Active')
+                                            <button @click="showPendingAlert = true" type="button" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</button>
+                                        @else
+                                            <a href="{{ route('client-portal') }}" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</a>
+                                        @endif
+                                    @else
+                                        <a href="{{ url('/register') }}" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</a>
+                                    @endauth
                                 </div>
                             @endif
 
                         @endforeach
                     </div>
                 @else
-                    {{-- Kalau admin belum nambahin paket yang is_show = 1 --}}
                     <div class="text-center p-12 bg-slate-50 border border-dashed border-slate-200 rounded-3xl">
                         <p class="text-slate-500 font-medium">Paket layanan sedang diperbarui. Silakan cek kembali nanti.</p>
                     </div>
@@ -379,7 +390,7 @@
                 <div>
                     <h4 class="font-bold text-slate-900 mb-4">Perusahaan</h4>
                     <ul class="space-y-2 text-sm text-slate-500">
-                        <li><a href="#about" class="hover:text-brand-600 transition">Tentang Kami</a></li>
+                        <li><a href="{{ url('/about') }}" class="hover:text-brand-600 transition">Tentang Kami</a></li>
                         <li><a href="#" class="hover:text-brand-600 transition">Karir</a></li>
                         <li><a href="#" class="hover:text-brand-600 transition">Blog</a></li>
                     </ul>
@@ -407,7 +418,6 @@
             <div class="border-t border-slate-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-slate-400">&copy; {{ date('Y') }} CSM.TV. All rights reserved.</p>
                 <div class="flex gap-4">
-                    {{-- Social Icons --}}
                     <a href="#" class="text-slate-400 hover:text-brand-600 transition">
                         <span class="sr-only">Instagram</span>
                         <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772 4.902 4.902 0 011.772-1.153c.636-.247 1.363-.416 2.427-.465C9.673 2.013 10.03 2 12.48 2h-.165zm-2.347 5.753a6.16 6.16 0 106.16 6.16 6.161 6.161 0 00-6.16-6.16zM12 9.122a3.486 3.486 0 11-3.486 3.486A3.487 3.487 0 0112 9.122zM19.166 5.86a1.026 1.026 0 11-1.026-1.026 1.026 1.026 0 011.026 1.026z" clip-rule="evenodd" /></svg>
@@ -423,7 +433,6 @@
             const icon = button.querySelector('.faq-icon');
             const isAlreadyOpen = content.style.gridTemplateRows === '1fr';
 
-            // 1. Tutup SEMUA item lain terlebih dahulu
             document.querySelectorAll('.faq-content').forEach(el => {
                 el.style.gridTemplateRows = '0fr';
             });
@@ -431,7 +440,6 @@
                 el.classList.remove('rotate-180');
             });
 
-            // 2. Buka yang diklik jika belum terbuka
             if (!isAlreadyOpen) {
                 content.style.gridTemplateRows = '1fr';
                 icon.classList.add('rotate-180');

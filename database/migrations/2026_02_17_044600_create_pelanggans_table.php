@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pelanggans', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->nullable()->constrained('users');
-            $table->foreignUuid('paket_id')->constrained('pakets');
+            $table->foreignUuid('paket_id')->nullable()->constrained('pakets');
             $table->string('nama_pelanggan');
             $table->text('alamat');
             $table->string('no_wa');
