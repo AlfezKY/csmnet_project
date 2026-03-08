@@ -20,7 +20,7 @@ class DashboardController extends Controller
             'role'           => auth()->user()->role,
             // Sementara kita hardcode dulu sampai tabelnya lo buat nanti
             'komplainAktif'  => 0,
-            'pendapatan'     => '12.500.000',
+            'pendapatan'     => '0',
         ];
 
         return view('admin.dashboard', $data);

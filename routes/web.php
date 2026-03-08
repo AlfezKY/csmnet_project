@@ -15,6 +15,11 @@ use App\Http\Controllers\Admin\TagihanController;
 
 use App\Http\Controllers\Client\ClientController;
 
+// --- ROUTE ABOUT (TENTANG KAMI) ---
+    Route::get('/about', function () {
+        return view('client.about');
+    })->name('about');
+
 
 // 1. GUEST (Orang yang belum login)
 Route::middleware('guest')->group(function () {
@@ -25,11 +30,7 @@ Route::middleware('guest')->group(function () {
         return view('client.index', compact('pakets'));
     })->name('home');
 
-    // --- ROUTE ABOUT (TENTANG KAMI) ---
-    Route::get('/about', function () {
-        return view('client.about');
-    })->name('about');
-
+    
 
     // --- 2. GUEST (Khusus orang yang BELUM login) ---
     Route::middleware('guest')->group(function () {
