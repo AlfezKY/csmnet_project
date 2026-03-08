@@ -231,6 +231,11 @@
                 </div>
 
                 @if($pakets->count() > 0)
+                    @php
+                        // Ambil data pelanggan SEKALI saja di luar perulangan untuk optimasi query
+                        $pelanggan = Auth::check() ? \App\Models\Pelanggan::where('user_id', Auth::id())->first() : null;
+                    @endphp
+
                     <div class="grid md:grid-cols-2 @if($pakets->count() <= 3) lg:grid-cols-3 max-w-5xl mx-auto @else lg:grid-cols-4 @endif gap-6">
                         
                         @foreach($pakets as $paket)
@@ -268,10 +273,17 @@
                                     @endif
 
                                     @auth
-                                        @if(Auth::user()->status !== 'Active')
+                                        @if(!$pelanggan || $pelanggan->status !== 'Active')
                                             <button @click="triggerAlert()" type="button" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</button>
                                         @else
-                                            <a href="{{ route('client-portal') }}" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</a>
+                                            @php
+                                                $pesanWa = "Halo CSM.TV, saya ingin berlangganan layanan internet.\n\n"
+                                                         . "Nama: " . $pelanggan->nama_pelanggan . "\n"
+                                                         . "Alamat: " . $pelanggan->alamat . "\n"
+                                                         . "Paket Pilihan: " . $paket->nama_paket;
+                                                $linkWa = "https://wa.me/6281234567890?text=" . urlencode($pesanWa);
+                                            @endphp
+                                            <a href="{{ $linkWa }}" target="_blank" rel="noopener noreferrer" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</a>
                                         @endif
                                     @else
                                         <a href="{{ url('/register') }}" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition text-center shadow-lg shadow-brand-900/50 mt-auto">Pilih Paket Ini</a>
@@ -303,10 +315,17 @@
                                     @endif
 
                                     @auth
-                                        @if(Auth::user()->status !== 'Active')
+                                        @if(!$pelanggan || $pelanggan->status !== 'Active')
                                             <button @click="triggerAlert()" type="button" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</button>
                                         @else
-                                            <a href="{{ route('client-portal') }}" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</a>
+                                            @php
+                                                $pesanWa = "Halo CSM.TV, saya ingin berlangganan layanan internet.\n\n"
+                                                         . "Nama: " . $pelanggan->nama_pelanggan . "\n"
+                                                         . "Alamat: " . $pelanggan->alamat . "\n"
+                                                         . "Paket Pilihan: " . $paket->nama_paket;
+                                                $linkWa = "https://wa.me/6281234567890?text=" . urlencode($pesanWa);
+                                            @endphp
+                                            <a href="{{ $linkWa }}" target="_blank" rel="noopener noreferrer" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</a>
                                         @endif
                                     @else
                                         <a href="{{ url('/register') }}" class="w-full py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold hover:border-brand-600 hover:text-brand-600 transition text-center mt-auto">Pilih Paket</a>
