@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class PelangganController extends Controller
 {
-    public function index(Request $request) // Tambahin Request disini
+    public function index(Request $request)
     {
-        // 1. Siapkan kerangka query dasar
         $query = Pelanggan::with(['paket', 'user'])->latest();
 
-        // 2. Filter Search Box (Berdasarkan Nama ATAU Alamat)
         if ($request->filled('q')) {
             $search = $request->q;
             $query->where(function ($q) use ($search) {
@@ -26,25 +24,19 @@ class PelangganController extends Controller
             });
         }
 
-        // 3. Filter Berdasarkan Paket Data (Dinamis dari ID)
         if ($request->filled('paket_id')) {
             $query->where('paket_id', $request->paket_id);
         }
 
-        // 4. Filter Status Pelanggan (Active / Pending / Non Active)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // 5. Filter Status Pembayaran (Lunas / Belum Lunas)
         if ($request->filled('status_pembayaran')) {
             $query->where('status_pembayaran', $request->status_pembayaran);
         }
 
-        // Eksekusi data setelah difilter
         $pelanggans = $query->get();
-
-        // Tarik data paket untuk opsi dropdown di Filter & Modal
         $pakets = Paket::where('status', 'Active')->get();
 
         return view('admin.pelanggan.index', compact('pelanggans', 'pakets'));
@@ -55,8 +47,9 @@ class PelangganController extends Controller
         $rules = [
             'nama_pelanggan' => 'required|string|max:255',
             'no_wa'          => 'required|string|max:20',
-            'paket_id'       => 'required|exists:pakets,id',
-            'jatuh_tempo'    => 'required|integer|min:1|max:31',
+            'paket_id'       => 'nullable|exists:pakets,id',
+            // Validasi min:0 biar angka 0 lolos
+            'jatuh_tempo'    => 'nullable|integer|min:0|max:31',
             'status'         => 'required|in:Active,Non Active,Pending',
             'alamat'         => 'required|string',
         ];
@@ -77,7 +70,7 @@ class PelangganController extends Controller
                     'username'   => $data['username'],
                     'password'   => Hash::make($data['password']),
                     'role'       => 'Pelanggan',
-                    'status'     => 'Active',
+                    'status'     => $data['status'],
                     'created_by' => auth()->user()->username ?? 'SYSTEM',
                 ]);
                 $userId = $user->id;
@@ -85,11 +78,12 @@ class PelangganController extends Controller
 
             Pelanggan::create([
                 'user_id'           => $userId,
-                'paket_id'          => $data['paket_id'],
+                'paket_id'          => empty($data['paket_id']) ? null : $data['paket_id'],
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
-                'jatuh_tempo'       => $data['jatuh_tempo'],
+                // JADIKAN 0 JIKA KOSONG:
+                'jatuh_tempo'       => empty($data['jatuh_tempo']) ? 0 : $data['jatuh_tempo'],
                 'status_pembayaran' => 'Belum Lunas',
                 'status'            => $data['status'],
                 'created_by'        => auth()->user()->username ?? 'SYSTEM',
@@ -104,8 +98,9 @@ class PelangganController extends Controller
         $rules = [
             'nama_pelanggan'    => 'required|string|max:255',
             'no_wa'             => 'required|string|max:20',
-            'paket_id'          => 'required|exists:pakets,id',
-            'jatuh_tempo'       => 'required|integer|min:1|max:31',
+            'paket_id'          => 'nullable|exists:pakets,id',
+            // Validasi min:0 biar angka 0 lolos
+            'jatuh_tempo'       => 'nullable|integer|min:0|max:31',
             'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
             'status'            => 'required|in:Active,Non Active,Pending',
             'alamat'            => 'required|string',
@@ -126,35 +121,42 @@ class PelangganController extends Controller
         $data = $request->validate($rules);
 
         DB::transaction(function () use ($data, $request, $pelanggan) {
-            if ($request->has('edit_account')) {
-                if ($pelanggan->user_id) {
-                    $user = User::find($pelanggan->user_id);
-                    $user->username = $data['username'];
-                    if ($request->filled('password')) {
-                        $user->password = Hash::make($data['password']);
+
+            if ($pelanggan->user_id) {
+                $user = User::find($pelanggan->user_id);
+                if ($user) {
+                    $user->status = $data['status'];
+
+                    if ($request->has('edit_account')) {
+                        $user->username = $data['username'];
+                        if ($request->filled('password')) {
+                            $user->password = Hash::make($data['password']);
+                        }
                     }
+
                     $user->updated_by = auth()->user()->username ?? 'SYSTEM';
                     $user->save();
-                } else {
-                    $user = User::create([
-                        'fullname'   => $data['nama_pelanggan'],
-                        'username'   => $data['username'],
-                        'password'   => Hash::make($data['password']),
-                        'role'       => 'Pelanggan',
-                        'status'     => 'Active',
-                        'created_by' => auth()->user()->username ?? 'SYSTEM',
-                    ]);
-                    $pelanggan->user_id = $user->id;
                 }
+            } else if ($request->has('edit_account')) {
+                $user = User::create([
+                    'fullname'   => $data['nama_pelanggan'],
+                    'username'   => $data['username'],
+                    'password'   => Hash::make($data['password']),
+                    'role'       => 'Pelanggan',
+                    'status'     => $data['status'],
+                    'created_by' => auth()->user()->username ?? 'SYSTEM',
+                ]);
+                $pelanggan->user_id = $user->id;
             }
 
             $pelanggan->update([
                 'user_id'           => $pelanggan->user_id,
-                'paket_id'          => $data['paket_id'],
+                'paket_id'          => empty($data['paket_id']) ? null : $data['paket_id'],
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
-                'jatuh_tempo'       => $data['jatuh_tempo'],
+                // JADIKAN 0 JIKA KOSONG:
+                'jatuh_tempo'       => empty($data['jatuh_tempo']) ? 0 : $data['jatuh_tempo'],
                 'status_pembayaran' => $data['status_pembayaran'],
                 'status'            => $data['status'],
                 'updated_by'        => auth()->user()->username ?? 'SYSTEM',
@@ -166,6 +168,10 @@ class PelangganController extends Controller
 
     public function destroy(Pelanggan $pelanggan)
     {
+        if ($pelanggan->user_id) {
+            User::find($pelanggan->user_id)?->delete();
+        }
+
         $pelanggan->delete();
         return back()->with('success', 'Pelanggan berhasil dihapus!');
     }

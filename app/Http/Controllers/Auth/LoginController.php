@@ -29,7 +29,19 @@ class LoginController extends Controller
 
         // 2. Coba Login
         if (Auth::attempt($credentials)) {
-            // Regenerate session biar aman dari hijacking
+
+            // --- TAMBAHAN: BLOKIR JIKA STATUS NON ACTIVE ---
+            if (Auth::user()->status === 'Non Active') {
+                // Langsung logout-in lagi
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                // Balikin ke halaman login bawa pesan alert
+                return back()->with('loginError', 'Akun tidak aktif, hubungi admin untuk informasi lebih lanjut.');
+            }
+
+            // Regenerate session biar aman dari hijacking (hanya untuk yang lolos)
             $request->session()->regenerate();
 
             // Ambil role user yang baru login
@@ -45,8 +57,8 @@ class LoginController extends Controller
             }
         }
 
-        // 4. Jika Gagal
-        return back()->with('loginError', 'Login Gagal! Pastikan akun Anda aktif.');
+        // 4. Jika Gagal (Kredensial Salah)
+        return back()->with('loginError', 'Login Gagal! Username atau password salah.');
     }
 
     /**

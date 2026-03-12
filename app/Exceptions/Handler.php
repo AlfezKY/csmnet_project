@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Session\TokenMismatchException; // WAJIB DI-IMPORT
+use Illuminate\Http\Request;                   // WAJIB DI-IMPORT
+use Illuminate\Support\Facades\Auth;           // WAJIB DI-IMPORT
 
 class Handler extends ExceptionHandler
 {
@@ -43,6 +46,17 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        // --- TAMBAHAN KODE NANGKEP 419 PAGE EXPIRED ---
+        $this->renderable(function (TokenMismatchException $e, Request $request) {
+            // 1. Paksa logout dan bersihkan sisa sesi
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // 2. Tendang ke halaman Beranda bawa pesan error
+            return redirect('/')->with('error', 'Sesi Anda telah berakhir karena terlalu lama tidak ada aktivitas. Silakan masuk kembali.');
         });
     }
 }

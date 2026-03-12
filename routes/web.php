@@ -15,33 +15,29 @@ use App\Http\Controllers\Admin\TagihanController;
 
 use App\Http\Controllers\Client\ClientController;
 
+// --- 1. PUBLIC ROUTES (Bisa diakses siapa saja, baik guest maupun yang sudah login) ---
 
-// 1. GUEST (Orang yang belum login)
+Route::get('/', function () {
+    $pakets = Paket::where('is_show', true)->take(4)->get();
+    return view('client.index', compact('pakets'));
+})->name('home');
+
+Route::get('/about', function () {
+    return view('client.about');
+})->name('about');
+
+
+// --- 2. GUEST ROUTES (Khusus orang yang BELUM login) ---
 Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'index'])->name('login');
+    Route::post('/login', [LoginController::class, 'authenticate']);
 
-    // --- ROUTE LANDING PAGE ---
-    Route::get('/', function () {
-        $pakets = Paket::where('is_show', true)->take(4)->get();
-        return view('client.index', compact('pakets'));
-    })->name('home');
-
-    // --- ROUTE ABOUT (TENTANG KAMI) ---
-    Route::get('/about', function () {
-        return view('client.about');
-    })->name('about');
-
-
-    // --- 2. GUEST (Khusus orang yang BELUM login) ---
-    Route::middleware('guest')->group(function () {
-        Route::get('/login', [LoginController::class, 'index'])->name('login');
-        Route::post('/login', [LoginController::class, 'authenticate']);
-
-        Route::get('/register', [RegisterController::class, 'index']);
-        Route::post('/register', [RegisterController::class, 'store']);
-    });
+    Route::get('/register', [RegisterController::class, 'index']);
+    Route::post('/register', [RegisterController::class, 'store']);
 });
 
-// 2. AUTH (Harus login dulu)
+
+// --- 3. AUTH ROUTES (Harus login dulu) ---
 Route::middleware('auth')->group(function () {
 
     // ROUTE LOGOUT (WAJIB ADA INI BIAR GAK 404)

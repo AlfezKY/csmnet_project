@@ -121,12 +121,14 @@
                     </td>
                     
                     <td class="px-6 py-4">
-                        <span class="text-sm font-bold text-blue-600">{{ $plg->paket->nama_paket ?? 'Tanpa Paket' }}</span>
+                        <span class="text-sm font-bold text-blue-600">{{ $plg->paket->nama_paket ?? 'Belum Dipilih' }}</span>
                     </td>
                     
                     <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $plg->no_wa }}</td>
                     
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold text-center">Tgl {{ $plg->jatuh_tempo }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 font-bold text-center">
+                        {{ $plg->jatuh_tempo ? 'Tgl ' . $plg->jatuh_tempo : '-' }}
+                    </td>
                     
                     <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border 
@@ -189,7 +191,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Paket</label>
-                        <select name="paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600" required>
+                        <select name="paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
                             <option value="">-- Pilih Paket Internet --</option>
                             @foreach($pakets as $paket)
                                 <option value="{{ $paket->id }}">{{ $paket->nama_paket }}</option>
@@ -198,7 +200,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
-                        <input type="number" name="jatuh_tempo" min="1" max="31" placeholder="1-31" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        <input type="number" name="jatuh_tempo" placeholder="1-31" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium">
                     </div>
                 </div>
 
@@ -289,7 +291,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Paket</label>
-                        <select name="paket_id" x-model="editData.paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600" required>
+                        <select name="paket_id" x-model="editData.paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
                             <option value="">-- Pilih Paket Internet --</option>
                             @foreach($pakets as $paket)
                                 <option value="{{ $paket->id }}">{{ $paket->nama_paket }}</option>
@@ -298,7 +300,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
-                        <input type="number" name="jatuh_tempo" x-model="editData.jatuh_tempo" min="1" max="31" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        <input type="number" name="jatuh_tempo" x-model="editData.jatuh_tempo" placeholder="1-31" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium">
                     </div>
                 </div>
 
