@@ -67,7 +67,7 @@
                     <td class="px-6 py-4 text-sm text-gray-500 font-bold text-center">
                         {{ \Carbon\Carbon::parse($trx->tanggal)->format('d M Y') }}
                     </td>
-                    <td class="px-6 py-4 text-sm font-bold text-center text-green-600">
+                    <td class="px-6 py-4 text-sm font-bold text-center text-gray-900">
                         Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                     </td>
                     
@@ -88,10 +88,10 @@
                         <div class="flex justify-end gap-1">
                             <button @click="openEdit = true; editData = {{ json_encode($trx) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-
+                            </button>
                             <button @click="openDelete = true; deleteUrl = '{{ route('transaksi.destroy', $trx->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Transaksi">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -105,30 +105,63 @@
     </div>
 
     <div x-show="openAdd" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
+        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
             <h4 class="text-xl font-bold text-gray-900 mb-1">Catat Pembayaran Baru</h4>
-            <p class="text-sm text-gray-500 mb-6">Pilih pelanggan yang melakukan pembayaran tagihan</p>
+            <p class="text-sm text-gray-500 mb-6">Pilih pelanggan dan tentukan perpanjangan masa aktif</p>
             
-            <form action="{{ route('transaksi.store') }}" method="POST" class="space-y-4" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
+            <form action="{{ route('transaksi.store') }}" method="POST" class="space-y-4" 
+                  x-data="{ 
+                      isSubmitting: false,
+                      selectedPelanggan: '',
+                      jumlahBulan: 1,
+                      nominalTampil: '',
+                      hargaPaket: {
+                          @foreach($pelanggans as $plg)
+                          '{{ $plg->id }}': {{ $plg->paket->harga ?? 0 }},
+                          @endforeach
+                      },
+                      kalkulasi() {
+                          if(this.selectedPelanggan) {
+                              this.nominalTampil = this.hargaPaket[this.selectedPelanggan] * this.jumlahBulan;
+                          } else {
+                              this.nominalTampil = '';
+                          }
+                      }
+                  }" 
+                  @submit="isSubmitting = true">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Pelanggan</label>
-                    <select name="pelanggan_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                    <select name="pelanggan_id" x-model="selectedPelanggan" @change="kalkulasi()" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800" required>
                         <option value="">-- Pilih Pelanggan --</option>
                         @foreach($pelanggans as $plg)
-                            <option value="{{ $plg->id }}">{{ $plg->nama_pelanggan }} (Jatuh Tempo: Tgl {{ $plg->jatuh_tempo }})</option>
+                            @php 
+                                $tgl = $plg->jatuh_tempo ? \Carbon\Carbon::parse($plg->jatuh_tempo)->translatedFormat('d M Y') : 'Belum Diatur';
+                            @endphp
+                            <option value="{{ $plg->id }}">{{ $plg->nama_pelanggan }} (Jatuh Tempo: {{ $tgl }})</option>
                         @endforeach
                     </select>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Bayar</label>
-                        <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jumlah Nominal (Rp)</label>
-                        <input type="number" name="jumlah" placeholder="Contoh: 150000" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-green-600" required>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Perpanjang Berapa Bulan?</label>
+                        <select name="jumlah_bulan" x-model="jumlahBulan" @change="kalkulasi()" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800">
+                            <option value="1">1 Bulan</option>
+                            <option value="2">2 Bulan</option>
+                            <option value="3">3 Bulan</option>
+                            <option value="6">6 Bulan</option>
+                            <option value="12">1 Tahun</option>
+                            <option value="0">0 (Hanya Bayar Cicilan)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal (Rp)</label>
+                        <input type="number" name="jumlah" x-model="nominalTampil" placeholder="0" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900" required>
                     </div>
                 </div>
 
@@ -155,7 +188,7 @@
                 @csrf @method('PUT')
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Pelanggan</label>
-                    <select name="pelanggan_id" x-model="editData.pelanggan_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                    <select name="pelanggan_id" x-model="editData.pelanggan_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800" required>
                         @foreach($pelanggans as $plg)
                             <option value="{{ $plg->id }}">{{ $plg->nama_pelanggan }}</option>
                         @endforeach
@@ -165,16 +198,16 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tanggal Bayar</label>
-                        <input type="date" name="tanggal" x-model="editData.tanggal" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        <input type="date" name="tanggal" x-model="editData.tanggal" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jumlah Nominal (Rp)</label>
-                        <input type="number" name="jumlah" x-model="editData.jumlah" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-green-600" required>
+                        <input type="number" name="jumlah" x-model="editData.jumlah" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900" required>
                     </div>
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-gray-100">
-                    <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg">Batal</button>
+                    <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
                     <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed">
                         <span x-show="!isSubmitting">Update Perubahan</span>
                         <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">

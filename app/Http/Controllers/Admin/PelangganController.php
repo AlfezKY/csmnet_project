@@ -48,15 +48,17 @@ class PelangganController extends Controller
             'nama_pelanggan' => 'required|string|max:255',
             'no_wa'          => 'required|string|max:20',
             'paket_id'       => 'nullable|exists:pakets,id',
-            // UBAH JADI DATE
             'jatuh_tempo'    => 'nullable|date',
             'status'         => 'required|in:Active,Non Active,Pending',
             'alamat'         => 'required|string',
         ];
 
-        if ($request->has('create_account')) {
-            $rules['username'] = 'required|string|max:255|unique:users,username';
-            $rules['password'] = 'required|string|min:8';
+        // JIKA USERNAME DIISI = BUAT AKUN
+        if ($request->filled('username')) {
+            $rules['username']    = 'required|string|max:255|unique:users,username';
+            $rules['email']       = 'nullable|email|max:255|unique:users,email';
+            $rules['password']    = 'required|string|min:8';
+            $rules['user_status'] = 'required|in:Active,Non Active,Pending';
         }
 
         $data = $request->validate($rules);
@@ -64,13 +66,14 @@ class PelangganController extends Controller
         DB::transaction(function () use ($data, $request) {
             $userId = null;
 
-            if ($request->has('create_account')) {
+            if ($request->filled('username')) {
                 $user = User::create([
                     'fullname'   => $data['nama_pelanggan'],
                     'username'   => $data['username'],
+                    'email'      => $data['email'] ?? null,
                     'password'   => Hash::make($data['password']),
                     'role'       => 'Pelanggan',
-                    'status'     => $data['status'],
+                    'status'     => $data['user_status'],
                     'created_by' => auth()->user()->username ?? 'SYSTEM',
                 ]);
                 $userId = $user->id;
@@ -82,7 +85,6 @@ class PelangganController extends Controller
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
-                // KEMBALIKAN JADI NULL KALAU KOSONG
                 'jatuh_tempo'       => empty($data['jatuh_tempo']) ? null : $data['jatuh_tempo'],
                 'status_pembayaran' => 'Belum Lunas',
                 'status'            => $data['status'],
@@ -99,23 +101,29 @@ class PelangganController extends Controller
             'nama_pelanggan'    => 'required|string|max:255',
             'no_wa'             => 'required|string|max:20',
             'paket_id'          => 'nullable|exists:pakets,id',
-            // UBAH JADI DATE
             'jatuh_tempo'       => 'nullable|date',
             'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
             'status'            => 'required|in:Active,Non Active,Pending',
             'alamat'            => 'required|string',
         ];
 
-        if ($request->has('edit_account')) {
+        // WAJIBKAN VALIDASI JIKA SUDAH PUNYA AKUN ATAU ADMIN MENGISI USERNAME
+        if ($pelanggan->user_id || $request->filled('username')) {
             $userId = $pelanggan->user_id;
 
             $rules['username'] = $userId
                 ? "required|string|max:255|unique:users,username,{$userId}"
                 : "required|string|max:255|unique:users,username";
 
+            $rules['email'] = $userId
+                ? "nullable|email|max:255|unique:users,email,{$userId}"
+                : "nullable|email|max:255|unique:users,email";
+
             if (!$userId || $request->filled('password')) {
                 $rules['password'] = 'required|string|min:8';
             }
+
+            $rules['user_status'] = 'required|in:Active,Non Active,Pending';
         }
 
         $data = $request->validate($rules);
@@ -125,25 +133,23 @@ class PelangganController extends Controller
             if ($pelanggan->user_id) {
                 $user = User::find($pelanggan->user_id);
                 if ($user) {
-                    $user->status = $data['status'];
-
-                    if ($request->has('edit_account')) {
-                        $user->username = $data['username'];
-                        if ($request->filled('password')) {
-                            $user->password = Hash::make($data['password']);
-                        }
+                    $user->username = $data['username'];
+                    $user->email    = $data['email'] ?? null;
+                    $user->status   = $data['user_status'];
+                    if ($request->filled('password')) {
+                        $user->password = Hash::make($data['password']);
                     }
-
                     $user->updated_by = auth()->user()->username ?? 'SYSTEM';
                     $user->save();
                 }
-            } else if ($request->has('edit_account')) {
+            } else if ($request->filled('username')) {
                 $user = User::create([
                     'fullname'   => $data['nama_pelanggan'],
                     'username'   => $data['username'],
+                    'email'      => $data['email'] ?? null,
                     'password'   => Hash::make($data['password']),
                     'role'       => 'Pelanggan',
-                    'status'     => $data['status'],
+                    'status'     => $data['user_status'],
                     'created_by' => auth()->user()->username ?? 'SYSTEM',
                 ]);
                 $pelanggan->user_id = $user->id;
@@ -155,7 +161,6 @@ class PelangganController extends Controller
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
-                // KEMBALIKAN JADI NULL KALAU KOSONG
                 'jatuh_tempo'       => empty($data['jatuh_tempo']) ? null : $data['jatuh_tempo'],
                 'status_pembayaran' => $data['status_pembayaran'],
                 'status'            => $data['status'],

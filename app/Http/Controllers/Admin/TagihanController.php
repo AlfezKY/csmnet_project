@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
+use App\Models\Transaksi; // WAJIB TAMBAH INI
 use Illuminate\Http\Request;
-use Carbon\Carbon; // <--- WAJIB TAMBAH INI BUAT NGITUNG TANGGAL
+use Carbon\Carbon;
 
 class TagihanController extends Controller
 {
-    // Nampilin data yang nunggak
     public function index()
     {
         $pelanggans = Pelanggan::with('paket')
@@ -21,29 +21,35 @@ class TagihanController extends Controller
         return view('admin.tagihan.index', compact('pelanggans'));
     }
 
-    // Aksi Tandai Lunas (Satuan)
     public function action(Request $request, string $id)
     {
         $request->validate([
             'jumlah_bulan' => 'required|integer|min:1'
         ]);
 
-        $pelanggan = Pelanggan::findOrFail($id);
+        $pelanggan = Pelanggan::with('paket')->findOrFail($id);
 
-        // Hitung tanggal jatuh tempo yang baru (Majuin X bulan)
+        // 1. Majuin Tanggal Pelanggan
         $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
         $jatuhTempoBaru = $tanggalSekarang->addMonths($request->jumlah_bulan);
 
         $pelanggan->update([
             'status_pembayaran' => 'Lunas',
-            'jatuh_tempo'       => $jatuhTempoBaru->format('Y-m-d'), // Simpan tanggal barunya
+            'jatuh_tempo'       => $jatuhTempoBaru->format('Y-m-d'),
             'updated_by'        => auth()->user()->username ?? 'SYSTEM'
         ]);
 
-        return back()->with('success', "Tagihan {$pelanggan->nama_pelanggan} berhasil dibayar untuk {$request->jumlah_bulan} bulan ke depan!");
+        // 2. OTOMATIS CATAT KE TABEL TRANSAKSI
+        Transaksi::create([
+            'pelanggan_id' => $pelanggan->id,
+            'tanggal'      => now()->format('Y-m-d'),
+            'jumlah'       => ($pelanggan->paket->harga ?? 0) * $request->jumlah_bulan,
+            'created_by'   => auth()->user()->username ?? 'SYSTEM'
+        ]);
+
+        return back()->with('success', "Tagihan {$pelanggan->nama_pelanggan} Lunas & riwayat tercatat di Transaksi!");
     }
 
-    // Aksi Tandai Lunas (Massal / Checkbox)
     public function bulkAction(Request $request)
     {
         $request->validate([
@@ -51,8 +57,7 @@ class TagihanController extends Controller
             'jumlah_bulan' => 'required|integer|min:1'
         ]);
 
-        // Karena tiap pelanggan tanggalnya beda-beda, kita harus update satu-satu pake looping
-        $pelanggans = Pelanggan::whereIn('id', $request->ids)->get();
+        $pelanggans = Pelanggan::with('paket')->whereIn('id', $request->ids)->get();
 
         foreach ($pelanggans as $pelanggan) {
             $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
@@ -63,8 +68,16 @@ class TagihanController extends Controller
                 'jatuh_tempo'       => $jatuhTempoBaru->format('Y-m-d'),
                 'updated_by'        => auth()->user()->username ?? 'SYSTEM'
             ]);
+
+            // OTOMATIS CATAT KE TABEL TRANSAKSI
+            Transaksi::create([
+                'pelanggan_id' => $pelanggan->id,
+                'tanggal'      => now()->format('Y-m-d'),
+                'jumlah'       => ($pelanggan->paket->harga ?? 0) * $request->jumlah_bulan,
+                'created_by'   => auth()->user()->username ?? 'SYSTEM'
+            ]);
         }
 
-        return back()->with('success', count($request->ids) . " Tagihan pelanggan berhasil diproses untuk {$request->jumlah_bulan} bulan!");
+        return back()->with('success', count($request->ids) . " Tagihan massal Lunas & riwayat tercatat di Transaksi!");
     }
 }

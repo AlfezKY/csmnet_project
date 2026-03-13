@@ -110,7 +110,7 @@
                             
                             @if($plg->user_id)
                                 <span class="text-[10px] text-green-600 font-bold mt-1.5 flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> Punya Akun
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> Akun: {{ $plg->user->status ?? 'Active' }}
                                 </span>
                             @else
                                 <span class="text-[10px] text-orange-500 font-bold mt-1.5 flex items-center gap-1">
@@ -146,7 +146,7 @@
 
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <button @click="openEdit = true; editData = { ...{{ json_encode($plg) }}, user_username: '{{ $plg->user->username ?? '' }}' }; document.dispatchEvent(new CustomEvent('reset-edit-form'))" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
+                            <button @click="openEdit = true; editData = { ...{{ json_encode($plg) }}, user_username: '{{ $plg->user->username ?? '' }}', user_email: '{{ $plg->user->email ?? '' }}', user_status: '{{ $plg->user->status ?? 'Active' }}' }; document.dispatchEvent(new CustomEvent('reset-edit-form'))" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
                             <button @click="openDelete = true; deleteUrl = '{{ route('pelanggan.destroy', $plg->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Pelanggan">
@@ -172,89 +172,105 @@
 
     <div x-show="openAdd" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto" @click.away="openAdd = false">
-            <h4 class="text-xl font-bold text-gray-900 mb-1">Tambah Pelanggan Baru</h4>
-            <p class="text-sm text-gray-500 mb-6">Lengkapi seluruh data pemasangan internet</p>
+            <h4 class="text-xl font-bold text-gray-900 mb-6">Tambah Pelanggan Baru</h4>
             
-            <form action="{{ route('pelanggan.store') }}" method="POST" class="space-y-4" x-data="{ isSubmitting: false, createAccount: false, showPassword: false }" @submit="isSubmitting = true"> 
+            <form action="{{ route('pelanggan.store') }}" method="POST" x-data="{ isSubmitting: false, showPassword: false }" @submit="isSubmitting = true"> 
                 @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Pelanggan</label>
-                        <input type="text" name="nama_pelanggan" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                
+                <div class="mb-4 pb-2 border-b border-slate-100">
+                    <h5 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Informasi Pelanggan</h5>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Pelanggan</label>
+                            <input type="text" name="nama_pelanggan" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">No. WhatsApp</label>
+                            <input type="text" name="no_wa" placeholder="08..." class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Paket</label>
+                            <select name="paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
+                                <option value="">-- Pilih Paket Internet --</option>
+                                @foreach($pakets as $paket)
+                                    <option value="{{ $paket->id }}">{{ $paket->nama_paket }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
+                            <input type="date" name="jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Pembayaran</label>
+                            <select disabled class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-not-allowed">
+                                <option value="Belum Lunas">Belum Lunas</option>
+                            </select>
+                            <input type="hidden" name="status_pembayaran" value="Belum Lunas">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Layanan Internet</label>
+                            <select disabled class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-not-allowed">
+                                <option value="Pending">Pending</option>
+                            </select>
+                            <input type="hidden" name="status" value="Pending">
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">No. WhatsApp</label>
-                        <input type="text" name="no_wa" placeholder="08..." class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alamat Pemasangan</label>
+                        <textarea name="alamat" rows="2" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required></textarea>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Paket</label>
-                        <select name="paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
-                            <option value="">-- Pilih Paket Internet --</option>
-                            @foreach($pakets as $paket)
-                                <option value="{{ $paket->id }}">{{ $paket->nama_paket }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
-                        <input type="date" name="jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600">
-                    </div>
+                <div class="mt-8 mb-4 pb-2 border-b border-slate-100">
+                    <h5 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Informasi Akun Login</h5>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Pembayaran</label>
-                        <select disabled class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-not-allowed">
-                            <option value="Belum Lunas">Belum Lunas</option>
-                        </select>
-                        <input type="hidden" name="status_pembayaran" value="Belum Lunas">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Langganan</label>
-                        <select disabled class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-not-allowed">
-                            <option value="Pending">Pending</option>
-                        </select>
-                        <input type="hidden" name="status" value="Pending">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alamat Pemasangan</label>
-                    <textarea name="alamat" rows="2" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required></textarea>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
-                    <label class="relative flex items-center cursor-pointer">
-                        <input type="checkbox" name="create_account" value="1" class="sr-only peer" x-model="createAccount">
-                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        <span class="ml-3 text-sm font-bold text-gray-800">Buatkan Akun Login Pelanggan</span>
-                    </label>
-
-                    <div x-show="createAccount" x-cloak x-transition.opacity.duration.300ms class="mt-4 pt-4 border-t border-slate-200">
-                        <p class="text-[11px] text-gray-500 mb-3 leading-relaxed">Kredensial ini digunakan pelanggan untuk login ke Area Client Portal.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username Login</label>
-                                <input type="text" name="username" placeholder="Bisa pakai No WA" class="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all" x-bind:required="createAccount">
+                <div class="space-y-4">
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        <span class="font-bold text-blue-600">Opsional:</span> Isi Username dan Password di bawah ini jika pelanggan ingin dibuatkan akses login. <b>Kosongkan Username</b> jika tidak perlu membuat akun.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username Login</label>
+                            <input type="text" name="username" placeholder="Cth: budi123" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Email (Opsional)</label>
+                            <input type="email" name="email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+                            <div class="relative">
+                                <input :type="showPassword ? 'text' : 'password'" name="password" placeholder="Min. 8 Karakter" class="w-full text-sm p-3 pr-10 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                                <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    <svg x-show="showPassword" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
+                                </button>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
-                                <div class="relative">
-                                    <input :type="showPassword ? 'text' : 'password'" name="password" placeholder="Min. 8 Karakter" class="w-full text-sm p-3 pr-10 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all" x-bind:required="createAccount">
-                                    <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                                        <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                        <svg x-show="showPassword" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
-                                    </button>
-                                </div>
-                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Akun</label>
+                            <select name="user_status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                                <option value="Active">Active (Bisa Login)</option>
+                                <option value="Non Active">Non Active (Blokir Login)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-3 pt-4 border-t border-gray-100">
+                <div class="flex gap-3 pt-6 mt-6 border-t border-slate-100">
                     <button type="button" @click="openAdd = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
                     <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
                         <span x-show="!isSubmitting">Simpan Pelanggan</span>
@@ -269,95 +285,108 @@
 
     <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto" @click.away="openEdit = false">
-            <h4 class="text-xl font-bold text-gray-900 mb-1">Edit Pelanggan</h4>
-            <p class="text-sm text-gray-500 mb-6">Perbarui informasi tagihan dan profil pelanggan</p>
+            <h4 class="text-xl font-bold text-gray-900 mb-6">Edit Pelanggan</h4>
             
-            <form :action="'/pelanggan/' + editData.id" method="POST" class="space-y-4" 
-                  x-data="{ isSubmitting: false, editAccount: false, showPasswordEdit: false }" 
-                  @reset-edit-form.window="editAccount = false; showPasswordEdit = false"
+            <form :action="'/pelanggan/' + editData.id" method="POST" 
+                  x-data="{ isSubmitting: false, showPasswordEdit: false }" 
+                  @reset-edit-form.window="showPasswordEdit = false"
                   @submit="isSubmitting = true"> 
                 @csrf @method('PUT')
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Pelanggan</label>
-                        <input type="text" name="nama_pelanggan" x-model="editData.nama_pelanggan" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                
+                <div class="mb-4 pb-2 border-b border-slate-100">
+                    <h5 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Informasi Pelanggan</h5>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nama Pelanggan</label>
+                            <input type="text" name="nama_pelanggan" x-model="editData.nama_pelanggan" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">No. WhatsApp</label>
+                            <input type="text" name="no_wa" x-model="editData.no_wa" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Paket</label>
+                            <select name="paket_id" x-model="editData.paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
+                                <option value="">-- Pilih Paket Internet --</option>
+                                @foreach($pakets as $paket)
+                                    <option value="{{ $paket->id }}">{{ $paket->nama_paket }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
+                            <input type="date" name="jatuh_tempo" x-model="editData.jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Pembayaran</label>
+                            <select name="status_pembayaran" x-model="editData.status_pembayaran" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600" required>
+                                <option value="Belum Lunas">Belum Lunas</option>
+                                <option value="Lunas">Lunas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Layanan Internet</label>
+                            <select name="status" x-model="editData.status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Active">Active</option>
+                                <option value="Non Active">Non Active</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">No. WhatsApp</label>
-                        <input type="text" name="no_wa" x-model="editData.no_wa" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alamat Pemasangan</label>
+                        <textarea name="alamat" x-model="editData.alamat" rows="3" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required></textarea>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Paket</label>
-                        <select name="paket_id" x-model="editData.paket_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
-                            <option value="">-- Pilih Paket Internet --</option>
-                            @foreach($pakets as $paket)
-                                <option value="{{ $paket->id }}">{{ $paket->nama_paket }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
-                        <input type="date" name="jatuh_tempo" x-model="editData.jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600">
-                    </div>
+                <div class="mt-8 mb-4 pb-2 border-b border-slate-100">
+                    <h5 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Informasi Akun Login</h5>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Pembayaran</label>
-                        <select name="status_pembayaran" x-model="editData.status_pembayaran" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600" required>
-                            <option value="Belum Lunas">Belum Lunas</option>
-                            <option value="Lunas">Lunas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Langganan</label>
-                        <select name="status" x-model="editData.status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600" required>
-                            <option value="Pending">Pending</option>
-                            <option value="Active">Active</option>
-                            <option value="Non Active">Non Active</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alamat Pemasangan</label>
-                    <textarea name="alamat" x-model="editData.alamat" rows="3" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium" required></textarea>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-2">
-                    <label class="relative flex items-center cursor-pointer">
-                        <input type="checkbox" name="edit_account" value="1" class="sr-only peer" x-model="editAccount">
-                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        <span class="ml-3 text-sm font-bold text-gray-800" x-text="editData.user_id ? 'Ubah Kredensial Akun Login' : 'Buatkan Akun Login Baru'"></span>
-                    </label>
-
-                    <div x-show="editAccount" x-cloak x-transition.opacity.duration.300ms class="mt-4 pt-4 border-t border-slate-200">
-                        <p class="text-[11px] text-gray-500 mb-3 leading-relaxed" x-text="editData.user_id ? 'Perbarui username atau reset password pelanggan. Kosongkan password jika tidak ingin diubah.' : 'Kredensial ini digunakan pelanggan untuk login ke Area Client Portal.'"></p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username Login</label>
-                                <input type="text" name="username" x-model="editData.user_username" placeholder="Bisa pakai No WA" class="w-full text-sm p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all" x-bind:required="editAccount">
+                <div class="space-y-4">
+                    <p class="text-xs text-gray-500 leading-relaxed" x-text="editData.user_id ? 'Ubah informasi login untuk pelanggan ini. Kosongkan password jika tidak ingin diganti.' : 'Opsional: Isi Username dan Password di bawah jika ingin membuatkan akses login baru. Kosongkan jika tidak perlu.'"></p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Username Login</label>
+                            <input type="text" name="username" x-model="editData.user_username" placeholder="Cth: budi123" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Email (Opsional)</label>
+                            <input type="email" name="email" x-model="editData.user_email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
+                            <div class="relative">
+                                <input :type="showPasswordEdit ? 'text' : 'password'" name="password" :placeholder="editData.user_id ? 'Kosongkan jika tdk diganti' : 'Min. 8 Karakter'" class="w-full text-sm p-3 pr-10 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                                <button type="button" @click="showPasswordEdit = !showPasswordEdit" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <svg x-show="!showPasswordEdit" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    <svg x-show="showPasswordEdit" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
+                                </button>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Password</label>
-                                <div class="relative">
-                                    <input :type="showPasswordEdit ? 'text' : 'password'" name="password" :placeholder="editData.user_id ? 'Kosongkan jika tdk diganti' : 'Min. 8 Karakter'" class="w-full text-sm p-3 pr-10 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all" x-bind:required="editAccount && !editData.user_id">
-                                    
-                                    <button type="button" @click="showPasswordEdit = !showPasswordEdit" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                                        <svg x-show="!showPasswordEdit" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                        <svg x-show="showPasswordEdit" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
-                                    </button>
-                                </div>
-                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Akun</label>
+                            <select name="user_status" x-model="editData.user_status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                                <option value="Active">Active (Bisa Login)</option>
+                                <option value="Non Active">Non Active (Blokir Login)</option>
+                                <option value="Pending">Pending</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-3 pt-4 border-t border-gray-100">
+                <div class="flex gap-3 pt-6 mt-6 border-t border-slate-100">
                     <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-500 p-3 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
                     <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
                         <span x-show="!isSubmitting">Update Perubahan</span>

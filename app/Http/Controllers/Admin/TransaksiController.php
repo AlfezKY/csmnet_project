@@ -6,15 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
+use Carbon\Carbon; // WAJIB TAMBAH
 
 class TransaksiController extends Controller
 {
     public function index()
     {
-        // Ambil riwayat transaksi beserta data pelanggannya
         $transaksis = Transaksi::with(['pelanggan', 'pelanggan.paket'])->latest()->get();
-        // Ambil daftar pelanggan buat di dropdown (yang statusnya Active)
-        $pelanggans = Pelanggan::where('status', 'Active')->get();
+        // Pastikan ambil relasi paket untuk kalkulasi JS di View
+        $pelanggans = Pelanggan::with('paket')->where('status', 'Active')->get();
 
         return view('admin.transaksi.index', compact('transaksis', 'pelanggans'));
     }
@@ -25,20 +25,37 @@ class TransaksiController extends Controller
             'pelanggan_id' => 'required|exists:pelanggans,id',
             'tanggal'      => 'required|date',
             'jumlah'       => 'required|numeric|min:0',
+            'jumlah_bulan' => 'required|integer|min:0', // 0 jika cuma cicil/bayar tunggakan
         ]);
 
         $data['created_by'] = auth()->user()->username ?? 'SYSTEM';
 
-        // Simpan Transaksi
-        Transaksi::create($data);
+        // 1. Simpan Transaksi
+        Transaksi::create([
+            'pelanggan_id' => $data['pelanggan_id'],
+            'tanggal'      => $data['tanggal'],
+            'jumlah'       => $data['jumlah'],
+            'created_by'   => $data['created_by'],
+        ]);
 
-        // OTOMATIS: Ubah status pelanggan jadi 'Lunas'
-        $pelanggan = Pelanggan::find($request->pelanggan_id);
+        // 2. Sinkronisasi dengan Data Pelanggan
+        $pelanggan = Pelanggan::find($data['pelanggan_id']);
         if ($pelanggan) {
-            $pelanggan->update(['status_pembayaran' => 'Lunas']);
+            if ($data['jumlah_bulan'] > 0) {
+                // Majuin Tanggal + Lunas
+                $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::parse($data['tanggal']);
+                $pelanggan->update([
+                    'status_pembayaran' => 'Lunas',
+                    'jatuh_tempo'       => $tanggalSekarang->addMonths($data['jumlah_bulan'])->format('Y-m-d'),
+                    'updated_by'        => auth()->user()->username ?? 'SYSTEM'
+                ]);
+            } else {
+                // Cuma Lunasin tanpa majuin bulan
+                $pelanggan->update(['status_pembayaran' => 'Lunas']);
+            }
         }
 
-        return back()->with('success', 'Pembayaran berhasil dicatat & Status pelanggan jadi Lunas!');
+        return back()->with('success', 'Transaksi dicatat & Tanggal jatuh tempo diperbarui!');
     }
 
     public function update(Request $request, Transaksi $transaksi)
