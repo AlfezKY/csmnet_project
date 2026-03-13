@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('nama_pelanggan');
             $table->text('alamat');
             $table->string('no_wa');
-            $table->integer('jatuh_tempo');
-
+            $table->date('jatuh_tempo')->nullable();
             $table->enum('status_pembayaran', ['Lunas', 'Belum Lunas'])->default('Belum Lunas');
             $table->enum('status', ['Active', 'Non Active', 'Pending'])->default('Pending');
 

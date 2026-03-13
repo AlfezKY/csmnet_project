@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
+use Carbon\Carbon; // <--- WAJIB TAMBAH INI BUAT NGITUNG TANGGAL
 
 class TagihanController extends Controller
 {
@@ -23,28 +24,47 @@ class TagihanController extends Controller
     // Aksi Tandai Lunas (Satuan)
     public function action(Request $request, string $id)
     {
+        $request->validate([
+            'jumlah_bulan' => 'required|integer|min:1'
+        ]);
+
         $pelanggan = Pelanggan::findOrFail($id);
+
+        // Hitung tanggal jatuh tempo yang baru (Majuin X bulan)
+        $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
+        $jatuhTempoBaru = $tanggalSekarang->addMonths($request->jumlah_bulan);
 
         $pelanggan->update([
             'status_pembayaran' => 'Lunas',
-            'updated_by' => auth()->user()->username ?? 'SYSTEM'
+            'jatuh_tempo'       => $jatuhTempoBaru->format('Y-m-d'), // Simpan tanggal barunya
+            'updated_by'        => auth()->user()->username ?? 'SYSTEM'
         ]);
 
-        return back()->with('success', "Tagihan {$pelanggan->nama_pelanggan} berhasil ditandai Lunas!");
+        return back()->with('success', "Tagihan {$pelanggan->nama_pelanggan} berhasil dibayar untuk {$request->jumlah_bulan} bulan ke depan!");
     }
 
     // Aksi Tandai Lunas (Massal / Checkbox)
     public function bulkAction(Request $request)
     {
         $request->validate([
-            'ids' => 'required|array',
+            'ids'          => 'required|array',
+            'jumlah_bulan' => 'required|integer|min:1'
         ]);
 
-        Pelanggan::whereIn('id', $request->ids)->update([
-            'status_pembayaran' => 'Lunas',
-            'updated_by' => auth()->user()->username ?? 'SYSTEM'
-        ]);
+        // Karena tiap pelanggan tanggalnya beda-beda, kita harus update satu-satu pake looping
+        $pelanggans = Pelanggan::whereIn('id', $request->ids)->get();
 
-        return back()->with('success', count($request->ids) . ' Tagihan pelanggan berhasil ditandai Lunas secara massal!');
+        foreach ($pelanggans as $pelanggan) {
+            $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
+            $jatuhTempoBaru = $tanggalSekarang->addMonths($request->jumlah_bulan);
+
+            $pelanggan->update([
+                'status_pembayaran' => 'Lunas',
+                'jatuh_tempo'       => $jatuhTempoBaru->format('Y-m-d'),
+                'updated_by'        => auth()->user()->username ?? 'SYSTEM'
+            ]);
+        }
+
+        return back()->with('success', count($request->ids) . " Tagihan pelanggan berhasil diproses untuk {$request->jumlah_bulan} bulan!");
     }
 }

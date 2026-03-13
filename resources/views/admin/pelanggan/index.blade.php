@@ -127,7 +127,7 @@
                     <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $plg->no_wa }}</td>
                     
                     <td class="px-6 py-4 text-sm text-gray-500 font-bold text-center">
-                        {{ $plg->jatuh_tempo ? 'Tgl ' . $plg->jatuh_tempo : '-' }}
+                        {{ $plg->jatuh_tempo ? \Carbon\Carbon::parse($plg->jatuh_tempo)->translatedFormat('d M Y') : '-' }}
                     </td>
                     
                     <td class="px-6 py-4 text-center">
@@ -200,7 +200,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
-                        <input type="number" name="jatuh_tempo" placeholder="1-31" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium">
+                        <input type="date" name="jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600">
                     </div>
                 </div>
 
@@ -300,7 +300,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tgl Jatuh Tempo</label>
-                        <input type="number" name="jatuh_tempo" x-model="editData.jatuh_tempo" placeholder="1-31" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium">
+                        <input type="date" name="jatuh_tempo" x-model="editData.jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600">
                     </div>
                 </div>
 

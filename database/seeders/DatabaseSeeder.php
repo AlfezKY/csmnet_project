@@ -7,6 +7,7 @@ use App\Models\Paket;
 use App\Models\Pelanggan;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon; // WAJIB TAMBAH INI BUAT TANGGAL
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,7 +17,6 @@ class DatabaseSeeder extends Seeder
         // 1. SEEDING USERS (Admin, Owner, Client)
         // ==========================================
 
-        // User 1: Admin
         User::create([
             'fullname'   => 'Super Administrator',
             'username'   => 'admin',
@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
             'created_by' => 'SYSTEM'
         ]);
 
-        // User 2: Owner
         User::create([
             'fullname'   => 'Bapak Pemilik',
             'username'   => 'owner',
@@ -36,7 +35,6 @@ class DatabaseSeeder extends Seeder
             'created_by' => 'SYSTEM'
         ]);
 
-        // User 3: Client (Contoh user yang juga pelanggan)
         $userClient = User::create([
             'fullname'   => 'Mas Pelanggan Setia',
             'username'   => 'client',
@@ -57,7 +55,7 @@ class DatabaseSeeder extends Seeder
             'deskripsi'  => 'Cocok untuk browsing ringan dan chat.',
             'keypoint'   => 'Fiber Optic, Unlimited Kuota',
             'status'     => 'Active',
-            'is_show'    => true, // Tampil di Landing Page
+            'is_show'    => true,
             'created_by' => 'SYSTEM'
         ]);
 
@@ -87,40 +85,40 @@ class DatabaseSeeder extends Seeder
         // 3. SEEDING PELANGGAN (3 Data)
         // ==========================================
 
-        // Pelanggan 1: Terhubung dengan User 'client' (Active & Belum Lunas -> Masuk Tagihan)
         Pelanggan::create([
             'user_id'           => $userClient->id,
             'paket_id'          => $paket2->id,
             'nama_pelanggan'    => 'Mas Pelanggan Setia',
             'alamat'            => 'Jl. Sudirman No. 10, Jakarta Pusat',
             'no_wa'             => '081234567890',
-            'jatuh_tempo'       => 5,
+            // UBAH: Jatuh tempo jadi 1 bulan ke depan dari hari ini
+            'jatuh_tempo'       => Carbon::now()->addMonths(1)->format('Y-m-d'),
             'status_pembayaran' => 'Belum Lunas',
             'status'            => 'Active',
             'created_by'        => 'SYSTEM'
         ]);
 
-        // Pelanggan 2: Belum punya akun login (Pending -> Masuk Approval)
         Pelanggan::create([
             'user_id'           => null,
             'paket_id'          => $paket1->id,
             'nama_pelanggan'    => 'Budi Santoso (Baru Daftar)',
             'alamat'            => 'Gg. Kancil No. 45, Bandung',
             'no_wa'             => '089876543210',
-            'jatuh_tempo'       => 15,
+            // UBAH: Jatuh tempo jadi 15 hari ke depan
+            'jatuh_tempo'       => Carbon::now()->addDays(15)->format('Y-m-d'),
             'status_pembayaran' => 'Belum Lunas',
-            'status'            => 'Pending', // Ini bakal muncul di menu Approval
+            'status'            => 'Pending',
             'created_by'        => 'SYSTEM'
         ]);
 
-        // Pelanggan 3: Pelanggan Lama (Active & Lunas)
         Pelanggan::create([
             'user_id'           => null,
             'paket_id'          => $paket3->id,
             'nama_pelanggan'    => 'Sultan Gaming',
             'alamat'            => 'Komplek Elite Blok A1, Surabaya',
             'no_wa'             => '085512345678',
-            'jatuh_tempo'       => 20,
+            // UBAH: Jatuh tempo jadi 3 bulan ke depan
+            'jatuh_tempo'       => Carbon::now()->addMonths(3)->format('Y-m-d'),
             'status_pembayaran' => 'Lunas',
             'status'            => 'Active',
             'created_by'        => 'SYSTEM'

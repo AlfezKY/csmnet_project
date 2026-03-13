@@ -28,14 +28,14 @@
     <div class="flex justify-between items-end mb-6 px-1">
         <div>
             <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Daftar Tagihan</h3>
-            <p class="text-sm text-gray-500 font-medium mt-1">Pelanggan aktif yang belum melakukan pembayaran bulan ini</p>
+            <p class="text-sm text-gray-500 font-medium mt-1">Pelanggan aktif yang belum melakukan pembayaran</p>
         </div>
         
         <div x-show="selectedIds.length > 0" x-cloak class="flex items-center gap-2 bg-gray-900 p-1.5 rounded-lg shadow-lg" x-transition>
             <span class="text-xs text-white font-bold px-3" x-text="selectedIds.length + ' Dipilih'"></span>
             <button @click="openBulkConfirm = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                Tandai Lunas Semua
+                Tandai Lunas Massal
             </button>
         </div>
     </div>
@@ -80,22 +80,23 @@
                     
                     <td class="px-6 py-4 text-center">
                         <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border bg-red-50 text-red-600 border-red-100">
-                            Tgl {{ $plg->jatuh_tempo }}
+                            {{ $plg->jatuh_tempo ? \Carbon\Carbon::parse($plg->jatuh_tempo)->translatedFormat('d M Y') : '-' }}
                         </span>
                     </td>
                     
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <button @click="openConfirm = true; confirmUrl = '{{ route('tagihan.action', $plg->id) }}'; confirmText = 'Tandai tagihan {{ $plg->nama_pelanggan }} bulan ini sebagai Lunas?'" 
-                                    class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white rounded text-[11px] font-bold transition-all" title="Tandai Lunas">
-                                Lunas
+                            <button @click="openConfirm = true; confirmUrl = '{{ route('tagihan.action', $plg->id) }}'; confirmText = 'Tandai tagihan {{ $plg->nama_pelanggan }} sebagai Lunas?'" 
+                                    class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white rounded text-[11px] font-bold transition-all" title="Proses Pembayaran">
+                                Bayar
                             </button>
 
                             @php
                                 $no_wa_format = preg_replace('/^0/', '62', $plg->no_wa);
                                 $harga = number_format($plg->paket->harga ?? 0, 0, ',', '.');
                                 $paket = $plg->paket->nama_paket ?? 'Internet';
-                                $pesan = "Halo kak *{$plg->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$plg->jatuh_tempo}*. Mohon segera melakukan pembayaran. Terima kasih \u{1F64F}";
+                                $tgl = $plg->jatuh_tempo ? \Carbon\Carbon::parse($plg->jatuh_tempo)->translatedFormat('d M Y') : '';
+                                $pesan = "Halo kak *{$plg->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*. Mohon segera melakukan pembayaran. Terima kasih \u{1F64F}";
                             @endphp
                             <a href="https://wa.me/{{ $no_wa_format }}?text={{ urlencode($pesan) }}" target="_blank" 
                                class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-100 hover:bg-green-500 hover:text-white rounded text-[11px] font-bold transition-all flex items-center gap-1.5" title="Kirim WA Pengingat">
@@ -127,15 +128,27 @@
             <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
             </div>
-            <h4 class="text-xl font-bold text-gray-900 mb-2">Konfirmasi Tagihan Lunas</h4>
-            <p class="text-sm text-gray-500 leading-relaxed mb-8 px-4" x-text="confirmText"></p>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Proses Pembayaran</h4>
+            <p class="text-sm text-gray-500 leading-relaxed mb-6 px-4" x-text="confirmText"></p>
             
             <form :action="confirmUrl" method="POST" @submit="isSubmitting = true">
                 @csrf @method('PUT')
+                
+                <div class="mb-6 text-left">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dibayar untuk berapa bulan?</label>
+                    <select name="jumlah_bulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
+                        <option value="1">1 Bulan Kedepan</option>
+                        <option value="2">2 Bulan Kedepan</option>
+                        <option value="3">3 Bulan Kedepan</option>
+                        <option value="6">6 Bulan Kedepan</option>
+                        <option value="12">12 Bulan (1 Tahun)</option>
+                    </select>
+                </div>
+
                 <div class="flex gap-3">
                     <button type="button" @click="openConfirm = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batal</button>
                     <button type="submit" :disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
-                        <span x-show="!isSubmitting">Ya, Lunas</span>
+                        <span x-show="!isSubmitting">Konfirmasi Lunas</span>
                         <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
                             <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         </span>
@@ -151,9 +164,9 @@
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             
-            <h4 class="text-xl font-bold text-gray-900 mb-2">Tandai Lunas Massal</h4>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">Bayar Massal</h4>
             <p class="text-sm text-gray-500 mb-6">
-                Yakin ingin menandai <span class="text-blue-600 font-bold" x-text="selectedIds.length"></span> tagihan pelanggan sebagai Lunas?
+                Yakin ingin memproses <span class="text-blue-600 font-bold" x-text="selectedIds.length"></span> tagihan pelanggan sekaligus?
             </p>
 
             <form action="{{ route('tagihan.bulk') }}" method="POST" @submit="isSubmitting = true">
@@ -162,10 +175,21 @@
                     <input type="hidden" name="ids[]" :value="id">
                 </template>
                 
+                <div class="mb-6 text-left">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Perpanjang berapa bulan?</label>
+                    <select name="jumlah_bulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
+                        <option value="1">1 Bulan Kedepan</option>
+                        <option value="2">2 Bulan Kedepan</option>
+                        <option value="3">3 Bulan Kedepan</option>
+                        <option value="6">6 Bulan Kedepan</option>
+                        <option value="12">12 Bulan (1 Tahun)</option>
+                    </select>
+                </div>
+
                 <div class="flex gap-3">
                     <button type="button" @click="openBulkConfirm = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batalkan</button>
                     <button type="submit" :disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
-                        <span x-show="!isSubmitting">Ya, Proses Semua</span>
+                        <span x-show="!isSubmitting">Proses Semua</span>
                         <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
                             <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         </span>

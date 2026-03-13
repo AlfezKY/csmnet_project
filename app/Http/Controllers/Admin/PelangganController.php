@@ -48,8 +48,8 @@ class PelangganController extends Controller
             'nama_pelanggan' => 'required|string|max:255',
             'no_wa'          => 'required|string|max:20',
             'paket_id'       => 'nullable|exists:pakets,id',
-            // Validasi min:0 biar angka 0 lolos
-            'jatuh_tempo'    => 'nullable|integer|min:0|max:31',
+            // UBAH JADI DATE
+            'jatuh_tempo'    => 'nullable|date',
             'status'         => 'required|in:Active,Non Active,Pending',
             'alamat'         => 'required|string',
         ];
@@ -82,8 +82,8 @@ class PelangganController extends Controller
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
-                // JADIKAN 0 JIKA KOSONG:
-                'jatuh_tempo'       => empty($data['jatuh_tempo']) ? 0 : $data['jatuh_tempo'],
+                // KEMBALIKAN JADI NULL KALAU KOSONG
+                'jatuh_tempo'       => empty($data['jatuh_tempo']) ? null : $data['jatuh_tempo'],
                 'status_pembayaran' => 'Belum Lunas',
                 'status'            => $data['status'],
                 'created_by'        => auth()->user()->username ?? 'SYSTEM',
@@ -99,8 +99,8 @@ class PelangganController extends Controller
             'nama_pelanggan'    => 'required|string|max:255',
             'no_wa'             => 'required|string|max:20',
             'paket_id'          => 'nullable|exists:pakets,id',
-            // Validasi min:0 biar angka 0 lolos
-            'jatuh_tempo'       => 'nullable|integer|min:0|max:31',
+            // UBAH JADI DATE
+            'jatuh_tempo'       => 'nullable|date',
             'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
             'status'            => 'required|in:Active,Non Active,Pending',
             'alamat'            => 'required|string',
@@ -155,8 +155,8 @@ class PelangganController extends Controller
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
-                // JADIKAN 0 JIKA KOSONG:
-                'jatuh_tempo'       => empty($data['jatuh_tempo']) ? 0 : $data['jatuh_tempo'],
+                // KEMBALIKAN JADI NULL KALAU KOSONG
+                'jatuh_tempo'       => empty($data['jatuh_tempo']) ? null : $data['jatuh_tempo'],
                 'status_pembayaran' => $data['status_pembayaran'],
                 'status'            => $data['status'],
                 'updated_by'        => auth()->user()->username ?? 'SYSTEM',
