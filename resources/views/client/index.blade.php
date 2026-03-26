@@ -10,24 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            600: '#4f46e5', // Indigo utama
-                            700: '#4338ca',
-                            900: '#312e81',
-                        }
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 600: '#4f46e5', 700: '#4338ca', 900: '#312e81' }
                     },
                     boxShadow: {
                         'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
@@ -37,19 +28,12 @@
             }
         }
     </script>
-
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Accordion Animation */
-        .faq-content {
-            transition: grid-template-rows 0.3s ease-out;
-        }
+        .faq-content { transition: grid-template-rows 0.3s ease-out; }
         .faq-content[aria-expanded="false"] { grid-template-rows: 0fr; }
         .faq-content[aria-expanded="true"] { grid-template-rows: 1fr; }
-        
-        /* Cegah elemen kedip saat Alpine loading */
         [x-cloak] { display: none !important; }
     </style>
 </head>
@@ -64,17 +48,13 @@
           }
       }">
 
-    <div x-show="showPendingAlert" 
-         x-cloak 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-[-20px] scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-         x-transition:leave-end="opacity-0 translate-y-[-20px] scale-95"
-         class="fixed top-24 right-5 z-50 max-w-sm w-full bg-orange-500 text-white p-4 rounded-xl shadow-2xl flex items-start gap-3">
-        
-        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    <a href="{{ route('komplain.form') }}" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 bg-white text-brand-600 border-2 border-brand-600 px-6 py-3.5 rounded-full shadow-2xl shadow-brand-600/20 hover:bg-brand-50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-2 font-bold">
+        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <span>Ajukan Komplain</span>
+    </a>
+
+    <div x-show="showPendingAlert" x-cloak class="fixed top-24 right-5 z-50 max-w-sm w-full bg-orange-500 text-white p-4 rounded-xl shadow-2xl flex items-start gap-3">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77-1.333.192 3 1.732 3z"></path></svg>
         <div class="flex-1">
             <h4 class="font-bold text-sm">Menunggu Persetujuan Admin</h4>
             <p class="text-xs mt-1 opacity-90 leading-relaxed">Pendaftaran Anda sedang ditinjau. Tim kami akan segera menghubungi Anda atau Anda dapat menghubungi WhatsApp kami.</p>
@@ -99,10 +79,13 @@
             <div class="hidden md:flex items-center gap-4">
                 @auth
                     @if(Auth::user()->role === 'Pelanggan')
-                        <span class="text-sm font-semibold text-slate-700 mr-2">Halo, {{ explode(' ', Auth::user()->fullname)[0] }}</span>
+                        <a href="{{ route('client-portal') }}" class="text-sm font-bold text-slate-700 hover:text-brand-600 transition-colors mr-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Client Portal
+                        </a>
                         <form action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="px-6 py-2.5 text-sm font-semibold text-white bg-red-600 rounded-full hover:bg-red-700 transition shadow-lg shadow-red-600/20">Logout</button>
+                            <button type="submit" class="px-5 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-full transition-colors">Logout</button>
                         </form>
                     @else
                         <a href="{{ route('dashboard') }}" class="px-6 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-full hover:bg-slate-800 transition">Dashboard Admin</a>
@@ -126,10 +109,10 @@
             
             @auth
                 @if(Auth::user()->role === 'Pelanggan')
-                    <p class="text-center text-sm text-slate-500 font-medium">Masuk sebagai {{ Auth::user()->fullname }}</p>
+                    <a href="{{ route('client-portal') }}" class="block w-full py-3 text-center border border-brand-200 text-brand-600 rounded-lg font-bold">Buka Client Portal</a>
                     <form action="{{ route('logout') }}" method="POST" class="w-full">
                         @csrf
-                        <button type="submit" class="w-full py-3 text-center bg-red-600 text-white rounded-lg font-bold">Logout</button>
+                        <button type="submit" class="w-full py-3 text-center bg-red-50 text-red-600 rounded-lg font-bold">Logout</button>
                     </form>
                 @else
                     <a href="{{ route('dashboard') }}" class="block w-full py-3 text-center bg-slate-900 text-white rounded-lg font-bold">Dashboard Admin</a>
@@ -232,7 +215,6 @@
 
                 @if($pakets->count() > 0)
                     @php
-                        // Ambil data pelanggan SEKALI saja di luar perulangan untuk optimasi query
                         $pelanggan = Auth::check() ? \App\Models\Pelanggan::where('user_id', Auth::id())->first() : null;
                     @endphp
 
@@ -376,7 +358,7 @@
         </section>
 
         {{-- Section FAQ --}}
-        <section id="faq" class="py-24 bg-white">
+        <section id="faq" class="py-24 bg-white border-t border-slate-100">
             <div class="max-w-3xl mx-auto px-6">
                 
                 <div class="text-center mb-16">
@@ -390,12 +372,12 @@
                         ['q' => 'Bagaimana cara mendaftar?', 'a' => 'Cukup klik tombol <a href="'.url('/register').'" class="text-brand-600 font-semibold hover:underline">Daftar</a> di menu atas, atau hubungi kami via WhatsApp.'],
                         ['q' => 'Berapa lama proses pemasangan?', 'a' => 'Estimasi pemasangan adalah <strong>1-3 hari kerja</strong> setelah pembayaran administrasi dikonfirmasi.'],
                         ['q' => 'Apakah ada biaya tersembunyi?', 'a' => 'Tidak ada. Harga yang tertera adalah harga bulanan flat (belum termasuk PPN 11%).'],
-                        ['q' => 'Bagaimana jika internet gangguan?', 'a' => 'Tim support kami siaga 24/7. Anda bisa melaporkan gangguan melalui WhatsApp Customer Service atau Dashboard Pelanggan.']
+                        ['q' => 'Bagaimana jika internet gangguan?', 'a' => 'Tim support kami siaga 24/7. Anda bisa melaporkan gangguan dengan menekan tombol <strong>Ajukan Komplain</strong> di pojok kanan bawah layar ini.']
                     ] as $faq)
-                    <div class="group border border-slate-100 rounded-3xl bg-slate-50 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                    <div class="group border border-slate-100 rounded-3xl bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
                         <button class="w-full px-6 py-5 md:px-8 text-left flex justify-between items-start md:items-center gap-4 focus:outline-none" onclick="toggleFaq(this)">
                             <span class="font-bold text-slate-800 text-lg group-hover:text-brand-600 transition-colors">{{ $faq['q'] }}</span>
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:border-brand-200 group-hover:text-brand-600 transition-all duration-300">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:border-brand-200 group-hover:text-brand-600 transition-all duration-300">
                                 <svg class="w-5 h-5 transform transition-transform duration-300 faq-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                         </button>

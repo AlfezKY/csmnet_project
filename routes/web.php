@@ -15,8 +15,7 @@ use App\Http\Controllers\Admin\TagihanController;
 
 use App\Http\Controllers\Client\ClientController;
 
-// --- 1. PUBLIC ROUTES (Bisa diakses siapa saja, baik guest maupun yang sudah login) ---
-
+// --- 1. PUBLIC ROUTES ---
 Route::get('/', function () {
     $pakets = Paket::where('is_show', true)->take(4)->get();
     return view('client.index', compact('pakets'));
@@ -26,8 +25,7 @@ Route::get('/about', function () {
     return view('client.about');
 })->name('about');
 
-
-// --- 2. GUEST ROUTES (Khusus orang yang BELUM login) ---
+// --- 2. GUEST ROUTES ---
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
     Route::post('/login', [LoginController::class, 'authenticate']);
@@ -36,11 +34,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'store']);
 });
 
-
-// --- 3. AUTH ROUTES (Harus login dulu) ---
+// --- 3. AUTH ROUTES ---
 Route::middleware('auth')->group(function () {
 
-    // ROUTE LOGOUT (WAJIB ADA INI BIAR GAK 404)
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     // Khusus Admin & Owner
@@ -51,6 +47,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('paket', PaketController::class);
         Route::resource('transaksi', TransaksiController::class);
 
+        // KOMPLAIN UNTUK ADMIN (Kelola Data)
+        Route::post('/komplain/admin-store', [App\Http\Controllers\Admin\KomplainController::class, 'storeAdmin'])->name('komplain.storeAdmin');
+        Route::resource('komplain', App\Http\Controllers\Admin\KomplainController::class)->except(['create', 'show', 'store']);
+
         Route::get('/approval', [ApprovalController::class, 'index'])->name('approval.index');
         Route::put('/approval/{id}', [ApprovalController::class, 'action'])->name('approval.action');
         Route::post('/approval/bulk', [ApprovalController::class, 'bulkAction'])->name('approval.bulk');
@@ -60,8 +60,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/tagihan/bulk-lunas', [TagihanController::class, 'bulkAction'])->name('tagihan.bulk');
     });
 
-    // Khusus Pelanggan
+    // Khusus Pelanggan (Otomatis redirect ke Login kalau belum masuk)
     Route::middleware(['checkRole:Pelanggan'])->group(function () {
         Route::get('/client-portal', [ClientController::class, 'index'])->name('client-portal');
+
+        // HALAMAN KOMPLAIN URL DIGANTI BIAR GAK BENTROK
+        Route::get('/lapor-gangguan', function () {
+            return view('client.komplain');
+        })->name('komplain.form');
+
+        // SUBMIT KOMPLAIN (Kirim Data)
+        Route::post('/komplain/kirim', [App\Http\Controllers\Admin\KomplainController::class, 'store'])->name('komplain.store');
     });
 });
