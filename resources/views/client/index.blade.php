@@ -48,13 +48,17 @@
           }
       }">
 
-    <a href="{{ route('komplain.form') }}" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 bg-white text-brand-600 border-2 border-brand-600 px-6 py-3.5 rounded-full shadow-2xl shadow-brand-600/20 hover:bg-brand-50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-2 font-bold">
-        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-        <span>Ajukan Komplain</span>
-    </a>
+    @auth
+        @if(Auth::user()->role === 'Pelanggan')
+        <a href="{{ route('komplain.form') }}" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-50 bg-white text-brand-600 border-2 border-brand-600 px-6 py-3.5 rounded-full shadow-2xl shadow-brand-600/20 hover:bg-brand-50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-2 font-bold">
+            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span>Ajukan Komplain</span>
+        </a>
+        @endif
+    @endauth
 
     <div x-show="showPendingAlert" x-cloak class="fixed top-24 right-5 z-50 max-w-sm w-full bg-orange-500 text-white p-4 rounded-xl shadow-2xl flex items-start gap-3">
-        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77-1.333.192 3 1.732 3z"></path></svg>
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         <div class="flex-1">
             <h4 class="font-bold text-sm">Menunggu Persetujuan Admin</h4>
             <p class="text-xs mt-1 opacity-90 leading-relaxed">Pendaftaran Anda sedang ditinjau. Tim kami akan segera menghubungi Anda atau Anda dapat menghubungi WhatsApp kami.</p>
@@ -372,7 +376,7 @@
                         ['q' => 'Bagaimana cara mendaftar?', 'a' => 'Cukup klik tombol <a href="'.url('/register').'" class="text-brand-600 font-semibold hover:underline">Daftar</a> di menu atas, atau hubungi kami via WhatsApp.'],
                         ['q' => 'Berapa lama proses pemasangan?', 'a' => 'Estimasi pemasangan adalah <strong>1-3 hari kerja</strong> setelah pembayaran administrasi dikonfirmasi.'],
                         ['q' => 'Apakah ada biaya tersembunyi?', 'a' => 'Tidak ada. Harga yang tertera adalah harga bulanan flat (belum termasuk PPN 11%).'],
-                        ['q' => 'Bagaimana jika internet gangguan?', 'a' => 'Tim support kami siaga 24/7. Anda bisa melaporkan gangguan dengan menekan tombol <strong>Ajukan Komplain</strong> di pojok kanan bawah layar ini.']
+                        ['q' => 'Bagaimana jika internet gangguan?', 'a' => 'Tim support kami siaga 24/7. Anda bisa melaporkan gangguan dengan menekan tombol <strong>Ajukan Komplain</strong> (khusus pelanggan) di pojok kanan bawah layar ini.']
                     ] as $faq)
                     <div class="group border border-slate-100 rounded-3xl bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
                         <button class="w-full px-6 py-5 md:px-8 text-left flex justify-between items-start md:items-center gap-4 focus:outline-none" onclick="toggleFaq(this)">

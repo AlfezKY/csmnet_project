@@ -37,6 +37,10 @@
         <form action="{{ url('/register') }}" method="post" class="space-y-5">
             @csrf
             
+            <div class="mb-4 pb-2 border-b border-slate-100">
+                <h5 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Informasi Pelanggan</h5>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap / Instansi</label>
@@ -54,7 +58,9 @@
                 <textarea name="alamat" rows="3" placeholder="Nama Jalan, RT/RW, Patokan Rumah..." class="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-medium transition-all @error('alamat') border-red-500 @enderror" required>{{ old('alamat') }}</textarea>
             </div>
 
-            <hr class="border-slate-100 my-4">
+            <div class="mt-8 mb-4 pb-2 border-b border-slate-100">
+                <h5 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Informasi Akun Login</h5>
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>

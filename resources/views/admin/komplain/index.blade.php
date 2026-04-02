@@ -15,21 +15,22 @@
 @endif
 
 <div x-data="{ 
+    activeTab: 'Not Yet', // Default tab yang kebuka adalah Not Yet
     openAdd: {{ $errors->any() ? 'true' : 'false' }}, 
     openEdit: false, 
     openDelete: false, 
     editData: {}, 
     deleteUrl: '' 
 }">
-    <div class="flex justify-between items-end mb-6 px-1">
+    <div class="flex flex-col md:flex-row md:justify-between items-start md:items-end mb-6 px-1 gap-4">
         <div>
             <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Daftar Komplain</h3>
-            <p class="text-sm text-gray-500 font-medium mt-1">Tindaklanjuti keluhan dan gangguan pelanggan Anda</p>
+            <p class="text-sm text-gray-500 font-medium mt-1">Pantau progress penanganan keluhan pelanggan</p>
         </div>
         
         <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-            Catat Komplain
+            Catat Manual
         </button>
     </div>
 
@@ -40,12 +41,41 @@
         </div>
     @endif
 
-    <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+    {{-- NAVIGATION TABS BERDASARKAN STATUS --}}
+    <div class="flex gap-2 border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar">
+        <button @click="activeTab = 'Not Yet'" 
+                class="px-6 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex items-center gap-2"
+                :class="activeTab === 'Not Yet' ? 'border-red-500 text-red-600 bg-red-50/50 rounded-t-lg' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-t-lg'">
+            <span class="w-2 h-2 rounded-full" :class="activeTab === 'Not Yet' ? 'bg-red-500 animate-pulse' : 'bg-gray-300'"></span>
+            Belum Ditangani
+            <span class="ml-1 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs">{{ $komplains->where('status', 'Not Yet')->count() }}</span>
+        </button>
+        
+        <button @click="activeTab = 'In Progress'" 
+                class="px-6 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex items-center gap-2"
+                :class="activeTab === 'In Progress' ? 'border-blue-500 text-blue-600 bg-blue-50/50 rounded-t-lg' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-t-lg'">
+            <span class="w-2 h-2 rounded-full" :class="activeTab === 'In Progress' ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'"></span>
+            Sedang Diproses
+            <span class="ml-1 bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs">{{ $komplains->where('status', 'In Progress')->count() }}</span>
+        </button>
+
+        <button @click="activeTab = 'Done'" 
+                class="px-6 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex items-center gap-2"
+                :class="activeTab === 'Done' ? 'border-green-500 text-green-600 bg-green-50/50 rounded-t-lg' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-t-lg'">
+            <span class="w-2 h-2 rounded-full" :class="activeTab === 'Done' ? 'bg-green-500' : 'bg-gray-300'"></span>
+            Selesai
+            <span class="ml-1 bg-green-100 text-green-600 py-0.5 px-2 rounded-full text-xs">{{ $komplains->where('status', 'Done')->count() }}</span>
+        </button>
+    </div>
+
+    {{-- TAB CONTENT (Loop 3 kali buat Not Yet, In Progress, Done) --}}
+    @foreach(['Not Yet', 'In Progress', 'Done'] as $statusKey)
+    <div x-show="activeTab === '{{ $statusKey }}'" x-cloak class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
         <table class="w-full text-left text-gray-600 border-collapse">
             <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
                 <tr>
                     <th class="px-6 py-4">Pelapor</th>
-                    <th class="px-6 py-4">Tanggal</th>
+                    <th class="px-6 py-4 w-32">Tanggal</th>
                     <th class="px-6 py-4 w-1/3">Detail Keluhan</th>
                     <th class="px-6 py-4 text-center">Prioritas</th>
                     <th class="px-6 py-4 text-center">Status</th>
@@ -53,7 +83,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                @forelse($komplains as $kp)
+                @forelse($komplains->where('status', $statusKey) as $kp)
                 <tr class="hover:bg-gray-50/50 transition-colors group">
                     <td class="px-6 py-4">
                         <div class="flex flex-col">
@@ -61,21 +91,21 @@
                             <span class="text-[11px] text-gray-500 font-medium mt-0.5">{{ $kp->pelanggan->no_wa ?? '-' }}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold">
+                    <td class="px-6 py-4 text-sm text-gray-500 font-bold whitespace-nowrap">
                         {{ \Carbon\Carbon::parse($kp->tanggal)->format('d M Y') }}
                     </td>
                     <td class="px-6 py-4">
                         <p class="text-sm text-gray-700 font-medium whitespace-pre-wrap">{{ $kp->keluhan }}</p>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border 
+                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border whitespace-nowrap
                             {{ $kp->priority == 'High' ? 'bg-red-50 text-red-600 border-red-100' : ($kp->priority == 'Medium' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-100 text-gray-600 border-gray-200') }}">
                             {{ $kp->priority }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border 
-                            {{ $kp->status == 'Done' ? 'bg-green-50 text-green-700 border-green-100' : ($kp->status == 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-red-50 text-red-600 border-red-100') }}">
+                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border whitespace-nowrap
+                            {{ $kp->status == 'Done' ? 'bg-green-50 text-green-700 border-green-100' : ($kp->status == 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-100 text-gray-500 border-gray-200') }}">
                             {{ $kp->status }}
                         </span>
                     </td>
@@ -91,7 +121,7 @@
                                 </a>
                             @endif
 
-                            <button @click="openEdit = true; editData = {{ json_encode($kp) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Update Status">
+                            <button @click="openEdit = true; editData = {{ json_encode($kp) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Update Progress">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
                             <button @click="openDelete = true; deleteUrl = '{{ route('komplain.destroy', $kp->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Data">
@@ -104,10 +134,10 @@
                 <tr>
                     <td colspan="6" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center">
-                            <div class="w-12 h-12 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <div class="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <p class="text-sm text-gray-500 font-bold">Yeay! Tidak ada komplain hari ini.</p>
+                            <p class="text-sm text-gray-500 font-bold">Tidak ada komplain dengan status ini.</p>
                         </div>
                     </td>
                 </tr>
@@ -115,7 +145,9 @@
             </tbody>
         </table>
     </div>
+    @endforeach
 
+    {{-- MODAL TAMBAH KOMPLAIN --}}
     <div x-show="openAdd" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-lg rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
             <h4 class="text-xl font-bold text-gray-900 mb-6">Catat Komplain Manual</h4>
@@ -173,6 +205,7 @@
         </div>
     </div>
 
+    {{-- MODAL EDIT KOMPLAIN --}}
     <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-8" @click.away="openEdit = false">
             <h4 class="text-xl font-bold text-gray-900 mb-6">Tindak Lanjut Komplain</h4>
@@ -213,6 +246,7 @@
         </div>
     </div>
 
+    {{-- MODAL DELETE --}}
     <div x-show="openDelete" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openDelete = false">
             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5">

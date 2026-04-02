@@ -6,12 +6,26 @@
 <div x-data="{ 
     selectedIds: [], 
     allIds: {{ $pelanggans->pluck('id')->toJson() }},
+    allData: [
+        @foreach($pelanggans as $p)
+            { id: '{{ $p->id }}', harga: {{ $p->paket->harga ?? 0 }} },
+        @endforeach
+    ],
     
     openConfirm: false, 
     confirmUrl: '', 
     confirmText: '',
     
+    // Variabel kalkulator satuan
+    hargaPaket: 0,
+    jumlahBulan: 1,
+    diskonPersen: 0,
+
+    // Variabel kalkulator massal
     openBulkConfirm: false,
+    bulkJumlahBulan: 1,
+    bulkDiskonPersen: 0,
+
     isSubmitting: false,
 
     get isAllSelected() {
@@ -23,6 +37,30 @@
         } else {
             this.selectedIds = [...this.allIds];
         }
+    },
+
+    // Hitung Total Bayar Satuan
+    get totalTagihan() {
+        let baseTotal = this.hargaPaket * this.jumlahBulan;
+        let diskonAmount = baseTotal * (this.diskonPersen / 100);
+        return Math.max(0, baseTotal - diskonAmount);
+    },
+
+    // Hitung Total Bayar Massal
+    get totalBulkTagihan() {
+        let totalHargaPerBulan = 0;
+        this.selectedIds.forEach(id => {
+            let plg = this.allData.find(p => p.id == id);
+            if(plg) totalHargaPerBulan += plg.harga;
+        });
+        let baseTotal = totalHargaPerBulan * this.bulkJumlahBulan;
+        let diskonAmount = baseTotal * (this.bulkDiskonPersen / 100);
+        return Math.max(0, baseTotal - diskonAmount);
+    },
+
+    // Format Rupiah Otomatis
+    formatRupiah(angka) {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     }
 }">
     <div class="flex justify-between items-end mb-6 px-1">
@@ -33,7 +71,7 @@
         
         <div x-show="selectedIds.length > 0" x-cloak class="flex items-center gap-2 bg-gray-900 p-1.5 rounded-lg shadow-lg" x-transition>
             <span class="text-xs text-white font-bold px-3" x-text="selectedIds.length + ' Dipilih'"></span>
-            <button @click="openBulkConfirm = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
+            <button @click="openBulkConfirm = true; bulkJumlahBulan = 1; bulkDiskonPersen = 0" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 Tandai Lunas Massal
             </button>
@@ -86,8 +124,14 @@
                     
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <button @click="openConfirm = true; confirmUrl = '{{ route('tagihan.action', $plg->id) }}'; confirmText = 'Tandai tagihan {{ $plg->nama_pelanggan }} sebagai Lunas?'" 
-                                    class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white rounded text-[11px] font-bold transition-all" title="Proses Pembayaran">
+                            <button @click="
+                                openConfirm = true; 
+                                confirmUrl = '{{ route('tagihan.action', $plg->id) }}'; 
+                                confirmText = 'Tandai tagihan {{ $plg->nama_pelanggan }} sebagai Lunas?';
+                                hargaPaket = {{ $plg->paket->harga ?? 0 }};
+                                jumlahBulan = 1;
+                                diskonPersen = 0;
+                            " class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white rounded text-[11px] font-bold transition-all" title="Proses Pembayaran">
                                 Bayar
                             </button>
 
@@ -123,6 +167,7 @@
         </table>
     </div>
 
+    {{-- MODAL BAYAR SATUAN --}}
     <div x-show="openConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openConfirm = false">
             <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -134,15 +179,36 @@
             <form :action="confirmUrl" method="POST" @submit="isSubmitting = true">
                 @csrf @method('PUT')
                 
-                <div class="mb-6 text-left">
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Dibayar untuk berapa bulan?</label>
-                    <select name="jumlah_bulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
-                        <option value="1">1 Bulan Kedepan</option>
-                        <option value="2">2 Bulan Kedepan</option>
-                        <option value="3">3 Bulan Kedepan</option>
-                        <option value="6">6 Bulan Kedepan</option>
-                        <option value="12">12 Bulan (1 Tahun)</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-3 mb-5 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
+                        <select name="jumlah_bulan" x-model.number="jumlahBulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
+                            <option value="1">1 Bulan</option>
+                            <option value="2">2 Bulan</option>
+                            <option value="3">3 Bulan</option>
+                            <option value="6">6 Bulan</option>
+                            <option value="12">12 Bulan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Diskon (%)</label>
+                        <div class="relative">
+                            <input type="number" name="diskon" x-model.number="diskonPersen" min="0" max="100" class="w-full text-sm p-3 pr-8 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all">
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 font-bold">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- DISPLAY TOTAL BAYAR LIVE --}}
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between">
+                    <div class="text-left">
+                        <span class="block text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-0.5">Total Tagihan</span>
+                        <span class="text-xs font-medium text-blue-500" x-text="jumlahBulan + ' Bulan x Rp ' + (hargaPaket/1000) + 'k'"></span>
+                    </div>
+                    <div class="text-xl font-black text-blue-700 tracking-tight" x-text="formatRupiah(totalTagihan)">
+                        0
+                    </div>
                 </div>
 
                 <div class="flex gap-3">
@@ -158,6 +224,7 @@
         </div>
     </div>
 
+    {{-- MODAL BAYAR MASSAL --}}
     <div x-show="openBulkConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openBulkConfirm = false">
             <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -175,15 +242,36 @@
                     <input type="hidden" name="ids[]" :value="id">
                 </template>
                 
-                <div class="mb-6 text-left">
-                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Perpanjang berapa bulan?</label>
-                    <select name="jumlah_bulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
-                        <option value="1">1 Bulan Kedepan</option>
-                        <option value="2">2 Bulan Kedepan</option>
-                        <option value="3">3 Bulan Kedepan</option>
-                        <option value="6">6 Bulan Kedepan</option>
-                        <option value="12">12 Bulan (1 Tahun)</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-3 mb-5 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
+                        <select name="jumlah_bulan" x-model.number="bulkJumlahBulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
+                            <option value="1">1 Bulan</option>
+                            <option value="2">2 Bulan</option>
+                            <option value="3">3 Bulan</option>
+                            <option value="6">6 Bulan</option>
+                            <option value="12">12 Bulan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Diskon (%)</label>
+                        <div class="relative">
+                            <input type="number" name="diskon" x-model.number="bulkDiskonPersen" min="0" max="100" class="w-full text-sm p-3 pr-8 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all">
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 font-bold">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- DISPLAY TOTAL BAYAR MASSAL LIVE --}}
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between">
+                    <div class="text-left">
+                        <span class="block text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-0.5">Total Penerimaan</span>
+                        <span class="text-xs font-medium text-blue-500" x-text="selectedIds.length + ' Pelanggan'"></span>
+                    </div>
+                    <div class="text-xl font-black text-blue-700 tracking-tight" x-text="formatRupiah(totalBulkTagihan)">
+                        0
+                    </div>
                 </div>
 
                 <div class="flex gap-3">

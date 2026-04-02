@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
-use App\Models\Transaksi; // WAJIB TAMBAH INI
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -24,7 +24,8 @@ class TagihanController extends Controller
     public function action(Request $request, string $id)
     {
         $request->validate([
-            'jumlah_bulan' => 'required|integer|min:1'
+            'jumlah_bulan' => 'required|integer|min:1',
+            'diskon'       => 'nullable|numeric|min:0|max:100'
         ]);
 
         $pelanggan = Pelanggan::with('paket')->findOrFail($id);
@@ -39,11 +40,19 @@ class TagihanController extends Controller
             'updated_by'        => auth()->user()->username ?? 'SYSTEM'
         ]);
 
-        // 2. OTOMATIS CATAT KE TABEL TRANSAKSI
+        // 2. Hitung Diskon
+        $jumlah_bulan = $request->jumlah_bulan;
+        $diskon_persen = $request->diskon ?? 0;
+
+        $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
+        $potongan = $harga_normal * ($diskon_persen / 100);
+        $total_bayar = max(0, $harga_normal - $potongan); // max(0) biar ga sampe minus
+
+        // 3. OTOMATIS CATAT KE TABEL TRANSAKSI
         Transaksi::create([
             'pelanggan_id' => $pelanggan->id,
             'tanggal'      => now()->format('Y-m-d'),
-            'jumlah'       => ($pelanggan->paket->harga ?? 0) * $request->jumlah_bulan,
+            'jumlah'       => $total_bayar, // Harga yang udah di-diskon
             'created_by'   => auth()->user()->username ?? 'SYSTEM'
         ]);
 
@@ -54,14 +63,19 @@ class TagihanController extends Controller
     {
         $request->validate([
             'ids'          => 'required|array',
-            'jumlah_bulan' => 'required|integer|min:1'
+            'jumlah_bulan' => 'required|integer|min:1',
+            'diskon'       => 'nullable|numeric|min:0|max:100'
         ]);
 
         $pelanggans = Pelanggan::with('paket')->whereIn('id', $request->ids)->get();
 
+        $jumlah_bulan = $request->jumlah_bulan;
+        $diskon_persen = $request->diskon ?? 0;
+
         foreach ($pelanggans as $pelanggan) {
+            // 1. Majuin Tanggal Pelanggan
             $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
-            $jatuhTempoBaru = $tanggalSekarang->addMonths($request->jumlah_bulan);
+            $jatuhTempoBaru = $tanggalSekarang->addMonths($jumlah_bulan);
 
             $pelanggan->update([
                 'status_pembayaran' => 'Lunas',
@@ -69,11 +83,16 @@ class TagihanController extends Controller
                 'updated_by'        => auth()->user()->username ?? 'SYSTEM'
             ]);
 
-            // OTOMATIS CATAT KE TABEL TRANSAKSI
+            // 2. Hitung Diskon per pelanggan
+            $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
+            $potongan = $harga_normal * ($diskon_persen / 100);
+            $total_bayar = max(0, $harga_normal - $potongan);
+
+            // 3. OTOMATIS CATAT KE TABEL TRANSAKSI
             Transaksi::create([
                 'pelanggan_id' => $pelanggan->id,
                 'tanggal'      => now()->format('Y-m-d'),
-                'jumlah'       => ($pelanggan->paket->harga ?? 0) * $request->jumlah_bulan,
+                'jumlah'       => $total_bayar, // Harga yang udah di-diskon
                 'created_by'   => auth()->user()->username ?? 'SYSTEM'
             ]);
         }

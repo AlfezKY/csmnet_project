@@ -60,7 +60,7 @@ class RegisterController extends Controller
                 'nama_pelanggan'    => $validatedData['fullname'],
                 'alamat'            => $validatedData['alamat'],
                 'no_wa'             => $validatedData['no_wa'],
-                'jatuh_tempo'       => 0,
+                'jatuh_tempo'       => null,
                 'status_pembayaran' => 'Belum Lunas',
                 'status'            => 'Pending',
                 'created_by'        => 'SELF_REGISTER',
