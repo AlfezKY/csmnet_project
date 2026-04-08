@@ -6,15 +6,32 @@ use App\Http\Controllers\Controller;
 use App\Models\Komplain;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View; // WAJIB TAMBAH INI
 
 class KomplainController extends Controller
 {
+    // List Kategori Dummy (Taruh sini biar gampang dipanggil di Index)
+    protected $kategoriList = [
+        'Kabel Putus',
+        'Modem LOS Merah',
+        'Internet Lambat/RTO',
+        'Ganti Password WiFi',
+        'Pembayaran/Tagihan',
+        'Lain-lain'
+    ];
+
+    // Bikin constructor buat ngeshare $kategoriList ke semua view di controller ini otomatis
+    public function __construct()
+    {
+        View::share('kategoriList', $this->kategoriList);
+    }
+
     // [ADMIN] Nampilin Semua Komplain
     public function index()
     {
         $komplains = Komplain::with(['pelanggan', 'pelanggan.paket'])->latest()->get();
-        // Ambil data pelanggan buat dropdown di Modal Tambah Komplain Manual
         $pelanggans = Pelanggan::all();
+        // $kategoriList udah di-share dari constructor, nggak usah dikirim manual lagi
 
         return view('admin.komplain.index', compact('komplains', 'pelanggans'));
     }
@@ -25,6 +42,7 @@ class KomplainController extends Controller
         $request->validate([
             'pelanggan_id' => 'required|exists:pelanggans,id',
             'keluhan'      => 'required|string',
+            'kategori'     => 'required|string',
             'priority'     => 'required|in:Low,Medium,High',
             'status'       => 'required|in:Not Yet,In Progress,Done',
         ]);
@@ -33,6 +51,7 @@ class KomplainController extends Controller
             'pelanggan_id' => $request->pelanggan_id,
             'tanggal'      => now()->format('Y-m-d'),
             'keluhan'      => $request->keluhan,
+            'kategori'     => $request->kategori,
             'priority'     => $request->priority,
             'status'       => $request->status,
             'created_by'   => auth()->user()->username ?? 'SYSTEM',
@@ -41,10 +60,9 @@ class KomplainController extends Controller
         return back()->with('success', 'Komplain baru berhasil dicatat secara manual!');
     }
 
-    // [PUBLIC/CLIENT] Nangkep Submit Form dari Landing Page / Client Portal
+    // [PUBLIC/CLIENT] Nangkep Submit Form dari Landing Page
     public function store(Request $request)
     {
-        // Validasi priority dicabut dari sini
         $request->validate([
             'keluhan'  => 'required|string',
         ]);
@@ -59,8 +77,9 @@ class KomplainController extends Controller
             'pelanggan_id' => $pelanggan->id,
             'tanggal'      => now()->format('Y-m-d'),
             'keluhan'      => $request->keluhan,
-            'priority'     => 'Medium',  // Otomatis diset Medium, admin yang ubah nanti
-            'status'       => 'Not Yet', // Otomatis Not Yet
+            'kategori'     => null,
+            'priority'     => 'Medium',
+            'status'       => 'Not Yet',
             'created_by'   => auth()->user()->username,
         ]);
 
@@ -71,6 +90,7 @@ class KomplainController extends Controller
     public function update(Request $request, Komplain $komplain)
     {
         $data = $request->validate([
+            'kategori' => 'nullable|string',
             'priority' => 'required|in:Low,Medium,High',
             'status'   => 'required|in:Not Yet,In Progress,Done',
         ]);
@@ -78,7 +98,7 @@ class KomplainController extends Controller
         $data['updated_by'] = auth()->user()->username ?? 'SYSTEM';
         $komplain->update($data);
 
-        return back()->with('success', 'Status komplain berhasil diperbarui!');
+        return back()->with('success', 'Status & Kategori komplain berhasil diperbarui!');
     }
 
     // [ADMIN] Hapus Komplain

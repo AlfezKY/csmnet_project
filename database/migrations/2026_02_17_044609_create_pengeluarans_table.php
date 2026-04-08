@@ -17,13 +17,14 @@ return new class extends Migration
             $table->string('kategori');
             $table->text('deskripsi')->nullable();
             $table->integer('jumlah');
-
+            $table->string('bukti_bayar')->nullable();
             $table->string('created_by')->default('SYSTEM');
             $table->string('updated_by')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable();
         });
     }
+
     /**
      * Reverse the migrations.
      */

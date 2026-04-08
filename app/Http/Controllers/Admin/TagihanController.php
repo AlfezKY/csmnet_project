@@ -7,6 +7,7 @@ use App\Models\Pelanggan;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class TagihanController extends Controller
 {
@@ -98,5 +99,45 @@ class TagihanController extends Controller
         }
 
         return back()->with('success', count($request->ids) . " Tagihan massal Lunas & riwayat tercatat di Transaksi!");
+    }
+
+    public function ingatkan($id)
+    {
+        $pelanggan = Pelanggan::with('paket')->findOrFail($id);
+
+        $domain = env('WABLAS_DOMAIN');
+        $token = env('WABLAS_TOKEN');
+
+        if (!$domain || !$token) {
+            return back()->with('error', 'API WhatsApp belum disetting di .env!');
+        }
+
+        // Susun Pesan
+        $harga = number_format($pelanggan->paket->harga ?? 0, 0, ',', '.');
+        $paket = $pelanggan->paket->nama_paket ?? 'Internet';
+        $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
+
+        $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*. Mohon segera melakukan pembayaran. Terima kasih \u{1F64F}";
+
+        // Tembak API WaBlas
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => $token,
+            ])->post("{$domain}/api/send-message", [
+                'phone'   => $pelanggan->no_wa,
+                'message' => $pesan,
+            ]);
+
+            $result = $response->json();
+
+            if ($response->successful() && isset($result['status']) && $result['status'] === true) {
+                return back()->with('success', "Pesan pengingat WhatsApp berhasil dikirim ke {$pelanggan->nama_pelanggan}!");
+            } else {
+                $errorMessage = $result['message'] ?? 'Gagal mengirim pesan WhatsApp.';
+                return back()->with('error', "WaBlas Error: {$errorMessage}");
+            }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan sistem saat menghubungi server WhatsApp.');
+        }
     }
 }

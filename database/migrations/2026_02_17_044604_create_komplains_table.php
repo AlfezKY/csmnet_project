@@ -17,6 +17,8 @@ return new class extends Migration
             $table->date('tanggal');
             $table->text('keluhan');
 
+            $table->string('kategori')->nullable();
+
             $table->enum('priority', ['Low', 'Medium', 'High']);
             $table->enum('status', ['Not Yet', 'In Progress', 'Done'])->default('Not Yet');
 

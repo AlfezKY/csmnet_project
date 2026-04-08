@@ -15,7 +15,7 @@
 @endif
 
 <div x-data="{ 
-    activeTab: 'Not Yet', // Default tab yang kebuka adalah Not Yet
+    activeTab: 'Not Yet',
     openAdd: {{ $errors->any() ? 'true' : 'false' }}, 
     openEdit: false, 
     openDelete: false, 
@@ -41,7 +41,7 @@
         </div>
     @endif
 
-    {{-- NAVIGATION TABS BERDASARKAN STATUS --}}
+    {{-- NAVIGATION TABS --}}
     <div class="flex gap-2 border-b border-gray-200 mb-6 overflow-x-auto no-scrollbar">
         <button @click="activeTab = 'Not Yet'" 
                 class="px-6 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex items-center gap-2"
@@ -68,15 +68,16 @@
         </button>
     </div>
 
-    {{-- TAB CONTENT (Loop 3 kali buat Not Yet, In Progress, Done) --}}
+    {{-- TAB CONTENT --}}
     @foreach(['Not Yet', 'In Progress', 'Done'] as $statusKey)
     <div x-show="activeTab === '{{ $statusKey }}'" x-cloak class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
         <table class="w-full text-left text-gray-600 border-collapse">
             <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
                 <tr>
-                    <th class="px-6 py-4">Pelapor</th>
-                    <th class="px-6 py-4 w-32">Tanggal</th>
-                    <th class="px-6 py-4 w-1/3">Detail Keluhan</th>
+                    <th class="px-6 py-4 w-48">Pelapor</th>
+                    <th class="px-6 py-4 w-32 whitespace-nowrap">Tanggal</th>
+                    <th class="px-6 py-4 w-40">Kategori</th>
+                    <th class="px-6 py-4">Detail Keluhan</th>
                     <th class="px-6 py-4 text-center">Prioritas</th>
                     <th class="px-6 py-4 text-center">Status</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
@@ -95,6 +96,19 @@
                         {{ \Carbon\Carbon::parse($kp->tanggal)->format('d M Y') }}
                     </td>
                     <td class="px-6 py-4">
+                        {{-- KOLOM KATEGORI SENDIRI --}}
+                        @if($kp->kategori)
+                            <span class="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                                {{ $kp->kategori }}
+                            </span>
+                        @else
+                            <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-400 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                                Belum Diatur
+                            </span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
+                        {{-- KOLOM DETAIL SENDIRI --}}
                         <p class="text-sm text-gray-700 font-medium whitespace-pre-wrap">{{ $kp->keluhan }}</p>
                     </td>
                     <td class="px-6 py-4 text-center">
@@ -132,7 +146,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
+                    {{-- COLSPAN DIUBAH JADI 7 KARENA NAMBAH 1 KOLOM KATEGORI --}}
+                    <td colspan="7" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center">
                             <div class="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-3">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -149,21 +164,33 @@
 
     {{-- MODAL TAMBAH KOMPLAIN --}}
     <div x-show="openAdd" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-lg rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
+        <div class="bg-white w-full max-w-xl rounded-xl shadow-2xl p-8" @click.away="openAdd = false">
             <h4 class="text-xl font-bold text-gray-900 mb-6">Catat Komplain Manual</h4>
             
             <form action="{{ route('komplain.storeAdmin') }}" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true"> 
                 @csrf
                 
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Pelanggan</label>
-                        <select name="pelanggan_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
-                            <option value="">-- Pilih Pelanggan --</option>
-                            @foreach($pelanggans as $plg)
-                                <option value="{{ $plg->id }}">{{ $plg->nama_pelanggan }} ({{ $plg->no_wa }})</option>
-                            @endforeach
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Pelanggan</label>
+                            <select name="pelanggan_id" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
+                                <option value="">-- Pilih Pelanggan --</option>
+                                @foreach($pelanggans as $plg)
+                                    <option value="{{ $plg->id }}">{{ $plg->nama_pelanggan }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kategori Masalah</label>
+                            <select name="kategori" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                @foreach($kategoriList as $kategori)
+                                    <option value="{{ $kategori }}">{{ $kategori }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -214,6 +241,16 @@
                 @csrf @method('PUT')
                 
                 <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Kategori Masalah</label>
+                        <select name="kategori" x-model="editData.kategori" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700">
+                            <option value="">-- Belum Dikategorikan --</option>
+                            @foreach($kategoriList as $kategori)
+                                <option value="{{ $kategori }}">{{ $kategori }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Prioritas Penanganan</label>
                         <select name="priority" x-model="editData.priority" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
