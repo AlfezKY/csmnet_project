@@ -112,8 +112,8 @@
                 @if(auth()->user()->role == 'Owner')
                 <div class="mb-8">
                     <p class="px-4 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">OWNER MENU</p>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 transition-all">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4V7M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <a href="{{ route('laporan.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium {{ request()->routeIs('laporan.*') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-500 hover:bg-gray-50' }} transition-all">
+                        <svg class="w-5 h-5 {{ request()->routeIs('laporan.*') ? 'text-blue-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4V7M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                         <span>Laporan</span>
                     </a>
                 </div>
@@ -184,5 +184,6 @@
             });
         });
     </script>
+    @stack('scripts')
 </body>
 </html>

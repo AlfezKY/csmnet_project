@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\TagihanController;
 use App\Http\Controllers\Admin\PengeluaranController;
+use App\Http\Controllers\Admin\LaporanController;
 
 use App\Http\Controllers\Client\ClientController;
 
@@ -60,7 +61,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/tagihan', [TagihanController::class, 'index'])->name('tagihan.index');
         Route::put('/tagihan/{id}/lunas', [TagihanController::class, 'action'])->name('tagihan.action');
         Route::post('/tagihan/bulk-lunas', [TagihanController::class, 'bulkAction'])->name('tagihan.bulk');
-
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        
         // RUTE BARU UNTUK WABLAS
         Route::post('/tagihan/{id}/ingatkan', [TagihanController::class, 'ingatkan'])->name('tagihan.ingatkan');
     });

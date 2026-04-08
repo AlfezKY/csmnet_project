@@ -5,18 +5,20 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Paket;
 use App\Models\Pelanggan;
+use App\Models\Transaksi;
+use App\Models\Pengeluaran;
+use App\Models\Komplain;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon; // WAJIB TAMBAH INI BUAT TANGGAL
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         // ==========================================
-        // 1. SEEDING USERS (Admin, Owner, Client)
+        // 1. SEEDING ADMIN & OWNER
         // ==========================================
-
         User::create([
             'fullname'   => 'Super Administrator',
             'username'   => 'admin',
@@ -35,93 +37,125 @@ class DatabaseSeeder extends Seeder
             'created_by' => 'SYSTEM'
         ]);
 
-        $userClient = User::create([
-            'fullname'   => 'Mas Pelanggan Setia',
-            'username'   => 'client',
-            'password'   => Hash::make('password'),
-            'role'       => 'Pelanggan',
-            'status'     => 'Active',
-            'created_by' => 'SYSTEM'
-        ]);
+        // ==========================================
+        // 2. SEEDING PAKET INTERNET
+        // ==========================================
+        $pakets = [
+            Paket::create(['nama_paket' => 'Hemat 10 Mbps', 'kecepatan' => '10 Mbps', 'harga' => 150000, 'status' => 'Active', 'is_show' => true]),
+            Paket::create(['nama_paket' => 'Keluarga 20 Mbps', 'kecepatan' => '20 Mbps', 'harga' => 200000, 'status' => 'Active', 'is_show' => true]),
+            Paket::create(['nama_paket' => 'Gamer 50 Mbps', 'kecepatan' => '50 Mbps', 'harga' => 350000, 'status' => 'Active', 'is_show' => true]),
+            Paket::create(['nama_paket' => 'Sultan 100 Mbps', 'kecepatan' => '100 Mbps', 'harga' => 600000, 'status' => 'Active', 'is_show' => true]),
+        ];
 
         // ==========================================
-        // 2. SEEDING PAKET INTERNET (3 Data)
+        // 3. SEEDING PELANGGAN (20 Orang)
         // ==========================================
+        $pelanggans = [];
+        $namaPelanggans = ['Budi', 'Andi', 'Siti', 'Joko', 'Dewi', 'Rina', 'Agus', 'Tono', 'Ayu', 'Rizky', 'Ivan', 'Reza', 'Putri', 'Sari', 'Eko', 'Dwi', 'Tri', 'Bayu', 'Gilang', 'Nia'];
 
-        $paket1 = Paket::create([
-            'nama_paket' => 'Paket Basic Home',
-            'kecepatan'  => '10 Mbps',
-            'harga'      => 150000,
-            'deskripsi'  => 'Cocok untuk browsing ringan dan chat.',
-            'keypoint'   => 'Fiber Optic, Unlimited Kuota',
-            'status'     => 'Active',
-            'is_show'    => true,
-            'created_by' => 'SYSTEM'
-        ]);
+        foreach ($namaPelanggans as $index => $nama) {
+            $user = User::create([
+                'fullname'   => $nama . ' Pelanggan',
+                'username'   => strtolower($nama),
+                'password'   => Hash::make('password'),
+                'role'       => 'Pelanggan',
+                'status'     => 'Active',
+                'created_by' => 'SYSTEM'
+            ]);
 
-        $paket2 = Paket::create([
-            'nama_paket' => 'Paket Family Stream',
-            'kecepatan'  => '30 Mbps',
-            'harga'      => 250000,
-            'deskripsi'  => 'Ideal untuk streaming HD dan WFH.',
-            'keypoint'   => 'Gratis Router, Prioritas Trafik',
-            'status'     => 'Active',
-            'is_show'    => true,
-            'created_by' => 'SYSTEM'
-        ]);
+            // Random pilih paket, mayoritas milih paket 1 atau 2
+            $paketPilihan = $pakets[mt_rand(0, 10) > 7 ? mt_rand(2, 3) : mt_rand(0, 1)];
 
-        $paket3 = Paket::create([
-            'nama_paket' => 'Paket Gamer Pro',
-            'kecepatan'  => '100 Mbps',
-            'harga'      => 500000,
-            'deskripsi'  => 'Latency rendah untuk gaming kompetitif.',
-            'keypoint'   => 'IP Public Static, VIP Support',
-            'status'     => 'Active',
-            'is_show'    => true,
-            'created_by' => 'SYSTEM'
-        ]);
+            $pelanggans[] = Pelanggan::create([
+                'user_id'           => $user->id,
+                'paket_id'          => $paketPilihan->id,
+                'nama_pelanggan'    => $nama . ' Pelanggan',
+                'alamat'            => 'Jl. Dummy Blok A No. ' . ($index + 1),
+                'no_wa'             => '0812' . mt_rand(10000000, 99999999),
+                'jatuh_tempo'       => Carbon::now()->addDays(mt_rand(1, 28))->format('Y-m-d'),
+                'status_pembayaran' => mt_rand(1, 10) > 2 ? 'Lunas' : 'Belum Lunas', // 80% Lunas
+                'status'            => 'Active',
+                'created_by'        => 'SYSTEM'
+            ]);
+        }
 
         // ==========================================
-        // 3. SEEDING PELANGGAN (3 Data)
+        // 4. SEEDING TRANSAKSI & PENGELUARAN (6 Bulan Terakhir)
         // ==========================================
+        $kategoriPengeluaran = ['Perawatan Jaringan', 'Biaya Operasional Kantor', 'Listrik', 'Transportasi', 'Lainnya'];
+        $now = Carbon::now();
 
-        Pelanggan::create([
-            'user_id'           => $userClient->id,
-            'paket_id'          => $paket2->id,
-            'nama_pelanggan'    => 'Mas Pelanggan Setia',
-            'alamat'            => 'Jl. Sudirman No. 10, Jakarta Pusat',
-            'no_wa'             => '081234567890',
-            // UBAH: Jatuh tempo jadi 1 bulan ke depan dari hari ini
-            'jatuh_tempo'       => Carbon::now()->addMonths(1)->format('Y-m-d'),
-            'status_pembayaran' => 'Belum Lunas',
-            'status'            => 'Active',
-            'created_by'        => 'SYSTEM'
-        ]);
+        for ($i = 0; $i < 6; $i++) {
+            $bulanEvaluasi = $now->copy()->subMonths($i);
 
-        Pelanggan::create([
-            'user_id'           => null,
-            'paket_id'          => $paket1->id,
-            'nama_pelanggan'    => 'Budi Santoso (Baru Daftar)',
-            'alamat'            => 'Gg. Kancil No. 45, Bandung',
-            'no_wa'             => '089876543210',
-            // UBAH: Jatuh tempo jadi 15 hari ke depan
-            'jatuh_tempo'       => Carbon::now()->addDays(15)->format('Y-m-d'),
-            'status_pembayaran' => 'Belum Lunas',
-            'status'            => 'Pending',
-            'created_by'        => 'SYSTEM'
-        ]);
+            // --- PEMASUKAN ---
+            // Asumsi 90% pelanggan bayar tiap bulan
+            foreach ($pelanggans as $pelanggan) {
+                if (mt_rand(1, 100) <= 90) {
+                    Transaksi::create([
+                        'pelanggan_id' => $pelanggan->id,
+                        'tanggal'      => $bulanEvaluasi->copy()->setDay(mt_rand(1, 28))->format('Y-m-d'),
+                        'jumlah'       => $pelanggan->paket->harga,
+                        'created_by'   => 'admin'
+                    ]);
+                }
+            }
 
-        Pelanggan::create([
-            'user_id'           => null,
-            'paket_id'          => $paket3->id,
-            'nama_pelanggan'    => 'Sultan Gaming',
-            'alamat'            => 'Komplek Elite Blok A1, Surabaya',
-            'no_wa'             => '085512345678',
-            // UBAH: Jatuh tempo jadi 3 bulan ke depan
-            'jatuh_tempo'       => Carbon::now()->addMonths(3)->format('Y-m-d'),
-            'status_pembayaran' => 'Lunas',
-            'status'            => 'Active',
-            'created_by'        => 'SYSTEM'
-        ]);
+            // --- PENGELUARAN RUTIN ---
+            // Tagihan ISP Induk (Biasa gede nilainya)
+            Pengeluaran::create([
+                'tanggal'     => $bulanEvaluasi->copy()->startOfMonth()->addDays(5)->format('Y-m-d'),
+                'kategori'    => 'Langganan ISP Induk',
+                'deskripsi'   => 'Bayar Bandwidth Utama',
+                'jumlah'      => 2000000, // 2 Juta
+                'created_by'  => 'owner'
+            ]);
+
+            // Pengeluaran Random 3-5 kali sebulan
+            $jmlPengeluaranRandom = mt_rand(3, 5);
+            for ($j = 0; $j < $jmlPengeluaranRandom; $j++) {
+                Pengeluaran::create([
+                    'tanggal'     => $bulanEvaluasi->copy()->setDay(mt_rand(1, 28))->format('Y-m-d'),
+                    'kategori'    => $kategoriPengeluaran[array_rand($kategoriPengeluaran)],
+                    'deskripsi'   => 'Pengeluaran operasional dummy',
+                    'jumlah'      => mt_rand(5, 50) * 10000, // Antara 50rb - 500rb
+                    'created_by'  => 'admin'
+                ]);
+            }
+        }
+
+        // ==========================================
+        // 5. SEEDING KOMPLAIN (Fokus Bulan Ini & Kemarin)
+        // ==========================================
+        $kategoriKomplain = ['Internet Mati', 'LOS Merah', 'Internet Lambat', 'Lain-lain'];
+        $statusKomplain = ['Not Yet', 'In Progress', 'Done'];
+        $priorityKomplain = ['Low', 'Medium', 'High'];
+
+        // Bikin 25 komplain buat bulan ini (Biar dashboard bulan ini RAME)
+        for ($k = 0; $k < 25; $k++) {
+            Komplain::create([
+                'pelanggan_id' => $pelanggans[array_rand($pelanggans)]->id,
+                'tanggal'      => $now->copy()->subDays(mt_rand(0, 25))->format('Y-m-d'),
+                'keluhan'      => 'Keluhan dummy pelanggan untuk testing chart',
+                'kategori'     => $kategoriKomplain[array_rand($kategoriKomplain)],
+                'priority'     => $priorityKomplain[array_rand($priorityKomplain)],
+                // Perbanyak yang Done biar metriknya keliatan bagus
+                'status'       => mt_rand(1, 10) > 3 ? 'Done' : $statusKomplain[array_rand($statusKomplain)],
+                'created_by'   => 'client'
+            ]);
+        }
+
+        // Bikin 15 komplain buat bulan lalu (Biar bisa di-filter ke bulan kemaren)
+        for ($k = 0; $k < 15; $k++) {
+            Komplain::create([
+                'pelanggan_id' => $pelanggans[array_rand($pelanggans)]->id,
+                'tanggal'      => $now->copy()->subMonth()->subDays(mt_rand(0, 25))->format('Y-m-d'),
+                'keluhan'      => 'Keluhan lama bulan lalu',
+                'kategori'     => $kategoriKomplain[array_rand($kategoriKomplain)],
+                'priority'     => $priorityKomplain[array_rand($priorityKomplain)],
+                'status'       => 'Done', // Asumsi bulan lalu udah beres semua
+                'created_by'   => 'client'
+            ]);
+        }
     }
 }
