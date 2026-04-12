@@ -128,13 +128,13 @@
         </div>
     </div>
 
-    {{-- KANAN: RINGKASAN KOMPLAIN --}}
+    {{-- KANAN: RINGKASAN KOMPLAIN (COMPACT VERSION) --}}
     <div class="lg:col-span-1 relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col transition-all duration-300 hover:shadow-md group">
         <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-orange-100/30 to-rose-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         
         <div class="relative z-10 flex flex-col h-full">
-            {{-- Header & Filter Bulan Khusus --}}
-            <div class="flex justify-between items-start mb-5">
+            {{-- Header & Filter --}}
+            <div class="flex justify-between items-center mb-4 gap-2">
                 <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                     Tiket Komplain
@@ -146,46 +146,32 @@
                     <input type="hidden" name="end_date" value="{{ request('end_date') }}">
                     <input type="hidden" name="chart_year" value="{{ request('chart_year', date('Y')) }}">
                     
-                    <input type="month" name="komplain_month" value="{{ request('komplain_month', date('Y-m')) }}" onchange="this.form.submit()" class="text-xs p-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-orange-500 text-gray-600 shadow-sm transition-all hover:bg-white">
+                    <input type="month" name="komplain_month" value="{{ request('komplain_month', date('Y-m')) }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-orange-500 text-gray-600 shadow-sm transition-all hover:bg-white">
                 </form>
             </div>
             
-            {{-- Card Total Komplain Besar --}}
-            <div class="relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200/50 p-4 rounded-2xl text-center border border-slate-200/60 mb-4 group/card hover:shadow-sm transition-all duration-300">
-                <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-white/40 to-slate-300/30 rounded-full blur-xl group-hover/card:scale-150 transition-transform duration-500 pointer-events-none"></div>
-                <div class="relative z-10">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Komplain</p>
-                    <h2 class="text-5xl font-black text-slate-800">{{ $komplainStats['total'] }}</h2>
+            {{-- 4 Status (Total gabung kesini biar compact) --}}
+            <div class="grid grid-cols-4 gap-2 mb-2 relative z-10">
+                <div class="bg-slate-50/80 p-2 rounded-xl text-center border border-slate-200/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
+                    <p class="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Total</p>
+                    <h2 class="text-lg font-black text-slate-800">{{ $komplainStats['total'] }}</h2>
                 </div>
-            </div>
-
-            {{-- 3 Status --}}
-            <div class="grid grid-cols-3 gap-3 mb-6">
-                <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-100/60 p-3 rounded-2xl text-center border border-emerald-100 flex flex-col justify-center group/mini hover:shadow-sm transition-all duration-300">
-                    <div class="absolute -right-2 -bottom-2 w-12 h-12 bg-gradient-to-br from-emerald-200/50 to-green-300/30 rounded-full blur-lg group-hover/mini:scale-150 transition-transform duration-500 pointer-events-none"></div>
-                    <div class="relative z-10">
-                        <p class="text-[9px] text-emerald-600 font-bold uppercase mb-1">Done</p>
-                        <p class="text-xl font-black text-emerald-700">{{ $komplainStats['done'] }}</p>
-                    </div>
+                <div class="bg-emerald-50/80 p-2 rounded-xl text-center border border-emerald-100/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
+                    <p class="text-[8px] text-emerald-600 font-black uppercase mb-0.5">Selesai</p>
+                    <p class="text-lg font-black text-emerald-700">{{ $komplainStats['done'] }}</p>
                 </div>
-                <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100/60 p-3 rounded-2xl text-center border border-blue-100 flex flex-col justify-center group/mini hover:shadow-sm transition-all duration-300">
-                    <div class="absolute -right-2 -bottom-2 w-12 h-12 bg-gradient-to-br from-blue-200/50 to-indigo-300/30 rounded-full blur-lg group-hover/mini:scale-150 transition-transform duration-500 pointer-events-none"></div>
-                    <div class="relative z-10">
-                        <p class="text-[8px] text-blue-600 font-bold uppercase mb-1 leading-tight">In Progress</p>
-                        <p class="text-xl font-black text-blue-700">{{ $komplainStats['in_progress'] }}</p>
-                    </div>
+                <div class="bg-blue-50/80 p-2 rounded-xl text-center border border-blue-100/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
+                    <p class="text-[8px] text-blue-600 font-black uppercase mb-0.5">Proses</p>
+                    <p class="text-lg font-black text-blue-700">{{ $komplainStats['in_progress'] }}</p>
                 </div>
-                <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-red-100/60 p-3 rounded-2xl text-center border border-rose-100 flex flex-col justify-center group/mini hover:shadow-sm transition-all duration-300">
-                    <div class="absolute -right-2 -bottom-2 w-12 h-12 bg-gradient-to-br from-rose-200/50 to-red-300/30 rounded-full blur-lg group-hover/mini:scale-150 transition-transform duration-500 pointer-events-none"></div>
-                    <div class="relative z-10">
-                        <p class="text-[9px] text-rose-600 font-bold uppercase mb-1">Not Yet</p>
-                        <p class="text-xl font-black text-rose-700">{{ $komplainStats['not_yet'] }}</p>
-                    </div>
+                <div class="bg-rose-50/80 p-2 rounded-xl text-center border border-rose-100/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
+                    <p class="text-[8px] text-rose-600 font-black uppercase mb-0.5">Pending</p>
+                    <p class="text-lg font-black text-rose-700">{{ $komplainStats['not_yet'] }}</p>
                 </div>
             </div>
 
             {{-- Horizontal Bar Chart --}}
-            <div id="complaintChart" class="w-full flex-grow relative z-10"></div>
+            <div id="complaintChart" class="w-full flex-grow relative z-10 min-h-[160px] -ml-2 mt-2"></div>
         </div>
     </div>
 </div>

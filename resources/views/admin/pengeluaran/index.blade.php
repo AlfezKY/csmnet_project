@@ -47,7 +47,12 @@
                     <th class="px-6 py-4 w-32">Tanggal</th>
                     <th class="px-6 py-4">Kategori</th>
                     <th class="px-6 py-4 w-1/3">Deskripsi</th>
+                    
+                    {{-- Sembunyikan Header Jumlah (Rp) untuk Admin --}}
+                    @if(auth()->user()->role == 'Owner')
                     <th class="px-6 py-4 text-right">Jumlah (Rp)</th>
+                    @endif
+                    
                     <th class="px-6 py-4 text-center">Bukti</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
                 </tr>
@@ -66,11 +71,16 @@
                     <td class="px-6 py-4">
                         <p class="text-sm text-gray-600 font-medium">{{ $out->deskripsi ?? '-' }}</p>
                     </td>
+                    
+                    {{-- Sembunyikan Isi Nominal Jumlah (Rp) untuk Admin --}}
+                    @if(auth()->user()->role == 'Owner')
                     <td class="px-6 py-4 text-right">
                         <span class="text-sm font-bold text-gray-700">
                             Rp {{ number_format($out->jumlah, 0, ',', '.') }}
                         </span>
                     </td>
+                    @endif
+                    
                     <td class="px-6 py-4 text-center">
                         @if($out->bukti_bayar)
                             <a href="{{ asset($out->bukti_bayar) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors" title="Lihat Lampiran">
@@ -94,7 +104,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
+                    {{-- Sesuaikan colspan agar tabel tetap rapi saat kolom disembunyikan --}}
+                    <td colspan="{{ auth()->user()->role == 'Owner' ? '6' : '5' }}" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center">
                             <div class="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-3">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>

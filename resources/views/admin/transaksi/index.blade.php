@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Transaksi Pelanggan')
+@section('title', auth()->user()->role == 'Owner' ? 'Catatan Pemasukkan' : 'Transaksi Pelanggan')
 
 @section('content')
 <div x-data="{ 
@@ -12,13 +12,21 @@
 }">
     <div class="flex justify-between items-end mb-6 px-1">
         <div>
-            <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Riwayat Pembayaran</h3>
-            <p class="text-sm text-gray-500 font-medium mt-1">Catat dan kelola riwayat pembayaran tagihan internet pelanggan</p>
+            <h3 class="text-2xl font-bold text-gray-900 tracking-tight">
+                {{ auth()->user()->role == 'Owner' ? 'Catatan Pemasukkan' : 'Transaksi Pelanggan' }}
+            </h3>
+            <p class="text-sm text-gray-500 font-medium mt-1">
+                {{ auth()->user()->role == 'Owner' ? 'Pantau semua riwayat pemasukkan dari pelanggan' : 'Catat dan kelola riwayat pembayaran tagihan internet pelanggan' }}
+            </p>
         </div>
+        
+        {{-- Tombol 'Catat Pembayaran' hanya tampil untuk Admin --}}
+        @if(auth()->user()->role == 'Admin')
         <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             Catat Pembayaran
         </button>
+        @endif
     </div>
 
     @if ($errors->any())

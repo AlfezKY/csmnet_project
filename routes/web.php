@@ -14,7 +14,6 @@ use App\Http\Controllers\Admin\ApprovalController;
 use App\Http\Controllers\Admin\TagihanController;
 use App\Http\Controllers\Admin\PengeluaranController;
 use App\Http\Controllers\Admin\LaporanController;
-
 use App\Http\Controllers\Client\ClientController;
 
 // --- 1. PUBLIC ROUTES ---
@@ -41,16 +40,23 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Khusus Admin & Owner
+    // ==========================================
+    // MENU BERSAMA (ADMIN & OWNER)
+    // ==========================================
     Route::middleware(['checkRole:Admin,Owner'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('transaksi', TransaksiController::class);
+        Route::resource('pengeluaran', PengeluaranController::class)->except(['create', 'show', 'edit']);
+    });
+
+    // ==========================================
+    // KHUSUS ADMIN
+    // ==========================================
+    Route::middleware(['checkRole:Admin'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('pelanggan', PelangganController::class);
         Route::resource('paket', PaketController::class);
-        Route::resource('transaksi', TransaksiController::class);
-        Route::resource('pengeluaran', PengeluaranController::class)->except(['create', 'show', 'edit']);
 
-        // KOMPLAIN UNTUK ADMIN (Kelola Data)
         Route::post('/komplain/admin-store', [App\Http\Controllers\Admin\KomplainController::class, 'storeAdmin'])->name('komplain.storeAdmin');
         Route::resource('komplain', App\Http\Controllers\Admin\KomplainController::class)->except(['create', 'show', 'store']);
 
@@ -61,22 +67,28 @@ Route::middleware('auth')->group(function () {
         Route::get('/tagihan', [TagihanController::class, 'index'])->name('tagihan.index');
         Route::put('/tagihan/{id}/lunas', [TagihanController::class, 'action'])->name('tagihan.action');
         Route::post('/tagihan/bulk-lunas', [TagihanController::class, 'bulkAction'])->name('tagihan.bulk');
-        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-        
-        // RUTE BARU UNTUK WABLAS
         Route::post('/tagihan/{id}/ingatkan', [TagihanController::class, 'ingatkan'])->name('tagihan.ingatkan');
     });
 
-    // Khusus Pelanggan (Otomatis redirect ke Login kalau belum masuk)
+    // ==========================================
+    // KHUSUS OWNER
+    // ==========================================
+
+    Route::middleware(['checkRole:Owner'])->group(function () {
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+
+        // Tambahkan baris ini brok:
+        Route::get('/cashflow', [App\Http\Controllers\Admin\CashflowController::class, 'index'])->name('cashflow.index');
+    });
+
+    // ==========================================
+    // KHUSUS PELANGGAN
+    // ==========================================
     Route::middleware(['checkRole:Pelanggan'])->group(function () {
         Route::get('/client-portal', [ClientController::class, 'index'])->name('client-portal');
-
-        // HALAMAN KOMPLAIN URL DIGANTI BIAR GAK BENTROK
         Route::get('/lapor-gangguan', function () {
             return view('client.komplain');
         })->name('komplain.form');
-
-        // SUBMIT KOMPLAIN (Kirim Data)
         Route::post('/komplain/kirim', [App\Http\Controllers\Admin\KomplainController::class, 'store'])->name('komplain.store');
     });
 });
