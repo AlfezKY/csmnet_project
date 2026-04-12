@@ -86,6 +86,8 @@ Route::middleware('auth')->group(function () {
     // ==========================================
     Route::middleware(['checkRole:Pelanggan'])->group(function () {
         Route::get('/client-portal', [ClientController::class, 'index'])->name('client-portal');
+        Route::put('/client-portal/update', [ClientController::class, 'update'])->name('client-portal.update'); // <--- TAMBAHIN BARIS INI
+
         Route::get('/lapor-gangguan', function () {
             return view('client.komplain');
         })->name('komplain.form');

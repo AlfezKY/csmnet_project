@@ -46,10 +46,111 @@
         </div>
     </div>
 
+    {{-- FLOATING TOAST SUCCESS (SMOOTH ANIMATION) --}}
     @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 text-sm font-bold rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            {{ session('success') }}
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 20);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-x-12 scale-90"
+             x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+             x-transition:leave="transition-all transform ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-x-12 scale-90"
+             x-cloak
+             class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-emerald-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
+            
+            <div class="px-4 py-3 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex flex-shrink-0 items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('success') }}</p>
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-emerald-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
+        </div>
+    @endif
+
+    {{-- FLOATING TOAST ERROR (SMOOTH ANIMATION) --}}
+    @if(session('error') || $errors->any())
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 20);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-x-12 scale-90"
+             x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+             x-transition:leave="transition-all transform ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-x-12 scale-90"
+             x-cloak
+             class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-red-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
+            
+            <div class="px-4 py-3 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex flex-shrink-0 items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('error') ?? 'Terjadi kesalahan, gagal memproses data.' }}</p>
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-red-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
         </div>
     @endif
 
