@@ -288,21 +288,64 @@
     </div>
 </div>
 
-{{-- ROW 4: AKTIVITAS TRANSAKSI --}}
-<div class="relative group mb-8 animate-fade-up delay-400">
-    <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <span class="w-3 h-8 rounded-full bg-purple-500"></span>
-                Aktivitas Transaksi Harian
-            </h4>
-            
-            <form method="GET">
-                @foreach(request()->except('trx_month') as $key => $value) <input type="hidden" name="{{ $key }}" value="{{ $value }}"> @endforeach
-                <input type="month" name="trx_month" value="{{ $trxFilter }}" onchange="this.form.submit()" class="text-sm px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-purple-500 text-gray-600 shadow-sm transition-all hover:bg-gray-50">
-            </form>
+{{-- ROW 4: AKTIVITAS TRANSAKSI & PELANGGAN MENUNGGAK --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-0 animate-fade-up delay-400">
+    
+    {{-- CHART KIRI (Aktivitas Transaksi) --}}
+    <div class="lg:col-span-2 relative group">
+        <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span class="w-3 h-8 rounded-full bg-purple-500"></span>
+                    Aktivitas Transaksi Harian
+                </h4>
+                
+                <form method="GET">
+                    @foreach(request()->except('trx_month') as $key => $value) <input type="hidden" name="{{ $key }}" value="{{ $value }}"> @endforeach
+                    <input type="month" name="trx_month" value="{{ $trxFilter }}" onchange="this.form.submit()" class="text-sm px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-purple-500 text-gray-600 shadow-sm transition-all hover:bg-gray-50">
+                </form>
+            </div>
+            <div id="chartTransaksiPerHari" class="w-full flex-1 min-h-[300px]"></div>
         </div>
-        <div id="chartTransaksiPerHari" class="w-full flex-1 min-h-[300px]"></div>
+    </div>
+
+    {{-- LIST KANAN (Pelanggan Menunggak > 3 Hari) --}}
+    <div class="relative group">
+        <div class="absolute inset-0 bg-gradient-to-br from-red-100/40 to-rose-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
+        <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-red-500">
+            <h4 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+                <span class="w-2.5 h-6 rounded-full bg-red-500"></span>
+                Peringatan Tunggakan
+            </h4>
+            <p class="text-[11px] text-gray-500 font-medium mb-5">Telat lebih dari 3 hari, perlu ditindaklanjuti.</p>
+
+            <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-1 max-h-[300px]">
+                @forelse($pelangganOverdue as $plg)
+                    @php
+                        $telatHari = \Carbon\Carbon::parse($plg->jatuh_tempo)->diffInDays(\Carbon\Carbon::now());
+                    @endphp
+                    <div class="flex justify-between items-center bg-red-50/50 p-3 rounded-2xl border border-red-100 shadow-sm hover:bg-red-50 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xs font-black shadow-inner border border-white">
+                                {{ $telatHari }}H
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900">{{ $plg->nama_pelanggan }}</p>
+                                <p class="text-[10px] text-red-500 font-bold mt-0.5">{{ $plg->paket->nama_paket ?? 'Tanpa Paket' }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('pelanggan.index', ['q' => $plg->nama_pelanggan]) }}" class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-bold transition-colors shadow-md shadow-red-200" title="Cek & Isolir Pelanggan">
+                            Cek
+                        </a>
+                    </div>
+                @empty
+                    <div class="text-center p-6 text-xs font-bold text-emerald-600 border-2 border-dashed border-emerald-200 rounded-2xl bg-emerald-50/50 flex flex-col items-center justify-center gap-2 h-full min-h-[200px]">
+                        <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Mantap! Tidak ada yang menunggak.</span>
+                    </div>
+                @endforelse
+            </div>
+        </div>
     </div>
 </div>
 
@@ -391,6 +434,11 @@ document.addEventListener('DOMContentLoaded', function () {
     new ApexCharts(document.querySelector("#chartPieISP"), optionsPie).render();
 
     // 4. CHART TOTAL TRANSAKSI PER HARI (AREA CHART PREMIUM)
+    // 4. CHART TOTAL TRANSAKSI PER HARI (AREA CHART PREMIUM)
+    // Ambil bulan dan tahun dari filter (Bulan dipaksa jadi 2 digit, misal: 4 jadi 04)
+    const trxSelectedMonth = '{{ str_pad($trxMonth, 2, "0", STR_PAD_LEFT) }}';
+    const trxSelectedYear = '{{ $trxYear }}';
+
     const optionsTrx = {
         series: [{ name: 'Transaksi', data: @json($trxPerHariData) }],
         chart: { type: 'area', height: '100%', minHeight: 300, toolbar: { show: false }, fontFamily: fontFamily },
@@ -410,7 +458,17 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         yaxis: { labels: { style: { colors: '#64748b', fontWeight: 600 } } },
         grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }, 
-        tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily } },
+        tooltip: { 
+            theme: 'light', 
+            style: { fontSize: '13px', fontFamily: fontFamily },
+            x: {
+                formatter: function(val) {
+                    // Tambahin '0' di depan angka satuan (misal 8 jadi 08)
+                    let day = val.toString().padStart(2, '0');
+                    return `${day}/${trxSelectedMonth}/${trxSelectedYear}`;
+                }
+            }
+        },
         markers: { size: 0, hover: { size: 6, sizeOffset: 3, colors: ['#fff'], strokeColors: '#8b5cf6', strokeWidth: 3 } }
     };
     new ApexCharts(document.querySelector("#chartTransaksiPerHari"), optionsTrx).render();

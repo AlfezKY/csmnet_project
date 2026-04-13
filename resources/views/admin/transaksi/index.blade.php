@@ -4,6 +4,7 @@
 
 @section('content')
 <div x-data="{ 
+    openFilter: false,
     openAdd: {{ $errors->any() ? 'true' : 'false' }}, 
     openEdit: false, 
     openDelete: false, 
@@ -47,56 +48,142 @@
         </div>
     @endif
 
-    <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+    {{-- BARIS PENCARIAN & FILTER (STYLE MODERN CLEAN) --}}
+    <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between overflow-visible transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+        
+        {{-- Input Search Kiri --}}
+        <form action="{{ route('transaksi.index') }}" method="GET" class="flex-1 flex items-center m-0 border-b md:border-b-0 border-gray-50 group" id="searchForm">
+            {{-- Simpan filter state biar nggak hilang pas search --}}
+            <input type="hidden" name="paket_id" value="{{ request('paket_id') }}">
+            <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+            <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+            
+            <div class="pl-5 pr-2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari transaksi atas nama pelanggan..." 
+                   class="w-full py-4 bg-transparent border-none focus:ring-0 outline-none text-sm font-medium text-gray-700 placeholder-gray-400" 
+                   onkeydown="if(event.key === 'Enter') this.form.submit();">
+        </form>
+
+        {{-- Kumpulan Tombol Kanan --}}
+        <div class="flex items-center justify-end gap-2 p-2 px-3 shrink-0 bg-gray-50/30 md:bg-transparent">
+            
+            <a href="{{ route('transaksi.index') }}" class="text-[11px] font-black text-gray-400 hover:text-red-500 px-3 py-2 transition-colors tracking-widest uppercase">Reset</a>
+            
+            <a href="{{ request()->fullUrlWithQuery(['export' => '1']) }}" class="text-[11px] font-black text-gray-400 hover:text-blue-600 px-3 py-2 transition-colors tracking-widest uppercase border-r border-gray-200 pr-4 mr-2" title="Download data tagihan Excel">Export</a>
+            
+            {{-- Wrapper Tombol Filter & Popover Dialog --}}
+            <div class="relative">
+                <button @click="openFilter = !openFilter" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20 relative z-10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Filter
+                </button>
+
+                {{-- POPOVER DIALOG FILTER --}}
+                <div x-show="openFilter" 
+                     @click.away="openFilter = false"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                     x-cloak 
+                     class="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.1)] border border-gray-100 p-5 z-[100]">
+                    
+                    <h4 class="text-sm font-black text-gray-900 tracking-tight mb-4">Filter Transaksi</h4>
+                    
+                    <form action="{{ route('transaksi.index') }}" method="GET">
+                        <input type="hidden" name="q" value="{{ request('q') }}">
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Paket</label>
+                                <select name="paket_id" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                                    <option value="">Semua Paket</option>
+                                    @foreach($pakets as $paket)
+                                        <option value="{{ $paket->id }}" {{ request('paket_id') == $paket->id ? 'selected' : '' }}>{{ $paket->nama_paket }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Dari Tanggal (Bayar)</label>
+                                <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Sampai Tanggal (Bayar)</label>
+                                <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button type="submit" class="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20">Terapkan Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- TABEL DATA TRANSAKSI --}}
+    <div class="relative overflow-x-auto bg-white shadow-sm rounded-2xl border border-gray-100">
         <table class="w-full text-left text-gray-600 border-collapse">
-            <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
+            <thead class="text-[11px] text-gray-400 bg-gray-50/50 border-b border-gray-100 uppercase tracking-widest font-black">
                 <tr>
+                    <th class="px-6 py-4 whitespace-nowrap">Tanggal Bayar</th>
                     <th class="px-6 py-4">Nama Pelanggan</th>
-                    <th class="px-6 py-4 text-center">Tgl Bayar</th>
+                    <th class="px-6 py-4">Paket ISP</th>
                     <th class="px-6 py-4 text-center">Jumlah Nominal</th>
                     <th class="px-6 py-4 text-center">Dibuat Pada</th>
-                    <th class="px-6 py-4 text-center">Update Terakhir</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-50">
                 @forelse($transaksis as $trx)
-                <tr class="hover:bg-gray-50/50 transition-colors group">
+                <tr class="hover:bg-blue-50/30 transition-colors group">
+                    
+                    {{-- 1. Tanggal Bayar --}}
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
+                        {{ \Carbon\Carbon::parse($trx->tanggal)->format('d/m/Y') }}
+                    </td>
+                    
+                    {{-- 2. Nama Pelanggan --}}
+                    <td class="px-6 py-4 text-sm font-bold text-gray-700">
+                        {{ $trx->pelanggan->nama_pelanggan ?? 'Pelanggan Dihapus' }}
+                    </td>
+                    
+                    {{-- 3. Paket ISP --}}
                     <td class="px-6 py-4">
-                        <div class="flex flex-col">
-                            <span class="text-sm font-bold text-gray-900">
-                                {{ $trx->pelanggan->nama_pelanggan ?? 'Pelanggan Dihapus' }}
-                            </span>
-                            <span class="text-[11px] font-medium text-blue-600 mt-0.5">
-                                {{ $trx->pelanggan->paket->nama_paket ?? 'Tanpa Paket' }}
-                            </span>
-                        </div>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                            {{ $trx->pelanggan->paket->nama_paket ?? 'Tanpa Paket' }}
+                        </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold text-center">
-                        {{ \Carbon\Carbon::parse($trx->tanggal)->format('d M Y') }}
-                    </td>
-                    <td class="px-6 py-4 text-sm font-bold text-center text-gray-900">
+                    
+                    {{-- 4. Jumlah Nominal --}}
+                    <td class="px-6 py-4 text-sm font-black text-center text-emerald-600 whitespace-nowrap">
                         Rp {{ number_format($trx->jumlah, 0, ',', '.') }}
                     </td>
                     
+                    {{-- 5. Dibuat Pada --}}
                     <td class="px-6 py-4 text-center">
-                        <div class="flex flex-col">
-                            <span class="text-[11px] text-gray-500 font-bold">{{ $trx->created_at->format('d M Y') }}</span>
-                            <span class="text-[10px] text-gray-400 uppercase font-medium">{{ $trx->created_by ?? 'SYSTEM' }}</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <div class="flex flex-col">
-                            <span class="text-[11px] text-gray-500 font-bold">{{ $trx->updated_by ? $trx->updated_at->format('d M Y') : '-' }}</span>
-                            <span class="text-[10px] text-gray-400 uppercase font-medium">{{ $trx->updated_by ?? '-' }}</span>
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-xs text-gray-600 font-bold">{{ $trx->created_at->format('d/m/Y') }}</span>
+                            <span class="text-[9px] text-gray-400 uppercase font-black mt-0.5 tracking-wider">{{ $trx->created_by ?? 'SYSTEM' }}</span>
                         </div>
                     </td>
 
+                    {{-- 6. Aksi --}}
                     <td class="px-6 py-4 text-right">
-                        <div class="flex justify-end gap-1">
+                        <div class="flex justify-end gap-2">                    
+                            {{-- Tombol Edit --}}
                             <button @click="openEdit = true; editData = {{ json_encode($trx) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
+                    
+                            {{-- Tombol Hapus --}}
                             <button @click="openDelete = true; deleteUrl = '{{ route('transaksi.destroy', $trx->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Transaksi">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
@@ -105,7 +192,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-400 font-medium">Belum ada riwayat pembayaran.</td>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-400">
+                            <svg class="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="text-sm font-bold">Belum ada riwayat pembayaran.</span>
+                        </div>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>

@@ -36,6 +36,53 @@ class PelangganController extends Controller
             $query->where('status_pembayaran', $request->status_pembayaran);
         }
 
+        // ==========================================
+        // FITUR EXPORT EXCEL (.xls Native)
+        // ==========================================
+        if ($request->has('export')) {
+            $pelanggans = $query->get();
+            $filename = "Data_Pelanggan_" . date('Y-m-d') . ".xls";
+
+            $headers = [
+                "Content-type"        => "application/vnd.ms-excel",
+                "Content-Disposition" => "attachment; filename=$filename",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            ];
+
+            $callback = function () use ($pelanggans) {
+                echo '<table border="1">';
+                // Header dengan warna biru khas CSMNET
+                echo '<tr>
+                        <th style="background-color:#2563eb; color:#ffffff;">Nama Lengkap</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Paket Internet</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Alamat</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">No WA</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Jatuh Tempo</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Pembayaran</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Status Layanan</th>
+                      </tr>';
+
+                foreach ($pelanggans as $plg) {
+                    $paket = $plg->paket->nama_paket ?? 'Tanpa Paket';
+                    $tanggal = $plg->jatuh_tempo ? \Carbon\Carbon::parse($plg->jatuh_tempo)->format('Y-m-d') : '-';
+                    echo "<tr>
+                            <td>{$plg->nama_pelanggan}</td>
+                            <td>{$paket}</td>
+                            <td>{$plg->alamat}</td>
+                            <td>'{$plg->no_wa}</td>
+                            <td>{$tanggal}</td>
+                            <td>{$plg->status_pembayaran}</td>
+                            <td>{$plg->status}</td>
+                          </tr>";
+                }
+                echo '</table>';
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
         $pelanggans = $query->get();
         $pakets = Paket::where('status', 'Active')->get();
 

@@ -15,6 +15,7 @@
 @endif
 
 <div x-data="{ 
+    openFilter: false,
     openAdd: {{ $errors->any() ? 'true' : 'false' }}, 
     openEdit: false, 
     openDelete: false, 
@@ -32,52 +33,92 @@
         </button>
     </div>
 
-    <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-6">
-        <form action="{{ route('pelanggan.index') }}" method="GET" class="flex flex-col lg:flex-row gap-3">
+    {{-- BARIS PENCARIAN & FILTER (STYLE MODERN CLEAN) --}}
+    <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between overflow-visible transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+        
+        {{-- Input Search Kiri --}}
+        <form action="{{ route('pelanggan.index') }}" method="GET" class="flex-1 flex items-center m-0 border-b md:border-b-0 border-gray-50 group" id="searchForm">
+            {{-- Simpan state filter biar gak hilang pas nge-search --}}
+            <input type="hidden" name="paket_id" value="{{ request('paket_id') }}">
+            <input type="hidden" name="status" value="{{ request('status') }}">
+            <input type="hidden" name="status_pembayaran" value="{{ request('status_pembayaran') }}">
             
-            <div class="flex-1 relative min-w-[200px]">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama pelanggan atau alamat..." class="w-full text-sm pl-9 p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+            <div class="pl-5 pr-2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-
-            <div class="flex gap-3 overflow-x-auto no-scrollbar shrink-0">
-                
-                <select name="paket_id" class="text-sm p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600 transition-all cursor-pointer">
-                    <option value="">-- Semua Paket --</option>
-                    @foreach($pakets as $paket)
-                        <option value="{{ $paket->id }}" {{ request('paket_id') == $paket->id ? 'selected' : '' }}>{{ $paket->nama_paket }}</option>
-                    @endforeach
-                </select>
-
-                <select name="status" class="text-sm p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600 transition-all cursor-pointer">
-                    <option value="">-- Semua Status --</option>
-                    <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
-                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="Non Active" {{ request('status') == 'Non Active' ? 'selected' : '' }}>Non Active</option>
-                </select>
-
-                <select name="status_pembayaran" class="text-sm p-2.5 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-600 transition-all cursor-pointer">
-                    <option value="">-- Pembayaran --</option>
-                    <option value="Lunas" {{ request('status_pembayaran') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                    <option value="Belum Lunas" {{ request('status_pembayaran') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                </select>
-
-                <div class="flex gap-2 shrink-0">
-                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center justify-center whitespace-nowrap">
-                        Filter
-                    </button>
-                    
-                    @if(request('q') || request('paket_id') || request('status') || request('status_pembayaran'))
-                        <a href="{{ route('pelanggan.index') }}" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-100 px-3 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center" title="Reset Pencarian">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </a>
-                    @endif
-                </div>
-            </div>
-            
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama atau alamat pelanggan..." 
+                   class="w-full py-4 bg-transparent border-none focus:ring-0 outline-none text-sm font-medium text-gray-700 placeholder-gray-400" 
+                   onkeydown="if(event.key === 'Enter') this.form.submit();">
         </form>
+
+        {{-- Kumpulan Tombol Kanan --}}
+        <div class="flex items-center justify-end gap-2 p-2 px-3 shrink-0 bg-gray-50/30 md:bg-transparent">
+            
+            {{-- Tombol Reset Selalu Muncul --}}
+            <a href="{{ route('pelanggan.index') }}" class="text-[11px] font-black text-gray-400 hover:text-red-500 px-3 py-2 transition-colors tracking-widest uppercase">Reset</a>
+            
+            <a href="{{ request()->fullUrlWithQuery(['export' => '1']) }}" class="text-[11px] font-black text-gray-400 hover:text-blue-600 px-3 py-2 transition-colors tracking-widest uppercase border-r border-gray-200 pr-4 mr-2" title="Download data sebagai Excel">Export</a>
+            
+            {{-- Wrapper Tombol Filter & Popover Dialog --}}
+            <div class="relative">
+                <button @click="openFilter = !openFilter" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20 relative z-10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Filter
+                </button>
+
+                {{-- POPOVER DIALOG FILTER --}}
+                <div x-show="openFilter" 
+                     @click.away="openFilter = false"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                     x-cloak 
+                     class="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.1)] border border-gray-100 p-5 z-[100]">
+                    
+                    <h4 class="text-sm font-black text-gray-900 tracking-tight mb-4">Opsi Filter</h4>
+                    
+                    <form action="{{ route('pelanggan.index') }}" method="GET">
+                        <input type="hidden" name="q" value="{{ request('q') }}">
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Paket</label>
+                                <select name="paket_id" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                                    <option value="">Semua Paket</option>
+                                    @foreach($pakets as $paket)
+                                        <option value="{{ $paket->id }}" {{ request('paket_id') == $paket->id ? 'selected' : '' }}>{{ $paket->nama_paket }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Status Layanan</label>
+                                <select name="status" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                                    <option value="">Semua Status</option>
+                                    <option value="Active" {{ request('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                                    <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="Non Active" {{ request('status') == 'Non Active' ? 'selected' : '' }}>Non Active</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Status Pembayaran</label>
+                                <select name="status_pembayaran" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                                    <option value="">Semua Pembayaran</option>
+                                    <option value="Lunas" {{ request('status_pembayaran') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
+                                    <option value="Belum Lunas" {{ request('status_pembayaran') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button type="submit" class="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20">Terapkan Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if(session('success'))

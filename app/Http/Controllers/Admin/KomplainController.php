@@ -27,11 +27,88 @@ class KomplainController extends Controller
     }
 
     // [ADMIN] Nampilin Semua Komplain
-    public function index()
+    // [ADMIN] Nampilin Semua Komplain
+    public function index(Request $request)
     {
-        $komplains = Komplain::with(['pelanggan', 'pelanggan.paket'])->latest()->get();
+        $query = Komplain::with(['pelanggan', 'pelanggan.paket']);
+
+        // 1. Filter Pencarian (Nama Pelanggan atau Detail Keluhan)
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('keluhan', 'like', "%{$search}%")
+                    ->orWhereHas('pelanggan', function ($subQ) use ($search) {
+                        $subQ->where('nama_pelanggan', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // 2. Filter Kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // 3. Filter Rentang Tanggal
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal', '<=', $request->end_date);
+        }
+
+        $query->latest();
+
+        // ==========================================
+        // 4. FITUR EXPORT EXCEL (.xls Native)
+        // ==========================================
+        if ($request->has('export')) {
+            $komplains = $query->get();
+            $filename = "Data_Komplain_" . date('Y-m-d') . ".xls";
+
+            $headers = [
+                "Content-type"        => "application/vnd.ms-excel",
+                "Content-Disposition" => "attachment; filename=$filename",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            ];
+
+            $callback = function () use ($komplains) {
+                echo '<table border="1">';
+                echo '<tr>
+                        <th style="background-color:#2563eb; color:#ffffff;">Tanggal</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Nama Pelanggan</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">No WA</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Kategori</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Keluhan</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Prioritas</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Status</th>
+                      </tr>';
+
+                foreach ($komplains as $kp) {
+                    $tanggal = \Carbon\Carbon::parse($kp->tanggal)->format('Y-m-d');
+                    $nama = $kp->pelanggan->nama_pelanggan ?? 'Data Dihapus';
+                    $wa = $kp->pelanggan->no_wa ?? '-';
+                    $kategori = $kp->kategori ?? 'Belum Diatur';
+
+                    echo "<tr>
+                            <td>{$tanggal}</td>
+                            <td>{$nama}</td>
+                            <td>'{$wa}</td>
+                            <td>{$kategori}</td>
+                            <td>{$kp->keluhan}</td>
+                            <td>{$kp->priority}</td>
+                            <td>{$kp->status}</td>
+                          </tr>";
+                }
+                echo '</table>';
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        $komplains = $query->get();
         $pelanggans = Pelanggan::all();
-        // $kategoriList udah di-share dari constructor, nggak usah dikirim manual lagi
 
         return view('admin.komplain.index', compact('komplains', 'pelanggans'));
     }

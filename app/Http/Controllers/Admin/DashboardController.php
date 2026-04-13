@@ -115,6 +115,17 @@ class DashboardController extends Controller
                 ->count();
         }
 
+        // ==========================================
+        // 8. LIST PELANGGAN MENUNGGAK (> 3 HARI)
+        // ==========================================
+        $tigaHariLalu = Carbon::today()->subDays(3);
+        $pelangganOverdue = Pelanggan::with('paket')
+            ->where('status', 'Active')
+            ->where('status_pembayaran', 'Belum Lunas')
+            ->whereDate('jatuh_tempo', '<=', $tigaHariLalu)
+            ->orderBy('jatuh_tempo', 'asc')
+            ->get();
+
         return view('admin.dashboard', compact(
             'kpi',
             'jatuhTempoTerpilih',
@@ -134,7 +145,8 @@ class DashboardController extends Controller
             'trxMonth',
             'trxYear',
             'trxPerHariLabel',
-            'trxPerHariData'
+            'trxPerHariData',
+            'pelangganOverdue'
         ));
     }
 }

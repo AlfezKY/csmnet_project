@@ -10,11 +10,91 @@ use Illuminate\Support\Facades\File;
 
 class PengeluaranController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Tampilkan pengeluaran terbaru di atas
-        $pengeluarans = Pengeluaran::orderBy('tanggal', 'desc')->latest()->get();
-        return view('admin.pengeluaran.index', compact('pengeluarans'));
+        $query = Pengeluaran::query();
+
+        // 1. Fitur Search (Kategori atau Deskripsi)
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('kategori', 'like', "%{$search}%")
+                    ->orWhere('deskripsi', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filter Kategori Spesifik
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        // 3. Filter Tanggal (Start & End Date)
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal', '<=', $request->end_date);
+        }
+
+        $query->orderBy('tanggal', 'desc')->latest();
+
+        // ==========================================
+        // 4. FITUR EXPORT EXCEL (.xls Native)
+        // ==========================================
+        if ($request->has('export')) {
+            $data = $query->get();
+            $filename = "Data_Pengeluaran_" . date('Y-m-d') . ".xls";
+
+            $headers = [
+                "Content-type"        => "application/vnd.ms-excel",
+                "Content-Disposition" => "attachment; filename=$filename",
+                "Pragma"              => "no-cache",
+                "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                "Expires"             => "0"
+            ];
+
+            $callback = function () use ($data) {
+                echo '<table border="1">';
+                echo '<tr>
+                        <th style="background-color:#2563eb; color:#ffffff;">Tanggal</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Kategori</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Deskripsi</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Jumlah (Rp)</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Dicatat Oleh</th>
+                      </tr>';
+
+                foreach ($data as $row) {
+                    $tanggal = \Carbon\Carbon::parse($row->tanggal)->format('d/m/Y');
+                    echo "<tr>
+                            <td>{$tanggal}</td>
+                            <td>{$row->kategori}</td>
+                            <td>{$row->deskripsi}</td>
+                            <td>{$row->jumlah}</td>
+                            <td>{$row->created_by}</td>
+                          </tr>";
+                }
+                echo '</table>';
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        $pengeluarans = $query->get();
+
+        // List Kategori untuk Dropdown Filter Popover
+        $kategoriList = [
+            'Langganan ISP Induk',
+            'Pembelian Perangkat (Router, Modem, Kabel)',
+            'Perawatan Jaringan',
+            'Gaji Karyawan / Teknisi',
+            'Biaya Operasional Kantor',
+            'Listrik',
+            'Internet Kantor',
+            'Transportasi',
+            'Lainnya'
+        ];
+
+        return view('admin.pengeluaran.index', compact('pengeluarans', 'kategoriList'));
     }
 
     public function store(Request $request)
