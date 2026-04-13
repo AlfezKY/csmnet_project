@@ -15,30 +15,109 @@
 @endif
 
 <div x-data="{ 
+    openFilter: false,
     openAdd: {{ $errors->any() ? 'true' : 'false' }}, 
     openEdit: false, 
     openDelete: false, 
     editData: {}, 
     deleteUrl: '' 
 }">
-    <div class="flex flex-col md:flex-row md:justify-between items-start md:items-end mb-6 px-1 gap-4">
-        <div>
-            <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Catatan Pengeluaran</h3>
-            <p class="text-sm text-gray-500 font-medium mt-1">Kelola data arus kas keluar operasional CSMNET</p>
-        </div>
-        
-        <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-            Catat Pengeluaran
-        </button>
+<div class="flex justify-between items-end mb-6 px-1">
+    <div>
+        <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Catatan Pengeluaran</h3>
+        <p class="text-sm text-gray-500 font-medium mt-1">Kelola data arus kas keluar operasional CSMNET</p>
     </div>
+    
+    <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        Catat Pengeluaran
+    </button>
+</div>
 
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 text-sm font-bold rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            {{ session('success') }}
+@if(session('success'))
+    <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 text-sm font-bold rounded-lg flex items-center gap-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        {{ session('success') }}
+    </div>
+@endif
+
+{{-- BARIS PENCARIAN & FILTER (STYLE MODERN CLEAN) --}}
+<div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between overflow-visible transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+    
+    {{-- Input Search Kiri --}}
+    <form action="{{ route('pengeluaran.index') }}" method="GET" class="flex-1 flex items-center m-0 border-b md:border-b-0 border-gray-50 group" id="searchForm">
+        <input type="hidden" name="kategori" value="{{ request('kategori') }}">
+        <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+        <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+        
+        <div class="pl-5 pr-2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
-    @endif
+        <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari kategori atau deskripsi..." 
+               class="w-full py-4 bg-transparent border-none focus:ring-0 outline-none text-sm font-medium text-gray-700 placeholder-gray-400" 
+               onkeydown="if(event.key === 'Enter') this.form.submit();">
+    </form>
+
+    {{-- Kumpulan Tombol Kanan --}}
+    <div class="flex items-center justify-end gap-2 p-2 px-3 shrink-0 bg-gray-50/30 md:bg-transparent">
+        <a href="{{ route('pengeluaran.index') }}" class="text-[11px] font-black text-gray-400 hover:text-red-500 px-3 py-2 transition-colors tracking-widest uppercase">Reset</a>
+        
+        <a href="{{ request()->fullUrlWithQuery(['export' => '1']) }}" class="text-[11px] font-black text-gray-400 hover:text-blue-600 px-3 py-2 transition-colors tracking-widest uppercase border-r border-gray-200 pr-4 mr-2" title="Download data tagihan Excel">Export</a>
+        
+        {{-- Wrapper Tombol Filter & Popover Dialog --}}
+        <div class="relative">
+            <button @click="openFilter = !openFilter" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20 relative z-10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                Filter
+            </button>
+
+            {{-- POPOVER DIALOG FILTER --}}
+            <div x-show="openFilter" 
+                 @click.away="openFilter = false"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                 x-cloak 
+                 class="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.1)] border border-gray-100 p-5 z-[100]">
+                
+                <h4 class="text-sm font-black text-gray-900 tracking-tight mb-4">Filter Pengeluaran</h4>
+                
+                <form action="{{ route('pengeluaran.index') }}" method="GET">
+                    <input type="hidden" name="q" value="{{ request('q') }}">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Kategori Pengeluaran</label>
+                            <select name="kategori" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                                <option value="">Semua Kategori</option>
+                                @foreach($kategoriList as $kat)
+                                    <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Dari Tanggal</label>
+                            <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Sampai Tanggal</label>
+                            <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <button type="submit" class="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20">Terapkan Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
     <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
         <table class="w-full text-left text-gray-600 border-collapse">
@@ -60,12 +139,13 @@
             <tbody class="divide-y divide-gray-100">
                 @forelse($pengeluarans as $out)
                 <tr class="hover:bg-gray-50/50 transition-colors group">
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold whitespace-nowrap">
-                        {{ \Carbon\Carbon::parse($out->tanggal)->translatedFormat('d M Y') }}
+                    <td class="px-6 py-4 text-sm text-gray-900 font-bold whitespace-nowrap">
+                        {{-- Format d/m/Y --}}
+                        {{ \Carbon\Carbon::parse($out->tanggal)->format('d/m/Y') }}
                     </td>
                     <td class="px-6 py-4">
-                        <span class="text-sm text-blue-600 font-bold">
-                            {{ $out->kategori }}
+                        {{-- Style Chip buat Kategori --}}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-100">                            {{ $out->kategori }}
                         </span>
                     </td>
                     <td class="px-6 py-4">
