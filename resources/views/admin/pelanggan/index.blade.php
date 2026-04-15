@@ -138,6 +138,7 @@
                     <th class="px-6 py-4 text-center">Jatuh Tempo</th>
                     <th class="px-6 py-4 text-center">Pembayaran</th>
                     <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-center">Tanggal Bergabung</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
                 </tr>
             </thead>
@@ -183,6 +184,10 @@
                             {{ $plg->status == 'Active' ? 'bg-blue-50 text-blue-700 border-blue-100' : ($plg->status == 'Pending' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-100 text-gray-500 border-gray-200') }}">
                             {{ $plg->status }}
                         </span>
+                    </td>
+
+                    <td class="px-6 py-4 text-center text-sm text-gray-500 font-bold">
+                        {{ $plg->created_at->translatedFormat('d/m/Y') }}
                     </td>
 
                     <td class="px-6 py-4 text-right">
@@ -253,17 +258,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Pembayaran</label>
-                            <select disabled class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-not-allowed">
+                            <select name="status_pembayaran" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
                                 <option value="Belum Lunas">Belum Lunas</option>
+                                <option value="Lunas">Lunas</option>
                             </select>
-                            <input type="hidden" name="status_pembayaran" value="Belum Lunas">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Layanan Internet</label>
-                            <select disabled class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 cursor-not-allowed">
+                            <select name="status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600">
                                 <option value="Pending">Pending</option>
+                                <option value="Active">Active</option>
+                                <option value="Non Active">Non Active</option>
                             </select>
-                            <input type="hidden" name="status" value="Pending">
                         </div>
                     </div>
 

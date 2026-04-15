@@ -234,6 +234,7 @@
                         </div>
                     </div>
 
+                    @if(auth()->user()->role === 'Owner')
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Total Pengeluaran (Rp)</label>
                         <div class="relative">
@@ -241,6 +242,7 @@
                             <input type="number" name="jumlah" min="0" placeholder="50000" class="w-full text-sm p-3 pl-10 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
                         </div>
                     </div>
+                    @endif
 
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Bukti Bayar (Opsional)</label>
@@ -305,6 +307,7 @@
                         </div>
                     </div>
 
+                    @if(auth()->user()->role === 'Owner')
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Total Pengeluaran (Rp)</label>
                         <div class="relative">
@@ -312,6 +315,7 @@
                             <input type="number" name="jumlah" x-model="editData.jumlah" min="0" class="w-full text-sm p-3 pl-10 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
                         </div>
                     </div>
+                    @endif
 
                     <div>
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Update Bukti Bayar</label>

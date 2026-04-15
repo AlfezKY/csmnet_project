@@ -255,7 +255,7 @@
                     <td class="px-6 py-4 text-sm text-gray-500 font-medium truncate max-w-[150px]" title="{{ $plg->alamat }}">{{ $plg->alamat }}</td>
                     <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $plg->no_wa }}</td>
                     <td class="px-6 py-4 text-center">
-                        <span class="text-[12px] text-gray-500 font-bold">{{ $plg->created_at->format('d/m/y') }}</span>
+                        <span class="text-[12px] text-gray-500 font-bold">{{ $plg->created_at->format('d/m/Y') }}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">

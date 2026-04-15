@@ -44,8 +44,8 @@
 {{-- ROW 1: 6 KPI CARDS (PREMIUM FLOATING STYLE) --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-5 mb-8 relative z-10">
     
-    {{-- 1. Pelanggan --}}
-    <div class="relative group animate-fade-up delay-100">
+    {{-- 1. Pelanggan (Ke halaman semua pelanggan) --}}
+    <a href="{{ route('pelanggan.index') }}" class="block relative group animate-fade-up delay-100 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
             <div class="flex justify-between items-start mb-4">
@@ -58,10 +58,10 @@
                 <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Total Pelanggan</p>
             </div>
         </div>
-    </div>
+    </a>
 
-    {{-- 2. Paket ISP --}}
-    <div class="relative group animate-fade-up delay-100">
+    {{-- 2. Paket ISP (Ke halaman semua paket) --}}
+    <a href="{{ route('paket.index') }}" class="block relative group animate-fade-up delay-100 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-400 to-pink-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
             <div class="flex justify-between items-start mb-4">
@@ -74,10 +74,10 @@
                 <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Total Paket ISP</p>
             </div>
         </div>
-    </div>
+    </a>
 
-    {{-- 3. Komplain --}}
-    <div class="relative group animate-fade-up delay-200">
+    {{-- 3. Komplain (Difilter Hari Ini) --}}
+    <a href="{{ route('komplain.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-200 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-rose-400 to-red-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
             <div class="flex justify-between items-start mb-4">
@@ -91,10 +91,10 @@
                 <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Tiket Komplain</p>
             </div>
         </div>
-    </div>
+    </a>
 
-    {{-- 4. Tagihan --}}
-    <div class="relative group animate-fade-up delay-200">
+    {{-- 4. Tagihan (Difilter Jatuh Tempo Hari Ini) --}}
+    <a href="{{ route('tagihan.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-200 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
             <div class="flex justify-between items-start mb-4">
@@ -108,39 +108,43 @@
                 <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Jatuh Tempo</p>
             </div>
         </div>
-    </div>
+    </a>
 
-    {{-- 5. Pengeluaran --}}
-    <div class="relative group animate-fade-up delay-300">
+    {{-- 5. Pengeluaran (Difilter Hari Ini) --}}
+    <a href="{{ route('pengeluaran.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-300 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-slate-400 to-gray-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
             <div class="flex justify-between items-start mb-4">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-600 to-gray-800 text-white flex items-center justify-center shadow-lg shadow-slate-500/30">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181"></path></svg>
                 </div>
+                {{-- Tag Hari Ini Warna Slate --}}
+                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-lg">Hari Ini</span>
             </div>
             <div>
                 <h3 class="text-lg font-black text-gray-900 tracking-tight">Rp {{ number_format($kpi['pengeluaranHariIni'], 0, ',', '.') }}</h3>
-                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Pengeluaran Hari Ini</p>
+                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Pengeluaran</p>
             </div>
         </div>
-    </div>
+    </a>
 
-    {{-- 6. Omzet --}}
-    <div class="relative group animate-fade-up delay-300">
+    {{-- 6. Omzet / Transaksi Masuk (Difilter Hari Ini) --}}
+    <a href="{{ route('transaksi.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-300 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
             <div class="flex justify-between items-start mb-4">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"></path></svg>
                 </div>
+                {{-- Tag Hari Ini Warna Emerald --}}
+                <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-lg">Hari Ini</span>
             </div>
             <div>
                 <h3 class="text-lg font-black text-emerald-600 tracking-tight">Rp {{ number_format($kpi['omzetHariIni'], 0, ',', '.') }}</h3>
-                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Omzet Hari Ini</p>
+                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-1">Omzet</p>
             </div>
         </div>
-    </div>
+    </a>
 </div>
 
 {{-- ROW 2: CHART PELANGGAN BARU & CALENDAR --}}
@@ -441,7 +445,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const optionsTrx = {
         series: [{ name: 'Transaksi', data: @json($trxPerHariData) }],
-        chart: { type: 'area', height: '100%', minHeight: 300, toolbar: { show: false }, fontFamily: fontFamily },
+        chart: { type: 'area', height: '100%', minHeight: 300, toolbar: { show: true , tools: {
+                    download: false, // Sembunyikan tombol download kalau tidak perlu
+                    selection: true,
+                    zoom: false,
+                    zoomin: false,
+                    zoomout: false,
+                    pan: true, // Tombol tangan untuk geser kiri-kanan
+                    reset: false
+                },}, fontFamily: fontFamily },
         colors: ['#8b5cf6'], 
         stroke: { curve: 'smooth', width: 4 },
         fill: { 

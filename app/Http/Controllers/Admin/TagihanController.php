@@ -97,7 +97,8 @@ class TagihanController extends Controller
     {
         $request->validate([
             'jumlah_bulan' => 'required|integer|min:1',
-            'diskon'       => 'nullable|numeric|min:0|max:100'
+            'diskon'       => 'nullable|numeric|min:0|max:100',
+            'biaya_lain'   => 'nullable|numeric|min:0'
         ]);
 
         $pelanggan = Pelanggan::with('paket')->findOrFail($id);
@@ -113,10 +114,13 @@ class TagihanController extends Controller
 
         $jumlah_bulan = $request->jumlah_bulan;
         $diskon_persen = $request->diskon ?? 0;
+        $biaya_lain = $request->biaya_lain ?? 0; // Ambil Biaya Lain
 
         $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
         $potongan = $harga_normal * ($diskon_persen / 100);
-        $total_bayar = max(0, $harga_normal - $potongan);
+
+        // Kalkulasi: Harga Normal - Diskon + Biaya Lain
+        $total_bayar = max(0, $harga_normal - $potongan) + $biaya_lain;
 
         Transaksi::create([
             'pelanggan_id' => $pelanggan->id,
@@ -133,12 +137,14 @@ class TagihanController extends Controller
         $request->validate([
             'ids'          => 'required|array',
             'jumlah_bulan' => 'required|integer|min:1',
-            'diskon'       => 'nullable|numeric|min:0|max:100'
+            'diskon'       => 'nullable|numeric|min:0|max:100',
+            'biaya_lain'   => 'nullable|numeric|min:0'
         ]);
 
         $pelanggans = Pelanggan::with('paket')->whereIn('id', $request->ids)->get();
         $jumlah_bulan = $request->jumlah_bulan;
         $diskon_persen = $request->diskon ?? 0;
+        $biaya_lain = $request->biaya_lain ?? 0; // Biaya Lain per Pelanggan
 
         foreach ($pelanggans as $pelanggan) {
             $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
@@ -152,7 +158,9 @@ class TagihanController extends Controller
 
             $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
             $potongan = $harga_normal * ($diskon_persen / 100);
-            $total_bayar = max(0, $harga_normal - $potongan);
+
+            // Diterapkan ke masing-masing transaksi
+            $total_bayar = max(0, $harga_normal - $potongan) + $biaya_lain;
 
             Transaksi::create([
                 'pelanggan_id' => $pelanggan->id,
@@ -198,7 +206,6 @@ class TagihanController extends Controller
 
             $result = $response->json();
 
-            // Wablas biasanya merespon dengan 'status' = true jika berhasil
             if ($response->successful() && isset($result['status']) && $result['status'] === true) {
                 return back()->with('success', "Pesan pengingat WhatsApp berhasil dikirim ke {$pelanggan->nama_pelanggan}!");
             } else {
@@ -208,5 +215,61 @@ class TagihanController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan jaringan saat menghubungi server Wablas.');
         }
+    }
+
+    public function bulkIngatkan(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+        ]);
+
+        $pelanggans = Pelanggan::with('paket')->whereIn('id', $request->ids)->get();
+
+        $domain = env('WABLAS_DOMAIN');
+        $token = env('WABLAS_TOKEN');
+
+        if (!$domain || !$token) {
+            return back()->with('error', 'API WhatsApp Wablas belum disetting dengan benar di .env!');
+        }
+
+        $berhasil = 0;
+        $gagal = 0;
+
+        foreach ($pelanggans as $pelanggan) {
+            $phone = $pelanggan->no_wa;
+            if (str_starts_with($phone, '0')) {
+                $phone = '62' . substr($phone, 1);
+            }
+
+            $harga = number_format($pelanggan->paket->harga ?? 0, 0, ',', '.');
+            $paket = $pelanggan->paket->nama_paket ?? 'Internet';
+            $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
+
+            $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk paket *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*.\n\nMohon segera melakukan pembayaran agar layanan tetap aktif. Terima kasih 🙏";
+
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => $token,
+                ])->post("{$domain}/api/send-message", [
+                    'phone'   => $phone,
+                    'message' => $pesan,
+                ]);
+
+                $result = $response->json();
+                if ($response->successful() && isset($result['status']) && $result['status'] === true) {
+                    $berhasil++;
+                } else {
+                    $gagal++;
+                }
+            } catch (\Exception $e) {
+                $gagal++;
+            }
+        }
+
+        if ($gagal > 0) {
+            return back()->with('success', "Proses selesai: {$berhasil} pesan berhasil terkirim, {$gagal} gagal dikirim.");
+        }
+
+        return back()->with('success', "Berhasil mengirim {$berhasil} pesan WA pengingat secara massal!");
     }
 }

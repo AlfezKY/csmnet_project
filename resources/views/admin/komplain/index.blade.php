@@ -176,7 +176,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500 font-bold whitespace-nowrap">
-                        {{ \Carbon\Carbon::parse($kp->tanggal)->format('d M Y') }}
+                        {{ \Carbon\Carbon::parse($kp->tanggal)->format('d/m/Y') }}
                     </td>
                     <td class="px-6 py-4">
                         {{-- KOLOM KATEGORI SENDIRI --}}

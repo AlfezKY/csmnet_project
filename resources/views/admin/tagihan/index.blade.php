@@ -21,11 +21,13 @@
     hargaPaket: 0,
     jumlahBulan: 1,
     diskonPersen: 0,
+    biayaLain: 0, // TAMBAHAN BIAYA LAIN
 
     // Variabel kalkulator massal
     openBulkConfirm: false,
     bulkJumlahBulan: 1,
     bulkDiskonPersen: 0,
+    bulkBiayaLain: 0, // TAMBAHAN BIAYA LAIN MASSAL
 
     isSubmitting: false,
 
@@ -44,7 +46,8 @@
     get totalTagihan() {
         let baseTotal = this.hargaPaket * this.jumlahBulan;
         let diskonAmount = baseTotal * (this.diskonPersen / 100);
-        return Math.max(0, baseTotal - diskonAmount);
+        let afterDiscount = Math.max(0, baseTotal - diskonAmount);
+        return afterDiscount + (Number(this.biayaLain) || 0); // DITAMBAH BIAYA LAIN
     },
 
     // Hitung Total Bayar Massal
@@ -56,7 +59,11 @@
         });
         let baseTotal = totalHargaPerBulan * this.bulkJumlahBulan;
         let diskonAmount = baseTotal * (this.bulkDiskonPersen / 100);
-        return Math.max(0, baseTotal - diskonAmount);
+        let afterDiscount = Math.max(0, baseTotal - diskonAmount);
+        
+        // Biaya lain dikalikan jumlah pelanggan yang dipilih
+        let totalBiayaLain = (Number(this.bulkBiayaLain) || 0) * this.selectedIds.length; 
+        return afterDiscount + totalBiayaLain;
     },
 
     // Format Rupiah Otomatis
@@ -72,18 +79,40 @@
         
         <div x-show="selectedIds.length > 0" x-cloak class="flex items-center gap-2 bg-gray-900 p-1.5 rounded-lg shadow-lg" x-transition>
             <span class="text-xs text-white font-bold px-3" x-text="selectedIds.length + ' Dipilih'"></span>
-            <button @click="openBulkConfirm = true; bulkJumlahBulan = 1; bulkDiskonPersen = 0" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
+            
+            {{-- Tombol Kirim WA Massal --}}
+            <form action="{{ route('tagihan.bulk-ingatkan') }}" method="POST" class="m-0" 
+                  x-data="{ isSendingBulk: false }" 
+                  @submit="if(confirm('Kirim WA pengingat ke ' + selectedIds.length + ' pelanggan terpilih?')) { isSendingBulk = true; return true; } else { return false; }">
+                @csrf
+                <template x-for="id in selectedIds" :key="id">
+                    <input type="hidden" name="ids[]" :value="id">
+                </template>
+                <button type="submit" x-bind:disabled="isSendingBulk" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <span x-show="!isSendingBulk" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.405-.883-.733-1.48-1.638-1.653-1.935-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WA Massal
+                    </span>
+                    <span x-show="isSendingBulk" x-cloak class="flex items-center gap-1.5">
+                        <svg class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        Mengirim...
+                    </span>
+                </button>
+            </form>
+
+            {{-- Tombol Lunas Massal --}}
+            <button @click="openBulkConfirm = true; bulkJumlahBulan = 1; bulkDiskonPersen = 0; bulkBiayaLain = 0;" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                Tandai Lunas Massal
+                Lunas Massal
             </button>
         </div>
     </div>
+    
     {{-- BARIS PENCARIAN & FILTER (STYLE MODERN CLEAN) --}}
     <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between overflow-visible transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         
         {{-- Input Search Kiri --}}
         <form action="{{ route('tagihan.index') }}" method="GET" class="flex-1 flex items-center m-0 border-b md:border-b-0 border-gray-50 group" id="searchForm">
-            {{-- Simpan filter state biar nggak hilang pas search --}}
             <input type="hidden" name="paket_id" value="{{ request('paket_id') }}">
             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
@@ -98,9 +127,7 @@
 
         {{-- Kumpulan Tombol Kanan --}}
         <div class="flex items-center justify-end gap-2 p-2 px-3 shrink-0 bg-gray-50/30 md:bg-transparent">
-            
             <a href="{{ route('tagihan.index') }}" class="text-[11px] font-black text-gray-400 hover:text-red-500 px-3 py-2 transition-colors tracking-widest uppercase">Reset</a>
-            
             <a href="{{ request()->fullUrlWithQuery(['export' => '1']) }}" class="text-[11px] font-black text-gray-400 hover:text-blue-600 px-3 py-2 transition-colors tracking-widest uppercase border-r border-gray-200 pr-4 mr-2" title="Download data tagihan Excel">Export</a>
             
             {{-- Wrapper Tombol Filter & Popover Dialog --}}
@@ -110,15 +137,9 @@
                     Filter
                 </button>
 
-                {{-- POPOVER DIALOG FILTER --}}
                 <div x-show="openFilter" 
                      @click.away="openFilter = false"
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                     x-transition
                      x-cloak 
                      class="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.1)] border border-gray-100 p-5 z-[100]">
                     
@@ -126,7 +147,6 @@
                     
                     <form action="{{ route('tagihan.index') }}" method="GET">
                         <input type="hidden" name="q" value="{{ request('q') }}">
-                        
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Paket</label>
@@ -137,18 +157,15 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Dari Jatuh Tempo</label>
                                 <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
                             </div>
-                            
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Sampai Jatuh Tempo</label>
                                 <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
                             </div>
                         </div>
-
                         <div class="mt-6">
                             <button type="submit" class="w-full py-2.5 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20">Terapkan Filter</button>
                         </div>
@@ -218,24 +235,20 @@
                                 hargaPaket = {{ $plg->paket->harga ?? 0 }};
                                 jumlahBulan = 1;
                                 diskonPersen = 0;
+                                biayaLain = 0;
                             " class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white rounded text-[11px] font-bold transition-all" title="Proses Pembayaran">
                                 Bayar
                             </button>
 
-                            {{-- TOMBOL INGATKAN (WITH ALPINE LOADING STATE) --}}
                             <form action="{{ route('tagihan.ingatkan', $plg->id) }}" method="POST" class="inline" 
                                   x-data="{ isSending: false }" 
                                   @submit="if(confirm('Kirim WA otomatis ke {{ $plg->nama_pelanggan }}?')) { isSending = true; return true; } else { return false; }">
                                 @csrf
-                                <button type="submit" x-bind:disabled="isSending" class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-100 hover:bg-green-500 hover:text-white rounded text-[11px] font-bold transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed group" title="Kirim WA Pengingat via API">
-                                    
-                                    {{-- Teks Normal --}}
+                                <button type="submit" x-bind:disabled="isSending" class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-100 hover:bg-green-500 hover:text-white rounded text-[11px] font-bold transition-all flex items-center gap-1.5 disabled:opacity-70 disabled:cursor-not-allowed group">
                                     <span x-show="!isSending" class="flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.405-.883-.733-1.48-1.638-1.653-1.935-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                                         Ingatkan
                                     </span>
-                                    
-                                    {{-- Teks Loading --}}
                                     <span x-show="isSending" x-cloak class="flex items-center gap-1.5">
                                         <svg class="animate-spin w-3.5 h-3.5 text-green-600 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                         Mengirim...
@@ -264,7 +277,7 @@
 
     {{-- MODAL BAYAR SATUAN --}}
     <div x-show="openConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openConfirm = false">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-8 text-center" @click.away="openConfirm = false">
             <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
             </div>
@@ -274,9 +287,10 @@
             <form :action="confirmUrl" method="POST" @submit="isSubmitting = true">
                 @csrf @method('PUT')
                 
-                <div class="grid grid-cols-2 gap-3 mb-5 text-left">
+                {{-- BARIS 1: DURASI & DISKON --}}
+                <div class="grid grid-cols-2 gap-3 mb-3 text-left">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
+                        <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
                         <select name="jumlah_bulan" x-model.number="jumlahBulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
                             <option value="1">1 Bulan</option>
                             <option value="2">2 Bulan</option>
@@ -287,7 +301,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Diskon (%)</label>
+                        <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2">Diskon (%)</label>
                         <div class="relative">
                             <input type="number" name="diskon" x-model.number="diskonPersen" min="0" max="100" class="w-full text-sm p-3 pr-8 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all">
                             <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 font-bold">%</span>
@@ -295,11 +309,20 @@
                     </div>
                 </div>
 
+                {{-- BARIS 2: BIAYA LAIN --}}
+                <div class="mb-5 text-left">
+                    <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2">Biaya Lain (Opsional)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold">Rp</span>
+                        <input type="number" name="biaya_lain" x-model.number="biayaLain" min="0" placeholder="0" class="w-full text-sm p-3 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all">
+                    </div>
+                </div>
+
                 {{-- DISPLAY TOTAL BAYAR LIVE --}}
                 <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between">
                     <div class="text-left">
                         <span class="block text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-0.5">Total Tagihan</span>
-                        <span class="text-xs font-medium text-blue-500" x-text="jumlahBulan + ' Bulan x Rp ' + (hargaPaket/1000) + 'k'"></span>
+                        <span class="text-xs font-medium text-blue-500" x-text="jumlahBulan + ' Bulan x Rp ' + (hargaPaket/1000) + 'k' + (biayaLain > 0 ? ' + Biaya Lain' : '')"></span>
                     </div>
                     <div class="text-xl font-black text-blue-700 tracking-tight" x-text="formatRupiah(totalTagihan)">
                         0
@@ -321,7 +344,7 @@
 
     {{-- MODAL BAYAR MASSAL --}}
     <div x-show="openBulkConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openBulkConfirm = false">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-8 text-center" @click.away="openBulkConfirm = false">
             <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
@@ -337,9 +360,10 @@
                     <input type="hidden" name="ids[]" :value="id">
                 </template>
                 
-                <div class="grid grid-cols-2 gap-3 mb-5 text-left">
+                {{-- GRID UBAH JADI 3 KOLOM --}}
+                <div class="grid grid-cols-3 gap-3 mb-5 text-left">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
+                        <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
                         <select name="jumlah_bulan" x-model.number="bulkJumlahBulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">
                             <option value="1">1 Bulan</option>
                             <option value="2">2 Bulan</option>
@@ -350,11 +374,16 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Diskon (%)</label>
+                        <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2">Diskon (%)</label>
                         <div class="relative">
                             <input type="number" name="diskon" x-model.number="bulkDiskonPersen" min="0" max="100" class="w-full text-sm p-3 pr-8 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all">
                             <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 font-bold">%</span>
                         </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2" title="Dikalikan jumlah pelanggan yang dipilih">Biaya Lain/Trx</label>
+                        <input type="number" name="biaya_lain" x-model.number="bulkBiayaLain" min="0" placeholder="0" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all">
                     </div>
                 </div>
 
@@ -362,7 +391,7 @@
                 <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between">
                     <div class="text-left">
                         <span class="block text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-0.5">Total Penerimaan</span>
-                        <span class="text-xs font-medium text-blue-500" x-text="selectedIds.length + ' Pelanggan'"></span>
+                        <span class="text-xs font-medium text-blue-500" x-text="selectedIds.length + ' Pelanggan' + (bulkBiayaLain > 0 ? ' + Biaya Lain' : '')"></span>
                     </div>
                     <div class="text-xl font-black text-blue-700 tracking-tight" x-text="formatRupiah(totalBulkTagihan)">
                         0

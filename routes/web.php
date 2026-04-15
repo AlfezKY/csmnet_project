@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/tagihan/{id}/lunas', [TagihanController::class, 'action'])->name('tagihan.action');
         Route::post('/tagihan/bulk-lunas', [TagihanController::class, 'bulkAction'])->name('tagihan.bulk');
         Route::post('/tagihan/{id}/ingatkan', [TagihanController::class, 'ingatkan'])->name('tagihan.ingatkan');
+        Route::post('/tagihan/bulk-ingatkan', [TagihanController::class, 'bulkIngatkan'])->name('tagihan.bulk-ingatkan');
     });
 
     // ==========================================
