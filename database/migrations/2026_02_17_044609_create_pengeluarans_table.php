@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->string('kategori');
             $table->text('deskripsi')->nullable();
-            $table->integer('jumlah');
+            $table->integer('jumlah')->nullable();
             $table->string('bukti_bayar')->nullable();
             $table->string('created_by')->default('SYSTEM');
             $table->string('updated_by')->nullable();

@@ -108,6 +108,124 @@
         </div>
     </div>
     
+    {{-- FLOATING TOAST SUCCESS (SMOOTH ANIMATION) --}}
+    @if(session('success'))
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 20);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-x-12 scale-90"
+             x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+             x-transition:leave="transition-all transform ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-x-12 scale-90"
+             x-cloak
+             class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-emerald-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
+            
+            <div class="px-4 py-3 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex flex-shrink-0 items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('success') }}</p>
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-emerald-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
+        </div>
+    @endif
+
+    {{-- FLOATING TOAST ERROR VALIDASI (SMOOTH ANIMATION) --}}
+    @if(session('error') || $errors->any())
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    // Durasinya dilambatkan sedikit (25) karena ada list error agar sempat dibaca
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 25);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-x-12 scale-90"
+             x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+             x-transition:leave="transition-all transform ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-x-12 scale-90"
+             x-cloak
+             class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-red-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
+            
+            <div class="px-4 py-3 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex flex-shrink-0 items-center justify-center mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    @if(session('error'))
+                        <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('error') }}</p>
+                    @else
+                        <p class="text-sm font-bold text-gray-800 tracking-tight mb-1">Terjadi Kesalahan:</p>
+                        <ul class="list-disc list-inside text-[11px] font-medium text-gray-500">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-red-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
+        </div>
+    @endif
+
     {{-- BARIS PENCARIAN & FILTER (STYLE MODERN CLEAN) --}}
     <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between overflow-visible transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         
@@ -139,7 +257,12 @@
 
                 <div x-show="openFilter" 
                      @click.away="openFilter = false"
-                     x-transition
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
                      x-cloak 
                      class="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl shadow-[0_10px_40px_rgb(0,0,0,0.1)] border border-gray-100 p-5 z-[100]">
                     
@@ -174,20 +297,6 @@
             </div>
         </div>
     </div>
-
-    @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 text-sm font-bold rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            {{ session('success') }}
-        </div>
-    @endif
-    
-    @if(session('error'))
-        <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 text-sm font-bold rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            {{ session('error') }}
-        </div>
-    @endif
 
     <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
         <table class="w-full text-left text-gray-600 border-collapse">

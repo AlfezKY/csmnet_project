@@ -101,20 +101,21 @@
         </div>
     @endif
 
-    {{-- FLOATING TOAST ERROR (SMOOTH ANIMATION) --}}
+    {{-- FLOATING TOAST ERROR VALIDASI (SMOOTH ANIMATION + LIST) --}}
     @if(session('error') || $errors->any())
         <div x-data="{
                 show: false,
                 progress: 100,
                 interval: null,
                 startTimer() {
+                    // Durasinya dilambatkan sedikit (25) karena ada list error agar sempat dibaca
                     this.interval = setInterval(() => {
                         this.progress -= 0.5;
                         if (this.progress <= 0) {
                             clearInterval(this.interval);
                             this.show = false;
                         }
-                    }, 20);
+                    }, 25);
                 },
                 pauseTimer() {
                     clearInterval(this.interval);
@@ -138,12 +139,21 @@
              x-cloak
              class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-red-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
             
-            <div class="px-4 py-3 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex flex-shrink-0 items-center justify-center">
+            <div class="px-4 py-3 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex flex-shrink-0 items-center justify-center mt-0.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('error') ?? 'Terjadi kesalahan, gagal memproses data.' }}</p>
+                    @if(session('error'))
+                        <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('error') }}</p>
+                    @else
+                        <p class="text-sm font-bold text-gray-800 tracking-tight mb-1">Gagal Memproses Data:</p>
+                        <ul class="list-disc list-inside text-[11px] font-medium text-gray-500">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
                 <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -223,9 +233,10 @@
         </div>
     </div>
 
-    <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+    {{-- TABEL DIPERBARUI --}}
+    <div class="relative overflow-x-auto bg-white shadow-sm rounded-2xl border border-gray-100">
         <table class="w-full text-left text-gray-600 border-collapse">
-            <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
+            <thead class="text-[11px] text-gray-400 bg-gray-50/50 border-b border-gray-100 uppercase tracking-widest font-black">
                 <tr>
                     <th class="px-4 py-4 w-12 text-center">
                         <input type="checkbox" :checked="isAllSelected" @change="toggleAll" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-pointer focus:ring-blue-500">
@@ -233,30 +244,40 @@
                     <th class="px-6 py-4">Nama Lengkap</th>
                     <th class="px-6 py-4">Paket Internet</th>
                     <th class="px-6 py-4">Alamat</th>
-                    <th class="px-6 py-4">No WA</th>
-                    <th class="px-6 py-4 text-center">Tanggal Daftar</th>
+                    <th class="px-6 py-4 whitespace-nowrap">No WA</th>
+                    <th class="px-6 py-4 text-center whitespace-nowrap">Tanggal Daftar</th>
                     <th class="px-6 py-4 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-50">
                 @forelse($pelanggans as $plg)
-                <tr class="hover:bg-gray-50/50 transition-colors group" :class="selectedIds.includes('{{ $plg->id }}') ? 'bg-blue-50/30' : ''">
+                <tr class="hover:bg-blue-50/30 transition-colors group" :class="selectedIds.includes('{{ $plg->id }}') ? 'bg-blue-50/40' : ''">
                     <td class="px-4 py-4 text-center">
                         <input type="checkbox" value="{{ $plg->id }}" x-model="selectedIds" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-pointer focus:ring-blue-500">
                     </td>
-                    <td class="px-6 py-4 text-sm font-bold text-gray-900">{{ $plg->nama_pelanggan }}</td>
+                    
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900 whitespace-nowrap">
+                        {{ $plg->nama_pelanggan }}
+                    </td>
                     
                     <td class="px-6 py-4">
-                        <span class="text-sm font-bold text-blue-600">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100 whitespace-nowrap">
                             {{ $plg->paket->nama_paket ?? 'Tanpa Paket' }}
                         </span>
                     </td>
                     
-                    <td class="px-6 py-4 text-sm text-gray-500 font-medium truncate max-w-[150px]" title="{{ $plg->alamat }}">{{ $plg->alamat }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{ $plg->no_wa }}</td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="text-[12px] text-gray-500 font-bold">{{ $plg->created_at->format('d/m/Y') }}</span>
+                    <td class="px-6 py-4 text-sm text-gray-600 font-medium truncate max-w-[200px]" title="{{ $plg->alamat }}">
+                        {{ $plg->alamat }}
                     </td>
+                    
+                    <td class="px-6 py-4 text-sm text-gray-600 font-medium whitespace-nowrap">
+                        {{ $plg->no_wa }}
+                    </td>
+                    
+                    <td class="px-6 py-4 text-center text-sm text-gray-600 font-bold whitespace-nowrap">
+                        {{ $plg->created_at->format('d/m/Y') }}
+                    </td>
+                    
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
                             <button @click="openConfirm = true; confirmUrl = '{{ route('approval.action', $plg->id) }}'; confirmAction = 'approve'; confirmText = 'Setujui pemasangan internet untuk {{ $plg->nama_pelanggan }}?'" 

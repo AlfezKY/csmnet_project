@@ -2,14 +2,13 @@
 @section('title', 'Laporan & Dashboard')
 
 @section('content')
-{{-- HEADER & FILTER KEUANGAN (SEAMLESS) --}}
+{{-- HEADER & FILTER KEUANGAN --}}
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8" x-data="{ filter: '{{ request('filter_type', 'all') }}' }">
     <div>
         <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Laporan</h3>
-        <p class="text-sm text-gray-500 font-medium mt-1">Ringkasan keuangan, tiket komplain, dan distribusi pelanggan.</p>
+        <p class="text-sm text-gray-500 font-medium mt-1">Helikopter view keuangan, komplain, dan performa bisnis.</p>
     </div>
 
-    {{-- Filter ditarik ke kanan atas, dibikin lebih compact --}}
     <form action="{{ route('laporan.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-2 bg-white p-1.5 rounded-2xl border border-gray-200 shadow-sm relative z-20">
         <select name="filter_type" x-model="filter" class="text-xs p-2 bg-transparent outline-none font-bold text-gray-700 cursor-pointer min-w-[130px]">
             <option value="all">Semua Waktu</option>
@@ -37,42 +36,34 @@
     </form>
 </div>
 
-{{-- 3 KARTU UTAMA (Berwarna, Clean & pakai Icon) --}}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-10">
+{{-- 4 KARTU UTAMA KPI --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 relative z-10">
     
     {{-- KARTU PEMASUKAN --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-100/60 p-6 rounded-3xl border border-emerald-100 flex items-center gap-5 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-100/60 p-6 rounded-3xl border border-emerald-100 flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-emerald-200/50 to-green-300/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        
-        <div class="w-14 h-14 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-emerald-600 relative z-10 border border-white/50">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-            </svg>
+        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-emerald-600 relative z-10 border border-white/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
         </div>
-        
         <div class="relative z-10 w-full">
-            <p class="text-[11px] text-emerald-800/70 font-bold uppercase tracking-widest mb-1">Total Pemasukan</p>
-            <h4 class="text-2xl lg:text-3xl font-black text-emerald-950 truncate">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h4>
+            <p class="text-[10px] text-emerald-800/70 font-bold uppercase tracking-widest mb-1">Pemasukan</p>
+            <h4 class="text-xl lg:text-2xl font-black text-emerald-950 truncate">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h4>
         </div>
     </div>
 
     {{-- KARTU PENGELUARAN --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-red-100/60 p-6 rounded-3xl border border-rose-100 flex items-center gap-5 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-red-100/60 p-6 rounded-3xl border border-rose-100 flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-rose-200/50 to-red-300/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        
-        <div class="w-14 h-14 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-rose-600 relative z-10 border border-white/50">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" />
-            </svg>
+        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-rose-600 relative z-10 border border-white/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" /></svg>
         </div>
-        
         <div class="relative z-10 w-full">
-            <p class="text-[11px] text-rose-800/70 font-bold uppercase tracking-widest mb-1">Total Pengeluaran</p>
-            <h4 class="text-2xl lg:text-3xl font-black text-rose-950 truncate">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h4>
+            <p class="text-[10px] text-rose-800/70 font-bold uppercase tracking-widest mb-1">Pengeluaran</p>
+            <h4 class="text-xl lg:text-2xl font-black text-rose-950 truncate">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h4>
         </div>
     </div>
 
-    {{-- KARTU LABA BERSIH (Otomatis ganti warna kalau minus) --}}
+    {{-- KARTU LABA BERSIH --}}
     @php 
         $isProfit = $labaBersih >= 0; 
         $bgClass = $isProfit ? 'from-blue-50 to-indigo-100/60 border-blue-100' : 'from-orange-50 to-orange-100/60 border-orange-100';
@@ -81,26 +72,34 @@
         $textColor = $isProfit ? 'text-blue-950' : 'text-orange-950';
         $labelColor = $isProfit ? 'text-blue-800/70' : 'text-orange-800/70';
     @endphp
-    <div class="relative overflow-hidden bg-gradient-to-br {{ $bgClass }} p-6 rounded-3xl border flex items-center gap-5 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br {{ $bgClass }} p-6 rounded-3xl border flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br {{ $blobClass }} rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        
-        <div class="w-14 h-14 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center {{ $iconColor }} relative z-10 border border-white/50">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
-            </svg>
+        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center {{ $iconColor }} relative z-10 border border-white/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg>
         </div>
-        
         <div class="relative z-10 w-full">
-            <p class="text-[11px] {{ $labelColor }} font-bold uppercase tracking-widest mb-1">Laba Bersih</p>
-            <h4 class="text-2xl lg:text-3xl font-black {{ $textColor }} truncate">Rp {{ number_format($labaBersih, 0, ',', '.') }}</h4>
+            <p class="text-[10px] {{ $labelColor }} font-bold uppercase tracking-widest mb-1">Laba Bersih</p>
+            <h4 class="text-xl lg:text-2xl font-black {{ $textColor }} truncate">Rp {{ number_format($labaBersih, 0, ',', '.') }}</h4>
+        </div>
+    </div>
+
+    {{-- KARTU PIUTANG (UANG MENGENDAP) --}}
+    <div class="relative overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-100/60 p-6 rounded-3xl border border-amber-100 flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-amber-200/50 to-yellow-300/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-amber-600 relative z-10 border border-white/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        <div class="relative z-10 w-full" title="Total tunggakan pelanggan aktif saat ini (Real-time)">
+            <p class="text-[10px] text-amber-800/70 font-bold uppercase tracking-widest mb-1 flex items-center gap-1">Total Piutang</p>
+            <h4 class="text-xl lg:text-2xl font-black text-amber-950 truncate">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</h4>
         </div>
     </div>
 </div>
 
-{{-- BAGIAN CHARTS & KOMPLAIN --}}
+{{-- BAGIAN TREN KEUANGAN & KOMPLAIN --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-0">
     
-    {{-- KIRI: TREND KEUANGAN --}}
+    {{-- KIRI: TREN KEUANGAN --}}
     <div class="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
         <div class="absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br from-blue-100/40 to-indigo-100/30 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-gradient-to-br from-emerald-100/30 to-teal-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
@@ -128,12 +127,11 @@
         </div>
     </div>
 
-    {{-- KANAN: RINGKASAN KOMPLAIN (COMPACT VERSION) --}}
+    {{-- KANAN: RINGKASAN KOMPLAIN --}}
     <div class="lg:col-span-1 relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col transition-all duration-300 hover:shadow-md group">
         <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-orange-100/30 to-rose-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         
         <div class="relative z-10 flex flex-col h-full">
-            {{-- Header & Filter --}}
             <div class="flex justify-between items-center mb-4 gap-2">
                 <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
@@ -150,44 +148,97 @@
                 </form>
             </div>
             
-            {{-- 4 Status (Total gabung kesini biar compact) --}}
-            <div class="grid grid-cols-4 gap-2 mb-2 relative z-10">
-                <div class="bg-slate-50/80 p-2 rounded-xl text-center border border-slate-200/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
-                    <p class="text-[8px] text-slate-500 font-bold uppercase mb-0.5">Total</p>
-                    <h2 class="text-lg font-black text-slate-800">{{ $komplainStats['total'] }}</h2>
-                </div>
-                <div class="bg-emerald-50/80 p-2 rounded-xl text-center border border-emerald-100/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
-                    <p class="text-[8px] text-emerald-600 font-black uppercase mb-0.5">Selesai</p>
-                    <p class="text-lg font-black text-emerald-700">{{ $komplainStats['done'] }}</p>
-                </div>
-                <div class="bg-blue-50/80 p-2 rounded-xl text-center border border-blue-100/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
-                    <p class="text-[8px] text-blue-600 font-black uppercase mb-0.5">Proses</p>
-                    <p class="text-lg font-black text-blue-700">{{ $komplainStats['in_progress'] }}</p>
-                </div>
-                <div class="bg-rose-50/80 p-2 rounded-xl text-center border border-rose-100/50 flex flex-col justify-center hover:shadow-sm hover:scale-105 transition-all cursor-default">
-                    <p class="text-[8px] text-rose-600 font-black uppercase mb-0.5">Pending</p>
-                    <p class="text-lg font-black text-rose-700">{{ $komplainStats['not_yet'] }}</p>
+            <div class="relative overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200/50 p-4 rounded-2xl text-center border border-slate-200/60 mb-4 group/card hover:shadow-sm transition-all duration-300">
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-gradient-to-br from-white/40 to-slate-300/30 rounded-full blur-xl group-hover/card:scale-150 transition-transform duration-500 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Total Komplain</p>
+                    <h2 class="text-5xl font-black text-slate-800">{{ $komplainStats['total'] }}</h2>
                 </div>
             </div>
 
-            {{-- Horizontal Bar Chart --}}
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-100/60 p-3 rounded-2xl text-center border border-emerald-100 flex flex-col justify-center group/mini hover:shadow-sm transition-all duration-300">
+                    <div class="absolute -right-2 -bottom-2 w-12 h-12 bg-gradient-to-br from-emerald-200/50 to-green-300/30 rounded-full blur-lg group-hover/mini:scale-150 transition-transform duration-500 pointer-events-none"></div>
+                    <div class="relative z-10">
+                        <p class="text-[9px] text-emerald-600 font-bold uppercase mb-1">Done</p>
+                        <p class="text-xl font-black text-emerald-700">{{ $komplainStats['done'] }}</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100/60 p-3 rounded-2xl text-center border border-blue-100 flex flex-col justify-center group/mini hover:shadow-sm transition-all duration-300">
+                    <div class="absolute -right-2 -bottom-2 w-12 h-12 bg-gradient-to-br from-blue-200/50 to-indigo-300/30 rounded-full blur-lg group-hover/mini:scale-150 transition-transform duration-500 pointer-events-none"></div>
+                    <div class="relative z-10">
+                        <p class="text-[8px] text-blue-600 font-bold uppercase mb-1 leading-tight">In Progress</p>
+                        <p class="text-xl font-black text-blue-700">{{ $komplainStats['in_progress'] }}</p>
+                    </div>
+                </div>
+                <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-red-100/60 p-3 rounded-2xl text-center border border-rose-100 flex flex-col justify-center group/mini hover:shadow-sm transition-all duration-300">
+                    <div class="absolute -right-2 -bottom-2 w-12 h-12 bg-gradient-to-br from-rose-200/50 to-red-300/30 rounded-full blur-lg group-hover/mini:scale-150 transition-transform duration-500 pointer-events-none"></div>
+                    <div class="relative z-10">
+                        <p class="text-[9px] text-rose-600 font-bold uppercase mb-1">Not Yet</p>
+                        <p class="text-xl font-black text-rose-700">{{ $komplainStats['not_yet'] }}</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="complaintChart" class="w-full flex-grow relative z-10 min-h-[160px] -ml-2 mt-2"></div>
         </div>
     </div>
 </div>
 
-{{-- BAWAH: DISTRIBUSI PAKET --}}
-<div class="relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm w-full md:w-1/2 transition-all duration-300 hover:shadow-md group">
-    <div class="absolute -left-10 -top-10 w-48 h-48 bg-gradient-to-br from-fuchsia-100/40 to-pink-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
-    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-amber-100/30 to-yellow-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+{{-- BAWAH: PIE CHARTS (DISTRIBUSI PAKET & PENGELUARAN) --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-0">
     
-    <div class="relative z-10">
-        <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <svg class="w-5 h-5 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-            Distribusi Pelanggan Berdasarkan Paket
-        </h4>
-        <div id="packageChart" class="w-full h-72 flex justify-center"></div>
+    {{-- KIRI: DISTRIBUSI PAKET --}}
+    <div class="relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
+        <div class="absolute -left-10 -top-10 w-48 h-48 bg-gradient-to-br from-fuchsia-100/40 to-pink-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-amber-100/30 to-yellow-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+        
+        <div class="relative z-10">
+            <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                Distribusi Pelanggan Berdasarkan Paket
+            </h4>
+            
+            {{-- CEK APAKAH ADA PELANGGAN --}}
+            @if(count($distribusiPaket) > 0)
+                <div id="packageChart" class="w-full h-72 flex justify-center"></div>
+            @else
+                <div class="w-full h-72 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-slate-100/50 rounded-full flex items-center justify-center mb-3 border border-slate-200/50">
+                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4M12 20V4" /></svg>
+                    </div>
+                    <p class="text-sm font-bold text-slate-500">Belum ada pelanggan</p>
+                </div>
+            @endif
+        </div>
     </div>
+
+    {{-- KANAN: BREAKDOWN PENGELUARAN --}}
+    <div class="relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
+        <div class="absolute -right-10 -top-10 w-48 h-48 bg-gradient-to-br from-rose-100/40 to-red-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+        <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-indigo-100/30 to-blue-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+        
+        <div class="relative z-10">
+            <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3" /></svg>
+                Breakdown Pengeluaran
+            </h4>
+            
+            {{-- [KUNCI FIX ADA DI SINI] CEK APAKAH TOTAL PENGELUARAN > 0 --}}
+            @if($totalPengeluaran > 0)
+                <div id="expenseChart" class="w-full h-72 flex justify-center"></div>
+            @else
+                <div class="w-full h-72 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-slate-100/50 rounded-full flex items-center justify-center mb-3 border border-slate-200/50">
+                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                    </div>
+                    <p class="text-sm font-bold text-slate-500">Belum ada pengeluaran bulan ini</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Data grafik akan otomatis muncul saat ada nominal pengeluaran.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -198,190 +249,108 @@
 document.addEventListener('DOMContentLoaded', function () {
     
     const fontFamily = 'Instrument Sans, sans-serif';
-    const formatRupiah = (value) => "Rp " + value.toLocaleString('id-ID');
+    const formatRupiah = (value) => "Rp " + Number(value || 0).toLocaleString('id-ID');
 
     // 1. CHART TREN KEUANGAN
     const financialOptions = {
-        series: [{
-            name: 'Pemasukan',
-            data: @json($pemasukanBulanan)
-        }, {
-            name: 'Pengeluaran',
-            data: @json($pengeluaranBulanan)
-        }],
-        chart: { 
-            type: 'bar', 
-            height: 350, 
-            toolbar: { show: false }, 
-            fontFamily: fontFamily,
-            animations: {
-                enabled: true,
-                easing: 'easeinout',
-                speed: 800,
-                animateGradually: { enabled: true, delay: 150 },
-                dynamicAnimation: { enabled: true, speed: 350 }
-            }
-        },
-        plotOptions: {
-            bar: { 
-                horizontal: false, 
-                columnWidth: '45%',
-                borderRadius: 4,
-                borderRadiusApplication: 'end'
-            }
-        },
+        series: [{ name: 'Pemasukan', data: @json($pemasukanBulanan) }, { name: 'Pengeluaran', data: @json($pengeluaranBulanan) }],
+        chart: { type: 'bar', height: 350, toolbar: { show: false }, fontFamily: fontFamily },
+        plotOptions: { bar: { horizontal: false, columnWidth: '45%', borderRadius: 4, borderRadiusApplication: 'end' } },
         dataLabels: { enabled: false },
         stroke: { show: true, width: 3, colors: ['transparent'] },
         colors: ['#22c55e', '#ef4444'],
-        xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
-            labels: { style: { colors: '#6b7280', fontWeight: 600, fontFamily: fontFamily } },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-        },
-        yaxis: {
-            labels: {
-                formatter: formatRupiah,
-                style: { colors: '#6b7280', fontWeight: 600, fontFamily: fontFamily }
-            }
-        },
-        grid: {
-            borderColor: '#f3f4f6',
-            strokeDashArray: 4,
-            yaxis: { lines: { show: true } }
-        },
-        fill: { 
-            opacity: 1,
-            type: 'gradient',
-            gradient: {
-                shade: 'light',
-                type: 'vertical',
-                shadeIntensity: 0.25,
-                inverseColors: false,
-                opacityFrom: 0.95,
-                opacityTo: 0.85,
-                stops: [50, 100]
-            }
-        },
-        tooltip: {
-            theme: 'light',
-            y: { formatter: formatRupiah },
-            style: { fontSize: '13px', fontFamily: fontFamily }
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right',
-            fontFamily: fontFamily,
-            fontWeight: 600,
-            markers: { radius: 12 }
-        }
+        xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'], labels: { style: { colors: '#6b7280', fontWeight: 600, fontFamily: fontFamily } }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { formatter: formatRupiah, style: { colors: '#6b7280', fontWeight: 600, fontFamily: fontFamily } } },
+        grid: { borderColor: '#f3f4f6', strokeDashArray: 4, yaxis: { lines: { show: true } } },
+        fill: { opacity: 1, type: 'gradient', gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.25, inverseColors: false, opacityFrom: 0.95, opacityTo: 0.85, stops: [50, 100] } },
+        tooltip: { theme: 'light', y: { formatter: formatRupiah }, style: { fontSize: '13px', fontFamily: fontFamily } },
+        legend: { position: 'top', horizontalAlign: 'right', fontFamily: fontFamily, fontWeight: 600, markers: { radius: 12 } }
     };
     new ApexCharts(document.querySelector("#financialChart"), financialOptions).render();
 
     // 2. CHART KOMPLAIN KATEGORI
     const komplainData = @json($komplainKategori);
     const complaintOptions = {
-        series: [{
-            name: 'Jumlah Tiket',
-            data: komplainData.map(item => item.total)
-        }],
-        chart: { 
-            type: 'bar', 
-            height: 250, 
-            toolbar: { show: false }, 
-            fontFamily: fontFamily
-        },
-        plotOptions: {
-            bar: { 
-                horizontal: true, 
-                borderRadius: 4, 
-                distributed: true,
-                barHeight: '60%' 
-            }
-        },
+        series: [{ name: 'Jumlah Tiket', data: komplainData.map(item => item.total) }],
+        chart: { type: 'bar', height: 250, toolbar: { show: false }, fontFamily: fontFamily },
+        plotOptions: { bar: { horizontal: true, borderRadius: 4, distributed: true, barHeight: '60%' } },
         colors: ['#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#10b981'],
-        dataLabels: { 
-            enabled: true, 
-            textAnchor: 'start',
-            style: { colors: ['#fff'], fontSize: '12px', fontFamily: fontFamily, fontWeight: 'bold' },
-            offsetX: 0,
-            dropShadow: { enabled: false }
-        },
+        dataLabels: { enabled: true, textAnchor: 'start', style: { colors: ['#fff'], fontSize: '12px', fontFamily: fontFamily, fontWeight: 'bold' }, offsetX: 0, dropShadow: { enabled: false } },
         stroke: { width: 0 },
-        xaxis: { 
-            categories: komplainData.map(item => item.kategori),
-            labels: { show: false },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-        },
-        yaxis: {
-            labels: { style: { colors: '#4b5563', fontWeight: 600, fontFamily: fontFamily } }
-        },
+        xaxis: { categories: komplainData.map(item => item.kategori), labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { style: { colors: '#4b5563', fontWeight: 600, fontFamily: fontFamily } } },
         grid: { show: false },
-        tooltip: {
-            theme: 'light',
-            style: { fontSize: '12px', fontFamily: fontFamily },
-            y: { formatter: function (val) { return val + " Tiket" } }
-        },
+        tooltip: { theme: 'light', style: { fontSize: '12px', fontFamily: fontFamily }, y: { formatter: function (val) { return val + " Tiket" } } },
         legend: { show: false }
     };
     new ApexCharts(document.querySelector("#complaintChart"), complaintOptions).render();
 
     // 3. CHART DISTRIBUSI PAKET
-    const paketData = @json($distribusiPaket);
-    const packageOptions = {
-        series: paketData.map(item => item.total),
-        chart: { 
-            type: 'donut', 
-            height: 320, 
-            fontFamily: fontFamily,
-            dropShadow: {
-                enabled: true,
-                color: '#111827',
-                top: 2,
-                left: 0,
-                blur: 4,
-                opacity: 0.05
-            }
-        },
-        labels: paketData.map(item => item.nama_paket),
-        colors: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6'],
-        dataLabels: { enabled: false },
-        stroke: { show: true, colors: '#ffffff', width: 2 },
-        plotOptions: {
-            pie: { 
-                donut: { 
-                    size: '70%', 
-                    labels: { 
-                        show: true, 
-                        name: { fontSize: '12px', fontFamily: fontFamily, color: '#6b7280' },
-                        value: { fontSize: '24px', fontFamily: fontFamily, fontWeight: 'bold', color: '#111827' },
-                        total: { 
+    const rawPaketData = @json($distribusiPaket);
+    const paketData = Array.isArray(rawPaketData) ? rawPaketData : Object.values(rawPaketData);
+    
+    if (document.querySelector("#packageChart") && paketData.length > 0) {
+        const packageOptions = {
+            series: paketData.map(item => Number(item.total)),
+            chart: { type: 'donut', height: 320, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
+            labels: paketData.map(item => item.nama_paket),
+            colors: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6'],
+            dataLabels: { enabled: false },
+            stroke: { show: true, colors: ['#ffffff'], width: 2 },
+            plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { fontSize: '12px', fontFamily: fontFamily, color: '#6b7280' }, value: { fontSize: '24px', fontFamily: fontFamily, fontWeight: 'bold', color: '#111827' }, total: { show: true, showAlways: true, label: 'Total', fontSize: '14px', fontFamily: fontFamily, fontWeight: 600, color: '#6b7280' } } } } },
+            tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return val + " Pelanggan" } } },
+            legend: { position: 'right', fontFamily: fontFamily, fontWeight: 600, markers: { radius: 12 } }
+        };
+        new ApexCharts(document.querySelector("#packageChart"), packageOptions).render();
+    }
+
+    // 4. CHART BREAKDOWN PENGELUARAN 
+    const rawExpenseData = @json($pengeluaranKategori);
+    console.log("Cek Data Pengeluaran:", rawExpenseData);
+    const expenseData = Array.isArray(rawExpenseData) ? rawExpenseData : Object.values(rawExpenseData);
+
+    // Di sini kita pastikan div-nya memang ke-render di HTML sebelum maksa eksekusi ApexCharts
+    if (document.querySelector("#expenseChart") && expenseData.length > 0) {
+        const expenseOptions = {
+            series: expenseData.map(item => Number(item.total)),
+            chart: { type: 'donut', height: 320, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
+            labels: expenseData.map(item => item.kategori || 'Lain-lain'),
+            colors: [
+    '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', 
+    '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', 
+    '#f43f5e', '#64748b', '#78716c', '#a3e635', '#2dd4bf'
+],
+            dataLabels: { enabled: false },
+            stroke: { show: true, colors: ['#ffffff'], width: 2 },
+            plotOptions: {
+                pie: { 
+                    donut: { 
+                        size: '70%', 
+                        labels: { 
                             show: true, 
-                            showAlways: true,
-                            label: 'Total', 
-                            fontSize: '14px',
-                            fontFamily: fontFamily,
-                            fontWeight: 600,
-                            color: '#6b7280'
+                            name: { fontSize: '12px', fontFamily: fontFamily, color: '#6b7280' }, 
+                            value: { 
+                                fontSize: '20px', fontFamily: fontFamily, fontWeight: 'bold', color: '#111827', 
+                                formatter: function (val) { return formatRupiah(val); } 
+                            }, 
+                            total: { 
+                                show: true, showAlways: true, 
+                                label: 'Total', 
+                                fontSize: '14px', fontFamily: fontFamily, fontWeight: 600, color: '#6b7280', 
+                                formatter: function (w) { 
+                                    const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0); 
+                                    return formatRupiah(total); 
+                                } 
+                            } 
                         } 
                     } 
-                } 
-            }
-        },
-        tooltip: {
-            theme: 'light',
-            style: { fontSize: '13px', fontFamily: fontFamily },
-            y: { formatter: function(val) { return val + " Pelanggan" } }
-        },
-        legend: { 
-            position: 'right', 
-            fontFamily: fontFamily,
-            fontWeight: 600,
-            markers: { radius: 12 }
-        }
-    };
-    new ApexCharts(document.querySelector("#packageChart"), packageOptions).render();
+                }
+            },
+            tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return formatRupiah(val) } } },
+            legend: { position: 'right', fontFamily: fontFamily, fontWeight: 600, markers: { radius: 12 } }
+        };
+        new ApexCharts(document.querySelector("#expenseChart"), expenseOptions).render();
+    }
 
 });
 </script>

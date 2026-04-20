@@ -14,8 +14,13 @@ class PelangganController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pelanggan::with(['paket', 'user'])->latest();
+        $query = Pelanggan::with(['paket', 'user'])
+            ->orderByRaw("CASE WHEN status = 'Active' THEN 0 ELSE 1 END") // 1. Prioritas utama: Status Active di atas
+            ->orderByRaw("jatuh_tempo IS NULL ASC")                       // 2. Data tanpa tanggal jatuh tempo taruh paling bawah
+            ->orderByRaw("CASE WHEN jatuh_tempo >= CURRENT_DATE THEN 0 ELSE 1 END") // 3. Tanggal >= Hari ini naik ke atas, yang sudah lewat turun ke bawah
+            ->orderByRaw("jatuh_tempo ASC");
 
+        // 1. Search Box
         if ($request->filled('q')) {
             $search = $request->q;
             $query->where(function ($q) use ($search) {
@@ -24,16 +29,31 @@ class PelangganController extends Controller
             });
         }
 
+        // 2. Filter Paket & Status
         if ($request->filled('paket_id')) {
             $query->where('paket_id', $request->paket_id);
         }
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
         if ($request->filled('status_pembayaran')) {
             $query->where('status_pembayaran', $request->status_pembayaran);
+        }
+
+        // 3. Filter Rentang Jatuh Tempo
+        if ($request->filled('jatuh_tempo_start')) {
+            $query->whereDate('jatuh_tempo', '>=', $request->jatuh_tempo_start);
+        }
+        if ($request->filled('jatuh_tempo_end')) {
+            $query->whereDate('jatuh_tempo', '<=', $request->jatuh_tempo_end);
+        }
+
+        // 4. Filter Rentang Tanggal Bergabung (created_at)
+        if ($request->filled('bergabung_start')) {
+            $query->whereDate('created_at', '>=', $request->bergabung_start);
+        }
+        if ($request->filled('bergabung_end')) {
+            $query->whereDate('created_at', '<=', $request->bergabung_end);
         }
 
         // ==========================================
@@ -62,11 +82,14 @@ class PelangganController extends Controller
                         <th style="background-color:#2563eb; color:#ffffff;">Jatuh Tempo</th>
                         <th style="background-color:#2563eb; color:#ffffff;">Pembayaran</th>
                         <th style="background-color:#2563eb; color:#ffffff;">Status Layanan</th>
+                        <th style="background-color:#2563eb; color:#ffffff;">Tgl Bergabung</th>
                       </tr>';
 
                 foreach ($pelanggans as $plg) {
                     $paket = $plg->paket->nama_paket ?? 'Tanpa Paket';
                     $tanggal = $plg->jatuh_tempo ? \Carbon\Carbon::parse($plg->jatuh_tempo)->format('Y-m-d') : '-';
+                    $tglGabung = $plg->created_at ? $plg->created_at->format('Y-m-d') : '-';
+
                     echo "<tr>
                             <td>{$plg->nama_pelanggan}</td>
                             <td>{$paket}</td>
@@ -75,6 +98,7 @@ class PelangganController extends Controller
                             <td>{$tanggal}</td>
                             <td>{$plg->status_pembayaran}</td>
                             <td>{$plg->status}</td>
+                            <td>{$tglGabung}</td>
                           </tr>";
                 }
                 echo '</table>';
@@ -100,7 +124,6 @@ class PelangganController extends Controller
             'alamat'         => 'required|string',
         ];
 
-        // JIKA USERNAME DIISI = BUAT AKUN
         if ($request->filled('username')) {
             $rules['username']    = 'required|string|max:255|unique:users,username';
             $rules['email']       = 'nullable|email|max:255|unique:users,email';
@@ -154,7 +177,6 @@ class PelangganController extends Controller
             'alamat'            => 'required|string',
         ];
 
-        // WAJIBKAN VALIDASI JIKA SUDAH PUNYA AKUN ATAU ADMIN MENGISI USERNAME
         if ($pelanggan->user_id || $request->filled('username')) {
             $userId = $pelanggan->user_id;
 

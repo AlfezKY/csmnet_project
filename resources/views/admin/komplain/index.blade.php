@@ -3,17 +3,6 @@
 @section('title', 'Manajemen Komplain')
 
 @section('content')
-@if ($errors->any())
-    <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 text-sm font-bold rounded-lg">
-        <p class="mb-1 uppercase">Gagal Menyimpan Data:</p>
-        <ul class="list-disc list-inside text-xs font-medium">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
 <div x-data="{ 
     activeTab: new URLSearchParams(window.location.search).get('tab') || 'Not Yet',
     openFilter: false,
@@ -35,19 +24,127 @@
         </button>
     </div>
 
+    {{-- FLOATING TOAST SUCCESS (SMOOTH ANIMATION) --}}
     @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 text-sm font-bold rounded-lg flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            {{ session('success') }}
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 20);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-x-12 scale-90"
+             x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+             x-transition:leave="transition-all transform ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-x-12 scale-90"
+             x-cloak
+             class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-emerald-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
+            
+            <div class="px-4 py-3 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex flex-shrink-0 items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('success') }}</p>
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-emerald-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
         </div>
     @endif
 
-    {{-- BARIS PENCARIAN & FILTER (STYLE MODERN CLEAN) --}}
+    {{-- FLOATING TOAST ERROR (SMOOTH ANIMATION + LIST) --}}
+    @if(session('error') || $errors->any())
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 25);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-x-12 scale-90"
+             x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+             x-transition:leave="transition-all transform ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-x-12 scale-90"
+             x-cloak
+             class="fixed top-28 right-6 z-[100] max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-red-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
+            
+            <div class="px-4 py-3 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex flex-shrink-0 items-center justify-center mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    @if(session('error'))
+                        <p class="text-sm font-bold text-gray-800 tracking-tight">{{ session('error') }}</p>
+                    @else
+                        <p class="text-sm font-bold text-gray-800 tracking-tight mb-1">Gagal Menyimpan Data:</p>
+                        <ul class="list-disc list-inside text-[11px] font-medium text-gray-500">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-red-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
+        </div>
+    @endif
+
+    {{-- BARIS PENCARIAN & FILTER --}}
     <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between overflow-visible transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         
-        {{-- Input Search Kiri --}}
         <form action="{{ route('komplain.index') }}" method="GET" class="flex-1 flex items-center m-0 border-b md:border-b-0 border-gray-50 group" id="searchForm">
-            {{-- Simpan Tab Aktif & Filter State --}}
             <input type="hidden" name="tab" x-bind:value="activeTab">
             <input type="hidden" name="kategori" value="{{ request('kategori') }}">
             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
@@ -61,21 +158,18 @@
                    onkeydown="if(event.key === 'Enter') this.form.submit();">
         </form>
 
-        {{-- Kumpulan Tombol Kanan --}}
         <div class="flex items-center justify-end gap-2 p-2 px-3 shrink-0 bg-gray-50/30 md:bg-transparent">
             
             <a href="{{ route('komplain.index') }}" class="text-[11px] font-black text-gray-400 hover:text-red-500 px-3 py-2 transition-colors tracking-widest uppercase">Reset</a>
             
             <button @click="window.location.href = '{{ route('komplain.index') }}?export=1&tab=' + activeTab" class="text-[11px] font-black text-gray-400 hover:text-blue-600 px-3 py-2 transition-colors tracking-widest uppercase border-r border-gray-200 pr-4 mr-2">Export</button>
             
-            {{-- Wrapper Tombol Filter & Popover Dialog --}}
             <div class="relative">
                 <button @click="openFilter = !openFilter" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-500/20 relative z-10">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                     Filter
                 </button>
 
-                {{-- POPOVER DIALOG FILTER --}}
                 <div x-show="openFilter" 
                      @click.away="openFilter = false"
                      x-transition:enter="transition ease-out duration-200"
@@ -103,12 +197,10 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Dari Tanggal</label>
                                 <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
                             </div>
-                            
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Sampai Tanggal</label>
                                 <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full p-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer">
@@ -151,11 +243,13 @@
         </button>
     </div>
 
-    {{-- TAB CONTENT --}}
+    {{-- TAB CONTENT (TABLE REVISED) --}}
     @foreach(['Not Yet', 'In Progress', 'Done'] as $statusKey)
-    <div x-show="activeTab === '{{ $statusKey }}'" x-cloak class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+    <div x-show="activeTab === '{{ $statusKey }}'" x-cloak class="relative overflow-x-auto bg-white shadow-sm rounded-2xl border border-gray-100">
         <table class="w-full text-left text-gray-600 border-collapse">
-            <thead class="text-xs text-gray-400 bg-gray-50/50 border-b border-gray-200 uppercase tracking-widest font-bold">
+            
+            {{-- THEAD KONSISTEN --}}
+            <thead class="text-[11px] text-gray-400 bg-gray-50/50 border-b border-gray-100 uppercase tracking-widest font-black">
                 <tr>
                     <th class="px-6 py-4 w-48">Pelapor</th>
                     <th class="px-6 py-4 w-32 whitespace-nowrap">Tanggal</th>
@@ -166,46 +260,60 @@
                     <th class="px-6 py-4 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            
+            {{-- TBODY KONSISTEN (HURUF & UKURAN) --}}
+            <tbody class="divide-y divide-gray-50">
                 @forelse($komplains->where('status', $statusKey) as $kp)
-                <tr class="hover:bg-gray-50/50 transition-colors group">
+                <tr class="hover:bg-blue-50/30 transition-colors group">
+                    
+                    {{-- PELAPOR --}}
                     <td class="px-6 py-4">
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-gray-900">{{ $kp->pelanggan->nama_pelanggan ?? 'Data Dihapus' }}</span>
                             <span class="text-[11px] text-gray-500 font-medium mt-0.5">{{ $kp->pelanggan->no_wa ?? '-' }}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 font-bold whitespace-nowrap">
+                    
+                    {{-- TANGGAL --}}
+                    <td class="px-6 py-4 text-sm font-bold text-gray-600 whitespace-nowrap">
                         {{ \Carbon\Carbon::parse($kp->tanggal)->format('d/m/Y') }}
                     </td>
+                    
+                    {{-- KATEGORI (CHIP DENGAN HURUF NORMAL/TITLE CASE, BUKAN UPPERCASE) --}}
                     <td class="px-6 py-4">
-                        {{-- KOLOM KATEGORI SENDIRI --}}
                         @if($kp->kategori)
-                            <span class="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-100 whitespace-nowrap">
                                 {{ $kp->kategori }}
                             </span>
                         @else
-                            <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-400 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-50 text-gray-500 border border-gray-200 whitespace-nowrap">
                                 Belum Diatur
                             </span>
                         @endif
                     </td>
+                    
+                    {{-- DETAIL KELUHAN --}}
                     <td class="px-6 py-4">
-                        {{-- KOLOM DETAIL SENDIRI --}}
-                        <p class="text-sm text-gray-700 font-medium whitespace-pre-wrap">{{ $kp->keluhan }}</p>
+                        <p class="text-sm text-gray-600 font-medium whitespace-pre-wrap leading-relaxed">{{ $kp->keluhan }}</p>
                     </td>
+                    
+                    {{-- PRIORITAS (CHIP UPPERCASE KARENA SINGKAT) --}}
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border whitespace-nowrap
-                            {{ $kp->priority == 'High' ? 'bg-red-50 text-red-600 border-red-100' : ($kp->priority == 'Medium' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-100 text-gray-600 border-gray-200') }}">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border whitespace-nowrap
+                            {{ $kp->priority == 'High' ? 'bg-red-50 text-red-600 border-red-100' : ($kp->priority == 'Medium' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-50 text-gray-600 border-gray-200') }}">
                             {{ $kp->priority }}
                         </span>
                     </td>
+                    
+                    {{-- STATUS (CHIP UPPERCASE KARENA SINGKAT) --}}
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 rounded-md text-[10px] font-bold uppercase border whitespace-nowrap
-                            {{ $kp->status == 'Done' ? 'bg-green-50 text-green-700 border-green-100' : ($kp->status == 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-100 text-gray-500 border-gray-200') }}">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider border whitespace-nowrap
+                            {{ $kp->status == 'Done' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : ($kp->status == 'In Progress' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-50 text-gray-500 border-gray-200') }}">
                             {{ $kp->status }}
                         </span>
                     </td>
+                    
+                    {{-- AKSI --}}
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
                             @if($kp->pelanggan)
@@ -213,7 +321,7 @@
                                     $wa = preg_replace('/^0/', '62', $kp->pelanggan->no_wa);
                                     $pesan = "Halo kak {$kp->pelanggan->nama_pelanggan}, kami dari Tim Teknis CSMNET ingin menindaklanjuti laporan kendala kakak mengenai: \n\n\"{$kp->keluhan}\"\n\n";
                                 @endphp
-                                <a href="https://wa.me/{{ $wa }}?text={{ urlencode($pesan) }}" target="_blank" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all" title="Balas via WhatsApp">
+                                <a href="https://wa.me/{{ $wa }}?text={{ urlencode($pesan) }}" target="_blank" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Balas via WhatsApp">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                                 </a>
                             @endif
@@ -221,6 +329,7 @@
                             <button @click="openEdit = true; editData = {{ json_encode($kp) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Update Progress">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
+                            
                             <button @click="openDelete = true; deleteUrl = '{{ route('komplain.destroy', $kp->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Data">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
@@ -229,13 +338,12 @@
                 </tr>
                 @empty
                 <tr>
-                    {{-- COLSPAN DIUBAH JADI 7 KARENA NAMBAH 1 KOLOM KATEGORI --}}
                     <td colspan="7" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-3">
+                        <div class="flex flex-col items-center justify-center text-gray-400">
+                            <div class="w-12 h-12 bg-gray-50/50 text-gray-300 rounded-full flex items-center justify-center mb-3">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <p class="text-sm text-gray-500 font-bold">Tidak ada komplain dengan status ini.</p>
+                            <span class="text-sm font-bold text-gray-500">Tidak ada komplain dengan status ini.</span>
                         </div>
                     </td>
                 </tr>

@@ -30,24 +30,58 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
+    {{-- FLOATING TOAST ERROR (SMOOTH ANIMATION) --}}
     @if(session()->has('loginError'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-[-20px] scale-95"
+        <div x-data="{
+                show: false,
+                progress: 100,
+                interval: null,
+                startTimer() {
+                    this.interval = setInterval(() => {
+                        this.progress -= 0.5;
+                        if (this.progress <= 0) {
+                            clearInterval(this.interval);
+                            this.show = false;
+                        }
+                    }, 25);
+                },
+                pauseTimer() {
+                    clearInterval(this.interval);
+                },
+                init() {
+                    setTimeout(() => {
+                        this.show = true;
+                        this.startTimer();
+                    }, 150);
+                }
+             }" 
+             x-show="show" 
+             @mouseenter="pauseTimer()"
+             @mouseleave="startTimer()"
+             x-transition:enter="transition-all transform ease-out duration-500"
+             x-transition:enter-start="opacity-0 translate-y-[-20px] scale-90"
              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave="transition-all transform ease-in duration-300"
              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-             x-transition:leave-end="opacity-0 translate-y-[-20px] scale-95"
-             class="fixed top-5 right-5 z-50 max-w-sm w-full bg-red-600 text-white p-4 rounded-xl shadow-2xl flex items-start gap-3">
+             x-transition:leave-end="opacity-0 translate-y-[-20px] scale-90"
+             x-cloak
+             class="fixed top-5 right-5 z-50 max-w-sm w-auto min-w-[280px] bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] shadow-red-500/10 rounded-xl overflow-hidden flex flex-col cursor-default">
             
-            <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <div class="flex-1">
-                <h4 class="font-bold text-sm">Gagal Masuk</h4>
-                <p class="text-xs mt-1 opacity-90 leading-relaxed">{{ session('loginError') }}</p>
+            <div class="px-4 py-3 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex flex-shrink-0 items-center justify-center mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-gray-800 tracking-tight mb-1">Gagal Masuk</p>
+                    <p class="text-[11px] font-medium text-gray-500">{{ session('loginError') }}</p>
+                </div>
+                <button @click="show = false" class="flex-shrink-0 text-gray-400 hover:text-red-500 p-1 rounded-md transition-colors ml-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <button @click="show = false" class="text-white hover:text-red-200 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+            <div class="w-full h-1 bg-gray-50">
+                <div class="h-full bg-red-500 transition-all duration-75 ease-linear" :style="`width: ${progress}%`"></div>
+            </div>
         </div>
     @endif
 

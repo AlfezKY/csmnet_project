@@ -16,7 +16,7 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         // ==========================================
-        // 1. FILTER UNTUK 3 KARTU UTAMA
+        // 1. FILTER UNTUK KARTU UTAMA
         // ==========================================
         $filterType = $request->filter_type ?? 'all'; // all, month, range
 
@@ -37,12 +37,23 @@ class LaporanController extends Controller
         $totalPengeluaran = $qPengeluaran->sum('jumlah');
         $labaBersih = $totalPemasukan - $totalPengeluaran;
 
+        // [BARU] Total Piutang (Absolute, tidak terpengaruh filter tanggal)
+        $totalPiutang = Pelanggan::where('pelanggans.status', 'Active')
+            ->where('pelanggans.status_pembayaran', 'Belum Lunas')
+            ->join('pakets', 'pelanggans.paket_id', '=', 'pakets.id')
+            ->sum('pakets.harga');
+
+        // [BARU] Breakdown Pengeluaran (Terpengaruh filter tanggal)
+        $pengeluaranKategori = (clone $qPengeluaran)
+            ->selectRaw('kategori, SUM(jumlah) as total')
+            ->groupBy('kategori')
+            ->get();
+
         // ==========================================
         // 2. DATA BAR CHART (TREN KEUANGAN 12 BULAN)
         // ==========================================
         $chartYear = $request->chart_year ?? date('Y');
 
-        // Ambil data grouping per bulan biar cuma 1 query
         $pemasukanBulananRaw = Transaksi::selectRaw('MONTH(tanggal) as month, SUM(jumlah) as total')
             ->whereYear('tanggal', $chartYear)
             ->groupBy('month')
@@ -53,7 +64,6 @@ class LaporanController extends Controller
             ->groupBy('month')
             ->pluck('total', 'month')->toArray();
 
-        // Format ke array 12 bulan berurutan (Jan - Des)
         $pemasukanBulanan = [];
         $pengeluaranBulanan = [];
         for ($i = 1; $i <= 12; $i++) {
@@ -64,7 +74,6 @@ class LaporanController extends Controller
         // ==========================================
         // 3. DATA KOMPLAIN (DENGAN FILTER BULAN KHUSUS)
         // ==========================================
-        // Tangkap input bulan dari form khusus komplain, default ke bulan ini
         $komplainMonthFilter = $request->komplain_month ?? date('Y-m');
         $komplainMonth = date('m', strtotime($komplainMonthFilter));
         $komplainYear = date('Y', strtotime($komplainMonthFilter));
@@ -73,7 +82,6 @@ class LaporanController extends Controller
             ->whereYear('tanggal', $komplainYear)
             ->get();
 
-        // Pecah status jadi 3 sesuai mockup
         $komplainStats = [
             'total'       => $komplains->count(),
             'done'        => $komplains->where('status', 'Done')->count(),
@@ -81,7 +89,6 @@ class LaporanController extends Controller
             'not_yet'     => $komplains->where('status', 'Not Yet')->count(),
         ];
 
-        // Format data Kategori agar 0 tetap muncul
         $kategoriDefault = [
             'Internet Mati' => 0,
             'LOS Merah' => 0,
@@ -123,6 +130,8 @@ class LaporanController extends Controller
             'totalPemasukan',
             'totalPengeluaran',
             'labaBersih',
+            'totalPiutang',
+            'pengeluaranKategori',
             'filterType',
             'pemasukanBulanan',
             'pengeluaranBulanan',
