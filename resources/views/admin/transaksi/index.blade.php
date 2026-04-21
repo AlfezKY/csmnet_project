@@ -322,6 +322,8 @@
                       isSubmitting: false,
                       selectedPelanggan: '',
                       jumlahBulan: 1,
+                      biayaLainnya: 0,
+                      diskon: 0,
                       nominalTampil: '',
                       hargaPaket: {
                           @foreach($pelanggans as $plg)
@@ -330,7 +332,17 @@
                       },
                       kalkulasi() {
                           if(this.selectedPelanggan) {
-                              this.nominalTampil = this.hargaPaket[this.selectedPelanggan] * this.jumlahBulan;
+                              // Hitung harga dasar (Harga Paket x Jumlah Bulan)
+                              let hargaDasar = this.hargaPaket[this.selectedPelanggan] * this.jumlahBulan;
+                              
+                              // Hitung nominal diskon dari persen
+                              let nominalDiskon = hargaDasar * (this.diskon / 100);
+                              
+                              // Pastikan biaya lainnya berupa angka
+                              let tambahan = parseInt(this.biayaLainnya) || 0;
+                              
+                              // Total akhir
+                              this.nominalTampil = Math.max(0, hargaDasar - nominalDiskon + tambahan);
                           } else {
                               this.nominalTampil = '';
                           }
@@ -355,7 +367,8 @@
                     </select>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {{-- GRID LAYOUT BARU UNTUK INPUTAN --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Tanggal Bayar</label>
                         <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all cursor-pointer" required>
@@ -372,8 +385,18 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Nominal (Rp)</label>
-                        <input type="number" name="jumlah" x-model="nominalTampil" placeholder="0" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all" required>
+                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Biaya Lainnya / Pasang (Rp)</label>
+                        <input type="number" name="biaya_lainnya" x-model="biayaLainnya" @input="kalkulasi()" placeholder="0" min="0" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Diskon (%)</label>
+                        <input type="number" name="diskon" x-model="diskon" @input="kalkulasi()" placeholder="0" min="0" max="100" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all">
+                    </div>
+                    
+                    {{-- TOTAL NOMINAL DIBUAT READONLY AGAR TIDAK BISA DIKETIK MANUAL --}}
+                    <div class="md:col-span-2 mt-2">
+                        <label class="block text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 ml-1">Total Nominal Otomatis (Rp)</label>
+                        <input type="number" name="jumlah" x-model="nominalTampil" placeholder="Otomatis dihitung..." class="w-full text-base p-3 bg-blue-50/50 border border-blue-100 rounded-xl outline-none font-black text-blue-700 cursor-not-allowed transition-all" readonly required>
                     </div>
                 </div>
 
@@ -381,57 +404,6 @@
                     <button type="button" @click="openAdd = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batal</button>
                     <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
                         <span x-show="!isSubmitting">Simpan Transaksi</span>
-                        <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        </span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- MODAL EDIT (DIPERBARUI ROUNDED-2XL) --}}
-    <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl p-8" @click.away="openEdit = false">
-            <h4 class="text-xl font-bold text-gray-900 mb-1">Edit Riwayat Pembayaran</h4>
-            <p class="text-sm text-gray-500 mb-6">Perbarui tanggal atau jumlah nominal tagihan</p>
-
-            <form :action="'/transaksi/' + editData.id" method="POST" class="space-y-4" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
-                @csrf @method('PUT')
-                <div>
-                    <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Pilih Pelanggan</label>
-                    <select name="pelanggan_id" 
-                            x-model="editData.pelanggan_id" 
-                            x-init="$watch('openEdit', val => { 
-                                if(val) { 
-                                    if(!$el.tomselect) { new TomSelect($el, {create: false}); }
-                                    /* Paksa update UI Tom Select saat data edit di-klik */
-                                    setTimeout(() => $el.tomselect.setValue(editData.pelanggan_id), 50);
-                                } 
-                            })"
-                            class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800 cursor-pointer transition-all" required>
-                        <option value="">-- Cari Pelanggan --</option>
-                        @foreach($pelanggans as $plg)
-                            <option value="{{ $plg->id }}">{{ $plg->nama_pelanggan }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Tanggal Bayar</label>
-                        <input type="date" name="tanggal" x-model="editData.tanggal" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all" required>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Jumlah Nominal (Rp)</label>
-                        <input type="number" name="jumlah" x-model="editData.jumlah" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all" required>
-                    </div>
-                </div>
-
-                <div class="flex gap-3 pt-6 mt-6 border-t border-slate-100">
-                    <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batal</button>
-                    <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
-                        <span x-show="!isSubmitting">Update Perubahan</span>
                         <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
                             <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         </span>

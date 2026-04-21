@@ -30,7 +30,8 @@ class ApprovalController extends Controller
         }
 
         // Selalu urutkan dari yang terbaru
-        $query->latest();
+        $query->orderByRaw('DATE(created_at) = CURDATE() DESC')
+              ->orderBy('created_at', 'asc');
 
         // 3. FITUR EXPORT EXCEL (.xls Native)
         if ($request->has('export')) {

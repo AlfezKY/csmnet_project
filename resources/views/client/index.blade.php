@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CSM.TV - Internet Service Provider Terpercaya</title>
+    <title>CSM.Net - Internet Service Provider Terpercaya</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,6 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        // Warna brand utama (kalem/profesional untuk komponen)
                         brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#5A4FF3', 700: '#4338ca', 800: '#3730a3', 900: '#312e81' }
                     },
                     boxShadow: {
@@ -55,7 +54,6 @@
         .faq-content[aria-expanded="true"] { grid-template-rows: 1fr; }
         [x-cloak] { display: none !important; }
         
-        /* Animasi Scroll Reveal */
         .reveal-on-scroll {
             opacity: 0;
             transform: translateY(30px);
@@ -66,7 +64,6 @@
             transform: translateY(0);
         }
         
-        /* Delay untuk elemen berurutan */
         .delay-100 { transition-delay: 100ms; }
         .delay-200 { transition-delay: 200ms; }
         .delay-300 { transition-delay: 300ms; }
@@ -83,7 +80,7 @@
           }
       }">
 
-    {{-- Background Dinamis (Blobs) --}}
+    {{-- Background Dinamis --}}
     <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#F8FAFC]">
         <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-brand-200/50 mix-blend-multiply filter blur-[100px] animate-blob"></div>
         <div class="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-200/50 mix-blend-multiply filter blur-[100px] animate-blob" style="animation-delay: 2s;"></div>
@@ -117,11 +114,11 @@
         </button>
     </div>
 
-    {{-- Navbar Clean Solid --}}
+    {{-- Navbar --}}
     <nav class="fixed w-full top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="{{ url('/') }}" class="text-2xl font-black tracking-tighter text-slate-900 transition-transform hover:scale-105">
-                CSM<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">.TV</span>
+                CSM<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">.Net</span>
             </a>
 
             <div class="hidden md:flex items-center gap-10">
@@ -181,64 +178,67 @@
     <main class="pt-24 lg:pt-32">
         
         {{-- Section Home --}}
-        <section id="home" class="py-10 lg:py-16 overflow-hidden relative">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+<section id="home" class="py-10 lg:py-20 overflow-hidden relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+            
+            <div class="order-2 lg:order-1 lg:col-span-5 relative z-10 reveal-on-scroll">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-brand-600 text-[10px] font-bold uppercase tracking-widest mb-6 shadow-sm hover:shadow-md transition-shadow">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse"></span>
+                    Promo Spesial
+                </div>
+                
+                <h1 class="text-4xl lg:text-6xl font-black text-slate-900 leading-[1.1] mb-6 tracking-tight">
+                    Paket Internet <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#6b46ff] to-[#b05aff]">Premium & Cepat.</span>
+                </h1>
+                <p class="text-lg text-slate-500 mb-10 leading-relaxed font-medium">
+                    Nikmati streaming tanpa buffering, gaming tanpa lag, dan download super cepat dengan infrastruktur fiber optic terbaru kami.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="#paket" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-indigo-600 rounded-full hover:shadow-glow hover:-translate-y-1 transition-all duration-300">
+                        Mulai Berlangganan
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                    <a href="https://wa.me/6281234567890" target="_blank" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:border-brand-300 hover:-translate-y-1 transition-all duration-300 shadow-sm">
+                        WhatsApp Kami
+                    </a>
+                </div>
+                
+                <div class="mt-8 flex items-center gap-2 text-sm text-slate-500 font-medium bg-white inline-flex px-4 py-2 rounded-full border border-slate-200 shadow-[0_4px_15px_rgba(0,0,0,0.03)] cursor-default">
+                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <span>Instalasi Cepat 1-3 Hari Kerja</span>
+                </div>
+            </div>
+
+            <div class="relative order-1 lg:order-2 lg:col-span-7 reveal-on-scroll delay-200">
+                <div class="relative group">
+                    <img src="{{ asset('assets/dummy-card.jpg') }}" alt="Internet Cepat" 
+                         class="relative w-full aspect-[4/3] lg:aspect-video rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] object-cover animate-float border-[6px] border-white" 
+                         onerror="this.src='https://placehold.co/1200x800?text=CSM+Internet'">
                     
-                    <div class="order-2 lg:order-1 relative z-10 reveal-on-scroll">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-brand-600 text-[10px] font-bold uppercase tracking-widest mb-6 shadow-sm hover:shadow-md transition-shadow">
-                            <span class="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse"></span>
-                            Promo Spesial
+                    <div class="absolute -bottom-6 -left-6 md:-bottom-10 md:-left-10 bg-white px-8 py-6 rounded-3xl shadow-card border border-slate-100 flex items-center gap-5 z-20 group-hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
-                        
-                        <h1 class="text-4xl lg:text-[3.5rem] font-black text-slate-900 leading-[1.1] mb-6 tracking-tight">
-                            Paket Internet <br>
-                            {{-- INI GRADIENT KHUSUS TEXT HERO --}}
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#6b46ff] to-[#b05aff]">Premium & Cepat.</span>
-                        </h1>
-                        <p class="text-lg text-slate-500 mb-10 leading-relaxed max-w-lg font-medium">
-                            Nikmati streaming tanpa buffering, gaming tanpa lag, dan download super cepat dengan infrastruktur fiber optic terbaru kami.
-                        </p>
-
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="#paket" class="inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold text-white bg-gradient-to-r from-brand-600 to-indigo-600 rounded-full hover:shadow-glow hover:-translate-y-1 transition-all duration-300">
-                                Mulai Berlangganan
-                                <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </a>
-                            <a href="https://wa.me/6281234567890" target="_blank" class="inline-flex items-center justify-center px-8 py-3.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:border-brand-300 hover:-translate-y-1 transition-all duration-300 shadow-sm">
-                                <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                                WhatsApp Kami
-                            </a>
-                        </div>
-                        
-                        <div class="mt-8 flex items-center gap-2 text-sm text-slate-500 font-medium bg-white inline-flex px-4 py-2 rounded-full border border-slate-200 shadow-[0_4px_15px_rgba(0,0,0,0.03)] hover:border-emerald-200 transition-colors cursor-default">
-                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            <span>Instalasi Cepat 1-3 Hari Kerja</span>
-                        </div>
-                    </div>
-
-                    <div class="relative order-1 lg:order-2 reveal-on-scroll delay-200">
-                        <img src="{{ asset('assets/dummy-card.jpg') }}" alt="Internet Cepat" class="relative w-full rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.2)] object-cover animate-float border-4 border-white" onerror="this.src='https://placehold.co/800x600?text=CSM+Internet'">
-                        
-                        <div class="absolute -bottom-8 -left-8 bg-white px-6 py-5 rounded-2xl shadow-card border border-slate-100 flex items-center gap-4 z-20 group hover:scale-105 hover:shadow-glow transition-all duration-300">
-                            <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:rotate-12 transition-transform">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            </div>
-                            <div>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Speed Test</p>
-                                <p class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">100 Mbps</p>
-                            </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Speed Test</p>
+                            <p class="text-3xl font-black text-slate-900">100 Mbps</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+
+        </div>
+    </div>
+</section>
 
         {{-- Section Features --}}
         <section class="py-24 relative z-10 mt-12">
             <div class="max-w-7xl mx-auto px-6 relative">
                 <div class="text-center mb-16 reveal-on-scroll">
-                    <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">Kenapa Harus CSM.TV?</h2>
+                    <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mb-4 tracking-tight">Kenapa Harus CSM.Net?</h2>
                     <p class="text-slate-500 max-w-2xl mx-auto font-medium">Kami menggabungkan teknologi terbaik dengan pelayanan sepenuh hati untuk pengalaman internet terbaik Anda.</p>
                 </div>
 
@@ -266,7 +266,7 @@
             <div class="max-w-7xl mx-auto px-6 relative z-10">
                 <div class="text-center mb-16 reveal-on-scroll">
                     <span class="inline-block py-1.5 px-4 rounded-full bg-brand-50 text-brand-600 font-bold tracking-widest uppercase text-[10px] mb-4 border border-brand-100">Pilihan Paket</span>
-                    <h2 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Paket Internet Rumah</h2>
+                    <h2 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Paket Internet Tersedia</h2>
                 </div>
 
                 @if($pakets->count() > 0)
@@ -298,6 +298,7 @@
                                             <span class="text-5xl font-black text-white">{{ $hargaRibuan }}rb</span>
                                             <span class="text-slate-400 font-medium">/bulan</span>
                                         </div>
+
                                         <div class="text-3xl font-black text-brand-400 mb-8 flex items-center gap-2">
                                             {{ filter_var($paket->kecepatan, FILTER_SANITIZE_NUMBER_INT) }} <span class="text-base font-bold text-slate-300">Mbps</span>
                                         </div>
@@ -321,7 +322,7 @@
                                             <button @click="triggerAlert()" type="button" class="relative z-10 w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold hover:shadow-glow hover:scale-[1.02] transition-all duration-300 text-center mt-auto">Pilih Paket Ini</button>
                                         @else
                                             @php
-                                                $pesanWa = "Halo CSM.TV, saya ingin berlangganan layanan internet.\n\n"
+                                                $pesanWa = "Halo CSM.Net, saya ingin berlangganan layanan internet.\n\n"
                                                          . "Nama: " . $pelanggan->nama_pelanggan . "\n"
                                                          . "Alamat: " . $pelanggan->alamat . "\n"
                                                          . "Paket Pilihan: " . $paket->nama_paket;
@@ -343,6 +344,7 @@
                                         <span class="text-4xl font-black text-slate-900">{{ $hargaRibuan }}rb</span>
                                         <span class="text-slate-500 font-medium">/bulan</span>
                                     </div>
+
                                     <div class="text-2xl font-black text-slate-800 mb-8 flex items-center gap-2 group-hover:text-brand-600 transition-colors">
                                         {{ filter_var($paket->kecepatan, FILTER_SANITIZE_NUMBER_INT) }} <span class="text-base font-bold text-slate-500">Mbps</span>
                                     </div>
@@ -365,7 +367,7 @@
                                             <button @click="triggerAlert()" type="button" class="w-full py-3.5 rounded-xl bg-slate-50 text-slate-800 font-bold hover:bg-brand-50 hover:text-brand-600 hover:scale-[1.02] hover:border-brand-200 transition-all duration-300 text-center mt-auto border border-slate-200">Pilih Paket</button>
                                         @else
                                             @php
-                                                $pesanWa = "Halo CSM.TV, saya ingin berlangganan layanan internet.\n\n"
+                                                $pesanWa = "Halo CSM.Net, saya ingin berlangganan layanan internet.\n\n"
                                                          . "Nama: " . $pelanggan->nama_pelanggan . "\n"
                                                          . "Alamat: " . $pelanggan->alamat . "\n"
                                                          . "Paket Pilihan: " . $paket->nama_paket;
@@ -389,6 +391,32 @@
                         <p class="text-slate-500 font-medium">Paket layanan sedang diperbarui. Silakan cek kembali nanti.</p>
                     </div>
                 @endif
+
+                {{-- INFO BIAYA PEMASANGAN & KABEL (Soft Marketing) --}}
+                @if($pakets->count() > 0)
+                <div class="mt-12 max-w-3xl mx-auto reveal-on-scroll delay-200">
+                    <div class="bg-gradient-to-r from-brand-50 to-indigo-50 border border-brand-100 rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-brand-200 rounded-full mix-blend-multiply filter blur-xl opacity-50"></div>
+                        
+                        <div class="relative z-10 flex flex-col sm:flex-row gap-5 items-start">
+                            <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center text-brand-600 flex-shrink-0 shadow-sm border border-brand-100">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900 mb-2">Satu Kali Investasi untuk Koneksi Optimal</h4>
+                                <p class="text-sm text-slate-600 leading-relaxed mb-3">
+                                    Untuk memastikan Anda mendapatkan kualitas sinyal fiber optic terbaik dan stabil tanpa gangguan, terdapat biaya instalasi awal sebesar <strong class="text-slate-900 font-bold border-b-2 border-brand-300">Rp 250.000</strong> (hanya dibayar satu kali saat pendaftaran).
+                                </p>
+                                <p class="text-xs text-slate-500 leading-relaxed bg-white/60 p-3 rounded-lg border border-brand-100/50">
+                                    <span class="font-semibold text-slate-700">Fleksibilitas Lokasi:</span> Karena struktur perumahan dan jarak tiang setiap area berbeda, teknisi kami akan mencarikan jalur kabel paling aman & efisien. Jika sewaktu survei diperlukan penarikan kabel ekstra, estimasi biayanya akan kami sampaikan secara transparan <span class="italic font-medium">sebelum</span> proses pemasangan dilanjutkan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                {{-- END INFO BIAYA --}}
+
             </div>
         </section>
 
@@ -400,7 +428,7 @@
                     
                     <div class="flex-1 relative z-10">
                         <h3 class="text-2xl font-black text-slate-900 mb-4">Performa Jaringan & Tim</h3>
-                        <p class="text-slate-500 mb-8 font-medium leading-relaxed">Kami bangga dengan dedikasi tim kami. Skor kepuasan pelanggan dan stabilitas jaringan kami adalah bukti komitmen CSM.TV.</p>
+                        <p class="text-slate-500 mb-8 font-medium leading-relaxed">Kami bangga dengan dedikasi tim kami. Skor kepuasan pelanggan dan stabilitas jaringan kami adalah bukti komitmen CSM.Net.</p>
                         
                         <div class="mb-3 flex justify-between text-sm font-bold">
                             <span class="text-slate-700">Network Uptime</span>
@@ -440,7 +468,7 @@
                     @foreach([
                         ['q' => 'Bagaimana cara mendaftar?', 'a' => 'Cukup klik tombol <a href="'.url('/register').'" class="text-brand-600 font-bold hover:underline">Daftar</a> di menu atas, atau hubungi kami via WhatsApp.'],
                         ['q' => 'Berapa lama proses pemasangan?', 'a' => 'Estimasi pemasangan adalah <strong class="text-slate-800">1-3 hari kerja</strong> setelah pembayaran administrasi dikonfirmasi.'],
-                        ['q' => 'Apakah ada biaya tersembunyi?', 'a' => 'Tidak ada. Harga yang tertera adalah harga bulanan flat (belum termasuk PPN 11%).'],
+                        ['q' => 'Apakah ada biaya tersembunyi?', 'a' => 'Tidak ada biaya bulanan yang disembunyikan. Harga paket adalah flat (belum termasuk PPN 11%). Untuk awal, hanya ada biaya instalasi Rp 250.000 dan penyesuaian penarikan kabel (jika ada, akan diinfokan transparan di awal).'],
                         ['q' => 'Bagaimana jika internet gangguan?', 'a' => 'Tim support kami siaga 24/7. Anda bisa melaporkan gangguan dengan menekan tombol <strong class="text-brand-600">Ajukan Komplain</strong> (khusus pelanggan) di pojok kanan bawah layar ini.']
                     ] as $faq)
                     <div class="bg-white border border-slate-200 rounded-2xl hover:border-brand-300 hover:shadow-md transition-all duration-300 group/faq">
@@ -464,9 +492,8 @@
         </section>
     </main>
 
-    {{-- FOOTER UPDATED: Base #574def dengan gradien halus --}}
+    {{-- Footer --}}
     <footer class="bg-gradient-to-br from-[#574def] to-[#4e44d6] border-t border-white/10 pt-16 pb-8 relative z-10 overflow-hidden">
-        {{-- Efek cahaya/glow transparan di latar belakang footer --}}
         <div class="absolute top-0 right-0 w-full h-full pointer-events-none opacity-40">
             <div class="absolute -top-32 -right-32 w-96 h-96 bg-white/20 rounded-full blur-[100px]"></div>
             <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-black/10 rounded-full blur-[100px]"></div>
@@ -475,9 +502,9 @@
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
                 <div class="col-span-2 lg:col-span-2">
-                    <a href="{{ url('/') }}" class="text-2xl font-black text-white tracking-tighter">CSM<span class="text-white/80">.TV</span></a>
+                    <a href="{{ url('/') }}" class="text-2xl font-black text-white tracking-tighter">CSM<span class="text-white/80">.Net</span></a>
                     <p class="mt-4 text-white/80 text-sm font-medium leading-relaxed max-w-xs">
-                        Penyedia layanan internet fiber optic terpercaya. Kami menghubungkan Anda dengan dunia melalui infrastruktur digital terbaik.
+                        Ps. Melayu, Jl. Ahmad Marzuki No.100 Kec. Sambas, Kabupaten Sambas, Kalimantan Barat 79462
                     </p>
                 </div>
                 
@@ -510,7 +537,7 @@
             </div>
             
             <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-sm text-white/80 font-medium">&copy; {{ date('Y') }} CSM.TV. All rights reserved.</p>
+                <p class="text-sm text-white/80 font-medium">&copy; {{ date('Y') }} CSM.Net. All rights reserved.</p>
                 <div class="flex gap-4">
                     <a href="#" class="text-white/80 hover:text-white hover:-translate-y-1 transition-all">
                         <span class="sr-only">Instagram</span>
@@ -522,7 +549,6 @@
     </footer>
 
     <script>
-        // Toggle FAQ
         function toggleFaq(button) {
             const content = button.nextElementSibling;
             const icon = button.querySelector('.faq-icon');
@@ -537,7 +563,6 @@
             }
         }
 
-        // Scroll Reveal & Progress Bar Animation
         document.addEventListener('DOMContentLoaded', () => {
             const observerOptions = {
                 root: null,
@@ -548,10 +573,8 @@
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        // Tambah kelas visible untuk reveal biasa
                         entry.target.classList.add('is-visible');
                         
-                        // Trigger animasi progress bar jika ada
                         if(entry.target.querySelector('#bar-uptime')) {
                             setTimeout(() => {
                                 document.getElementById('bar-uptime').style.width = '99.9%';
@@ -561,7 +584,7 @@
                             }, 600);
                         }
                         
-                        observer.unobserve(entry.target); // Hanya animasi sekali
+                        observer.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
@@ -570,7 +593,6 @@
                 observer.observe(element);
             });
             
-            // Animasi load awal untuk hero text
             setTimeout(() => {
                 document.querySelectorAll('.reveal-on-scroll')[0]?.classList.add('is-visible');
             }, 100);
