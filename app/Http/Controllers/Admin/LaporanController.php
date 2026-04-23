@@ -37,17 +37,11 @@ class LaporanController extends Controller
         $totalPengeluaran = $qPengeluaran->sum('jumlah');
         $labaBersih = $totalPemasukan - $totalPengeluaran;
 
-        // [BARU] Total Piutang (Absolute, tidak terpengaruh filter tanggal)
+        // Total Piutang (Absolute, tidak terpengaruh filter tanggal)
         $totalPiutang = Pelanggan::where('pelanggans.status', 'Active')
             ->where('pelanggans.status_pembayaran', 'Belum Lunas')
             ->join('pakets', 'pelanggans.paket_id', '=', 'pakets.id')
             ->sum('pakets.harga');
-
-        // [BARU] Breakdown Pengeluaran (Terpengaruh filter tanggal)
-        $pengeluaranKategori = (clone $qPengeluaran)
-            ->selectRaw('kategori, SUM(jumlah) as total')
-            ->groupBy('kategori')
-            ->get();
 
         // ==========================================
         // 2. DATA BAR CHART (TREN KEUANGAN 12 BULAN)
@@ -113,32 +107,57 @@ class LaporanController extends Controller
         }
 
         // ==========================================
-        // 4. DATA PIE CHART (DISTRIBUSI PAKET)
+        // 4. DATA OMZET PER PAKET
         // ==========================================
-        $distribusiPaket = Pelanggan::with('paket')
-            ->selectRaw('paket_id, COUNT(*) as total')
-            ->groupBy('paket_id')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'nama_paket' => $item->paket ? $item->paket->nama_paket : 'Tanpa Paket',
-                    'total' => $item->total
-                ];
-            });
+        $omzetFilter = $request->omzet_month ?? date('Y-m');
+        $omzetYear = Carbon::parse($omzetFilter)->year;
+        $omzetMonth = Carbon::parse($omzetFilter)->month;
+
+        $omzetPerPaket = Transaksi::join('pelanggans', 'transaksis.pelanggan_id', '=', 'pelanggans.id')
+            ->leftJoin('pakets', 'pelanggans.paket_id', '=', 'pakets.id')
+            ->whereYear('transaksis.tanggal', $omzetYear)
+            ->whereMonth('transaksis.tanggal', $omzetMonth)
+            ->select(DB::raw('COALESCE(pakets.nama_paket, "Tanpa Paket") as nama_paket'), DB::raw('SUM(transaksis.jumlah) as total_omzet'))
+            ->groupBy('nama_paket')
+            ->orderByDesc('total_omzet')
+            ->get();
+
+        $omzetPaketLabels = $omzetPerPaket->pluck('nama_paket')->toArray();
+        $omzetPaketData = $omzetPerPaket->pluck('total_omzet')->toArray();
+
+        // ==========================================
+        // 5. DATA BREAKDOWN PENGELUARAN (DENGAN FILTER BULAN KHUSUS)
+        // ==========================================
+        $pengeluaranFilter = $request->pengeluaran_month ?? date('Y-m');
+        $pengeluaranYear = Carbon::parse($pengeluaranFilter)->year;
+        $pengeluaranMonth = Carbon::parse($pengeluaranFilter)->month;
+
+        $pengeluaranKategori = Pengeluaran::whereYear('tanggal', $pengeluaranYear)
+            ->whereMonth('tanggal', $pengeluaranMonth)
+            ->selectRaw('kategori, SUM(jumlah) as total')
+            ->groupBy('kategori')
+            ->get();
+
+        // Menyimpan total spesifik untuk bulan ini guna validasi render grafik di view
+        $totalPengeluaranChart = $pengeluaranKategori->sum('total');
 
         return view('owner.laporan.index', compact(
             'totalPemasukan',
             'totalPengeluaran',
             'labaBersih',
             'totalPiutang',
-            'pengeluaranKategori',
             'filterType',
             'pemasukanBulanan',
             'pengeluaranBulanan',
             'chartYear',
             'komplainStats',
             'komplainKategori',
-            'distribusiPaket'
+            'omzetFilter',
+            'omzetPaketLabels',
+            'omzetPaketData',
+            'pengeluaranFilter',
+            'pengeluaranKategori',
+            'totalPengeluaranChart'
         ));
     }
 }

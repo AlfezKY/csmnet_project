@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CSM.TV</title>
+    <title>Login - CSM.Net</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,7 +87,7 @@
 
     <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md border-t-4 border-indigo-600">
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Masuk CSM<span class="text-indigo-600">.TV</span></h2>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Masuk CSM<span class="text-indigo-600">.Net</span></h2>
             <p class="text-sm text-slate-500 mt-2">Silakan login untuk mengakses Area Client Portal.</p>
         </div>
 

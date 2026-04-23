@@ -2,7 +2,7 @@
 @section('title', 'Laporan & Dashboard')
 
 @section('content')
-{{-- HEADER & FILTER KEUANGAN --}}
+{{-- HEADER & FILTER KEUANGAN UTAMA --}}
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8" x-data="{ filter: '{{ request('filter_type', 'all') }}' }">
     <div>
         <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard Laporan</h3>
@@ -29,6 +29,9 @@
         </div>
 
         <input type="hidden" name="chart_year" value="{{ $chartYear }}">
+        <input type="hidden" name="komplain_month" value="{{ request('komplain_month') }}">
+        <input type="hidden" name="omzet_month" value="{{ request('omzet_month') }}">
+        <input type="hidden" name="pengeluaran_month" value="{{ request('pengeluaran_month') }}">
 
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl transition-all shadow-sm ml-1" title="Terapkan Filter">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -115,6 +118,9 @@
                     <input type="hidden" name="month" value="{{ request('month') }}">
                     <input type="hidden" name="start_date" value="{{ request('start_date') }}">
                     <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                    <input type="hidden" name="komplain_month" value="{{ request('komplain_month') }}">
+                    <input type="hidden" name="omzet_month" value="{{ request('omzet_month') }}">
+                    <input type="hidden" name="pengeluaran_month" value="{{ request('pengeluaran_month') }}">
                     
                     <select name="chart_year" onchange="this.form.submit()" class="text-sm p-2 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 shadow-sm transition-all hover:bg-white">
                         @for($y = date('Y'); $y >= 2024; $y--)
@@ -143,6 +149,8 @@
                     <input type="hidden" name="start_date" value="{{ request('start_date') }}">
                     <input type="hidden" name="end_date" value="{{ request('end_date') }}">
                     <input type="hidden" name="chart_year" value="{{ request('chart_year', date('Y')) }}">
+                    <input type="hidden" name="omzet_month" value="{{ request('omzet_month') }}">
+                    <input type="hidden" name="pengeluaran_month" value="{{ request('pengeluaran_month') }}">
                     
                     <input type="month" name="komplain_month" value="{{ request('komplain_month', date('Y-m')) }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-orange-500 text-gray-600 shadow-sm transition-all hover:bg-white">
                 </form>
@@ -185,50 +193,75 @@
     </div>
 </div>
 
-{{-- BAWAH: PIE CHARTS (DISTRIBUSI PAKET & PENGELUARAN) --}}
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-0">
+{{-- BAWAH: OMZET PER PAKET & BREAKDOWN PENGELUARAN --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-0">
     
-    {{-- KIRI: DISTRIBUSI PAKET --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
-        <div class="absolute -left-10 -top-10 w-48 h-48 bg-gradient-to-br from-fuchsia-100/40 to-pink-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
-        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-amber-100/30 to-yellow-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+    {{-- KIRI: PENDAPATAN BERDASARKAN PAKET --}}
+    <div class="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
+        <div class="absolute -left-10 -top-10 w-48 h-48 bg-gradient-to-br from-emerald-100/40 to-teal-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-blue-100/30 to-indigo-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         
-        <div class="relative z-10">
-            <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <svg class="w-5 h-5 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-                Distribusi Pelanggan Berdasarkan Paket
-            </h4>
+        <div class="relative z-10 flex flex-col h-full">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Pendapatan Berdasarkan Paket
+                </h4>
+                
+                <form action="{{ route('laporan.index') }}" method="GET">
+                    <input type="hidden" name="filter_type" value="{{ request('filter_type', 'all') }}">
+                    <input type="hidden" name="month" value="{{ request('month') }}">
+                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                    <input type="hidden" name="chart_year" value="{{ request('chart_year', date('Y')) }}">
+                    <input type="hidden" name="komplain_month" value="{{ request('komplain_month') }}">
+                    <input type="hidden" name="pengeluaran_month" value="{{ request('pengeluaran_month') }}">
+                    
+                    <input type="month" name="omzet_month" value="{{ $omzetFilter }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-emerald-500 text-gray-600 shadow-sm transition-all hover:bg-white">
+                </form>
+            </div>
             
-            {{-- CEK APAKAH ADA PELANGGAN --}}
-            @if(count($distribusiPaket) > 0)
-                <div id="packageChart" class="w-full h-72 flex justify-center"></div>
-            @else
-                <div class="w-full h-72 flex flex-col items-center justify-center text-center">
-                    <div class="w-16 h-16 bg-slate-100/50 rounded-full flex items-center justify-center mb-3 border border-slate-200/50">
-                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4M12 20V4" /></svg>
-                    </div>
-                    <p class="text-sm font-bold text-slate-500">Belum ada pelanggan</p>
+            @if(empty($omzetPaketData))
+                <div class="flex-1 flex flex-col items-center justify-center min-h-[250px] border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
+                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 12H4m16 0a8 8 0 11-16 0 8 8 0 0116 0z"></path></svg>
+                    <p class="text-sm font-bold text-gray-400">Belum ada data pemasukan di bulan ini.</p>
                 </div>
+            @else
+                <div id="chartOmzetPaket" class="w-full flex-1 min-h-[280px]"></div>
             @endif
         </div>
     </div>
 
     {{-- KANAN: BREAKDOWN PENGELUARAN --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
+    <div class="lg:col-span-1 relative overflow-hidden bg-gradient-to-br from-white to-slate-50/80 p-6 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group">
         <div class="absolute -right-10 -top-10 w-48 h-48 bg-gradient-to-br from-rose-100/40 to-red-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-gradient-to-br from-indigo-100/30 to-blue-100/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         
-        <div class="relative z-10">
-            <h4 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3" /></svg>
-                Breakdown Pengeluaran
-            </h4>
+        <div class="relative z-10 flex flex-col h-full">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3" /></svg>
+                    Breakdown Pengeluaran
+                </h4>
+                
+                <form action="{{ route('laporan.index') }}" method="GET">
+                    <input type="hidden" name="filter_type" value="{{ request('filter_type', 'all') }}">
+                    <input type="hidden" name="month" value="{{ request('month') }}">
+                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                    <input type="hidden" name="chart_year" value="{{ request('chart_year', date('Y')) }}">
+                    <input type="hidden" name="komplain_month" value="{{ request('komplain_month') }}">
+                    <input type="hidden" name="omzet_month" value="{{ request('omzet_month') }}">
+                    
+                    <input type="month" name="pengeluaran_month" value="{{ $pengeluaranFilter }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-rose-500 text-gray-600 shadow-sm transition-all hover:bg-white">
+                </form>
+            </div>
             
-            {{-- [KUNCI FIX ADA DI SINI] CEK APAKAH TOTAL PENGELUARAN > 0 --}}
-            @if($totalPengeluaran > 0)
-                <div id="expenseChart" class="w-full h-72 flex justify-center"></div>
+            {{-- Menggunakan totalPengeluaranChart untuk mengecek ada/tidaknya data di chart spesifik ini --}}
+            @if($totalPengeluaranChart > 0)
+                <div id="expenseChart" class="w-full flex-1 flex justify-center min-h-[280px]"></div>
             @else
-                <div class="w-full h-72 flex flex-col items-center justify-center text-center">
+                <div class="w-full flex-1 flex flex-col items-center justify-center text-center min-h-[280px]">
                     <div class="w-16 h-16 bg-slate-100/50 rounded-full flex items-center justify-center mb-3 border border-slate-200/50">
                         <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
                     </div>
@@ -285,41 +318,44 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     new ApexCharts(document.querySelector("#complaintChart"), complaintOptions).render();
 
-    // 3. CHART DISTRIBUSI PAKET
-    const rawPaketData = @json($distribusiPaket);
-    const paketData = Array.isArray(rawPaketData) ? rawPaketData : Object.values(rawPaketData);
-    
-    if (document.querySelector("#packageChart") && paketData.length > 0) {
-        const packageOptions = {
-            series: paketData.map(item => Number(item.total)),
-            chart: { type: 'donut', height: 320, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
-            labels: paketData.map(item => item.nama_paket),
-            colors: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6'],
-            dataLabels: { enabled: false },
-            stroke: { show: true, colors: ['#ffffff'], width: 2 },
-            plotOptions: { pie: { donut: { size: '70%', labels: { show: true, name: { fontSize: '12px', fontFamily: fontFamily, color: '#6b7280' }, value: { fontSize: '24px', fontFamily: fontFamily, fontWeight: 'bold', color: '#111827' }, total: { show: true, showAlways: true, label: 'Total', fontSize: '14px', fontFamily: fontFamily, fontWeight: 600, color: '#6b7280' } } } } },
-            tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return val + " Pelanggan" } } },
-            legend: { position: 'right', fontFamily: fontFamily, fontWeight: 600, markers: { radius: 12 } }
-        };
-        new ApexCharts(document.querySelector("#packageChart"), packageOptions).render();
-    }
+    // 3. CHART PENDAPATAN PER PAKET
+    @if(!empty($omzetPaketData))
+    const optionsOmzet = {
+        series: [{ name: 'Total Omzet', data: @json($omzetPaketData) }],
+        chart: { type: 'bar', height: '100%', minHeight: 280, toolbar: { show: false }, fontFamily: fontFamily },
+        colors: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], 
+        plotOptions: { 
+            bar: { horizontal: true, distributed: true, borderRadius: 8, barHeight: '55%' } 
+        },
+        dataLabels: { 
+            enabled: true, 
+            formatter: function(val) { return formatRupiah(val); },
+            style: { fontSize: '12px', fontWeight: 800, colors: ['#fff'] }, 
+            dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.2 } 
+        },
+        xaxis: { categories: @json($omzetPaketLabels), labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { style: { colors: '#475569', fontWeight: 700, fontSize: '13px' } } },
+        grid: { show: false }, 
+        tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return formatRupiah(val); } } }, 
+        legend: { show: false }
+    };
+    new ApexCharts(document.querySelector("#chartOmzetPaket"), optionsOmzet).render();
+    @endif
 
     // 4. CHART BREAKDOWN PENGELUARAN 
     const rawExpenseData = @json($pengeluaranKategori);
-    console.log("Cek Data Pengeluaran:", rawExpenseData);
     const expenseData = Array.isArray(rawExpenseData) ? rawExpenseData : Object.values(rawExpenseData);
 
-    // Di sini kita pastikan div-nya memang ke-render di HTML sebelum maksa eksekusi ApexCharts
     if (document.querySelector("#expenseChart") && expenseData.length > 0) {
         const expenseOptions = {
             series: expenseData.map(item => Number(item.total)),
-            chart: { type: 'donut', height: 320, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
+            chart: { type: 'donut', height: '100%', minHeight: 280, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
             labels: expenseData.map(item => item.kategori || 'Lain-lain'),
             colors: [
-    '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', 
-    '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', 
-    '#f43f5e', '#64748b', '#78716c', '#a3e635', '#2dd4bf'
-],
+                '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', 
+                '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', 
+                '#f43f5e', '#64748b', '#78716c', '#a3e635', '#2dd4bf'
+            ],
             dataLabels: { enabled: false },
             stroke: { show: true, colors: ['#ffffff'], width: 2 },
             plotOptions: {
@@ -347,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return formatRupiah(val) } } },
-            legend: { position: 'right', fontFamily: fontFamily, fontWeight: 600, markers: { radius: 12 } }
+            legend: { position: 'bottom', fontFamily: fontFamily, fontWeight: 600, markers: { radius: 12 } }
         };
         new ApexCharts(document.querySelector("#expenseChart"), expenseOptions).render();
     }
