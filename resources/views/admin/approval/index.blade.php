@@ -306,6 +306,7 @@
         </table>
     </div>
 
+    {{-- MODAL KONFIRMASI SATUAN --}}
     <div x-show="openConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openConfirm = false">
             <div class="w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center"
@@ -315,11 +316,22 @@
             </div>
 
             <h4 class="text-xl font-bold text-gray-900 mb-2">Konfirmasi Tindakan</h4>
-            <p class="text-sm text-gray-500 leading-relaxed mb-8 px-4" x-text="confirmText"></p>
+            <p class="text-sm text-gray-500 leading-relaxed mb-6 px-4" x-text="confirmText"></p>
             
             <form :action="confirmUrl" method="POST" @submit="isSubmitting = true">
                 @csrf @method('PUT')
                 <input type="hidden" name="action" :value="confirmAction">
+
+                {{-- TAMBAHAN: FORM ALASAN PENOLAKAN SATUAN --}}
+                <template x-if="confirmAction === 'reject'">
+                    <div class="mb-6 text-left">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                        <textarea name="reason" rows="3" required
+                                  class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 outline-none transition-all" 
+                                  placeholder="Contoh: Lokasi saat ini belum tercover jaringan kami..."></textarea>
+                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan langsung ke WhatsApp pelanggan.</p>
+                    </div>
+                </template>
                 
                 <div class="flex gap-3">
                     <button type="button" @click="openConfirm = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batalkan</button>
@@ -336,6 +348,7 @@
         </div>
     </div>
 
+    {{-- MODAL KONFIRMASI MASSAL --}}
     <div x-show="openBulkConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openBulkConfirm = false">
             <div class="w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center" 
@@ -356,6 +369,17 @@
                 
                 <template x-for="id in selectedIds" :key="id">
                     <input type="hidden" name="ids[]" :value="id">
+                </template>
+
+                {{-- TAMBAHAN: FORM ALASAN PENOLAKAN MASSAL --}}
+                <template x-if="bulkActionType === 'reject'">
+                    <div class="mb-6 text-left">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan Massal <span class="text-red-500">*</span></label>
+                        <textarea name="reason" rows="3" required
+                                  class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 outline-none transition-all" 
+                                  placeholder="Masukkan alasan penolakan untuk semua data yang dipilih..."></textarea>
+                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan langsung ke WhatsApp semua pelanggan yang ditolak.</p>
+                    </div>
                 </template>
                 
                 <div class="flex gap-3">

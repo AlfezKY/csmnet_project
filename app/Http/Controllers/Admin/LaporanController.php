@@ -16,9 +16,13 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         // ==========================================
-        // 1. FILTER UNTUK KARTU UTAMA
+        // 1. FILTER UNTUK KARTU UTAMA & SETUP DEFAULT
         // ==========================================
         $filterType = $request->filter_type ?? 'all'; // all, month, range
+
+        // Bikin default bulan & tahun berdasarkan filter utama (agar chart di bawah otomatis sinkron)
+        $defaultFilterMonth = ($filterType === 'month' && $request->month) ? $request->month : date('Y-m');
+        $defaultFilterYear = ($filterType === 'month' && $request->month) ? date('Y', strtotime($request->month)) : date('Y');
 
         $qTransaksi = Transaksi::query();
         $qPengeluaran = Pengeluaran::query();
@@ -46,7 +50,7 @@ class LaporanController extends Controller
         // ==========================================
         // 2. DATA BAR CHART (TREN KEUANGAN 12 BULAN)
         // ==========================================
-        $chartYear = $request->chart_year ?? date('Y');
+        $chartYear = $request->chart_year ?: $defaultFilterYear;
 
         $pemasukanBulananRaw = Transaksi::selectRaw('MONTH(tanggal) as month, SUM(jumlah) as total')
             ->whereYear('tanggal', $chartYear)
@@ -68,9 +72,9 @@ class LaporanController extends Controller
         // ==========================================
         // 3. DATA KOMPLAIN (DENGAN FILTER BULAN KHUSUS)
         // ==========================================
-        $komplainMonthFilter = $request->komplain_month ?? date('Y-m');
-        $komplainMonth = date('m', strtotime($komplainMonthFilter));
-        $komplainYear = date('Y', strtotime($komplainMonthFilter));
+        $komplainFilter = $request->komplain_month ?: $defaultFilterMonth;
+        $komplainMonth = date('m', strtotime($komplainFilter));
+        $komplainYear = date('Y', strtotime($komplainFilter));
 
         $komplains = Komplain::whereMonth('tanggal', $komplainMonth)
             ->whereYear('tanggal', $komplainYear)
@@ -109,7 +113,7 @@ class LaporanController extends Controller
         // ==========================================
         // 4. DATA OMZET PER PAKET
         // ==========================================
-        $omzetFilter = $request->omzet_month ?? date('Y-m');
+        $omzetFilter = $request->omzet_month ?: $defaultFilterMonth;
         $omzetYear = Carbon::parse($omzetFilter)->year;
         $omzetMonth = Carbon::parse($omzetFilter)->month;
 
@@ -128,7 +132,7 @@ class LaporanController extends Controller
         // ==========================================
         // 5. DATA BREAKDOWN PENGELUARAN (DENGAN FILTER BULAN KHUSUS)
         // ==========================================
-        $pengeluaranFilter = $request->pengeluaran_month ?? date('Y-m');
+        $pengeluaranFilter = $request->pengeluaran_month ?: $defaultFilterMonth;
         $pengeluaranYear = Carbon::parse($pengeluaranFilter)->year;
         $pengeluaranMonth = Carbon::parse($pengeluaranFilter)->month;
 
@@ -150,6 +154,7 @@ class LaporanController extends Controller
             'pemasukanBulanan',
             'pengeluaranBulanan',
             'chartYear',
+            'komplainFilter',      // <-- VARIABEL BARU YANG DI-PASS
             'komplainStats',
             'komplainKategori',
             'omzetFilter',

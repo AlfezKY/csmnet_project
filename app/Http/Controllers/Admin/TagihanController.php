@@ -93,15 +93,23 @@ class TagihanController extends Controller
         return view('admin.tagihan.index', compact('pelanggans', 'pakets'));
     }
 
-    public function action(Request $request, string $id)
+   public function action(Request $request, string $id)
     {
         $request->validate([
             'jumlah_bulan' => 'required|integer|min:1',
             'diskon'       => 'nullable|numeric|min:0|max:100',
-            'biaya_lain'   => 'nullable|numeric|min:0'
+            'biaya_lain'   => 'nullable|numeric|min:0',
+            'paket_id'     => 'required|exists:pakets,id' // <-- UBAH JADI REQUIRED MUTLAK
         ]);
 
         $pelanggan = Pelanggan::with('paket')->findOrFail($id);
+
+        // ==========================================
+        // UPDATE/BINDING PAKET (BARU MAUPUN GANTI PAKET LAMA)
+        // ==========================================
+        // Langsung update paket_id berdasarkan pilihan dropdown di modal
+        $pelanggan->update(['paket_id' => $request->paket_id]);
+        $pelanggan->load('paket'); // Refresh relasi paket agar harganya terbaca di perhitungan bawah
 
         $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
         $jatuhTempoBaru = $tanggalSekarang->addMonths($request->jumlah_bulan);
@@ -114,8 +122,9 @@ class TagihanController extends Controller
 
         $jumlah_bulan = $request->jumlah_bulan;
         $diskon_persen = $request->diskon ?? 0;
-        $biaya_lain = $request->biaya_lain ?? 0; // Ambil Biaya Lain
+        $biaya_lain = $request->biaya_lain ?? 0; 
 
+        // Harga normal sekarang bakal narik dari paket yang baru di-bind/diubah
         $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
         $potongan = $harga_normal * ($diskon_persen / 100);
 

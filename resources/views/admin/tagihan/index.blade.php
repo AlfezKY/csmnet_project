@@ -22,6 +22,7 @@
     jumlahBulan: 1,
     diskonPersen: 0,
     biayaLain: 0, // TAMBAHAN BIAYA LAIN
+    selectedPaketId: '', // <-- TAMBAHKAN BARIS INI
 
     // Variabel kalkulator massal
     openBulkConfirm: false,
@@ -345,6 +346,7 @@
                                 jumlahBulan = 1;
                                 diskonPersen = 0;
                                 biayaLain = 0;
+                                selectedPaketId = '{{ $plg->paket_id ?? '' }}'; // <-- TAMBAHKAN BARIS INI
                             " class="px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white rounded text-[11px] font-bold transition-all" title="Proses Pembayaran">
                                 Bayar
                             </button>
@@ -398,6 +400,34 @@
                 
                 {{-- BARIS 1: DURASI & DISKON --}}
                 <div class="grid grid-cols-2 gap-3 mb-3 text-left">
+                    <div class="mb-4 text-left">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Pilih Paket Internet <span class="text-red-500">*</span>
+                        </label>
+                        
+                        {{-- Hapus :disabled="hasPaket" dan buat menjadi selalu required --}}
+                        <select name="paket_id" 
+                                required
+                                x-model="selectedPaketId"
+                                class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                @change="hargaPaket = Number($event.target.options[$event.target.selectedIndex].dataset.harga)">
+                            
+                            <option value="" data-harga="0" disabled>-- Pilih Paket --</option>
+                            
+                            @foreach($pakets as $paket)
+                                <option value="{{ $paket->id }}" data-harga="{{ $paket->harga }}">
+                                    {{ $paket->nama_paket }} - Rp {{ number_format($paket->harga, 0, ',', '.') }}
+                                </option>
+                            @endforeach
+                            
+                        </select>
+
+                        {{-- Pesan error ini otomatis muncul kalau selectedPaketId kosong --}}
+                        <p x-show="!selectedPaketId" class="text-[11px] text-orange-500 font-bold mt-1.5 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            Pelanggan ini belum memilih paket. Silahkan pilih paket!
+                        </p>
+                    </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-700 uppercase mb-2">Durasi (Bulan)</label>
                         <select name="jumlah_bulan" x-model.number="jumlahBulan" class="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 cursor-pointer transition-all">

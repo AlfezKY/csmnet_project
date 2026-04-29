@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
 use App\Models\Paket;
 use App\Models\User;
+use App\Models\Transaksi; // Pastikan model Transaksi (jika namanya ini) ikut terpanggil
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -242,11 +243,22 @@ class PelangganController extends Controller
 
     public function destroy(Pelanggan $pelanggan)
     {
-        if ($pelanggan->user_id) {
-            User::find($pelanggan->user_id)?->delete();
-        }
+        DB::transaction(function () use ($pelanggan) {
+            $userId = $pelanggan->user_id;
 
-        $pelanggan->delete();
-        return back()->with('success', 'Pelanggan berhasil dihapus!');
+            // 1. Hapus semua data transaksi yang berelasi dengan pelanggan ini
+            // Menggunakan query builder jika model Transaksi belum di-import atau belum direlasikan
+            DB::table('transaksis')->where('pelanggan_id', $pelanggan->id)->delete();
+
+            // 2. Hapus data pelanggan (anak dari user, tapi parent dari transaksi)
+            $pelanggan->delete();
+
+            // 3. Terakhir, hapus data user yang terhubung (parent utama)
+            if ($userId) {
+                User::find($userId)?->delete();
+            }
+        });
+
+        return back()->with('success', 'Pelanggan beserta seluruh transaksinya berhasil dihapus!');
     }
 }

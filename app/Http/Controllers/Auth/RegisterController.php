@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -68,6 +70,50 @@ class RegisterController extends Controller
 
             Auth::login($user);
         });
+
+        // ==========================================
+// 3. FITUR KIRIM WA OTOMATIS WABLAS (UPDATED)
+// ==========================================
+$domain = env('WABLAS_DOMAIN'); 
+$token  = env('WABLAS_TOKEN');  
+
+if ($domain && $token) {
+    $phone = $validatedData['no_wa'];
+    // Bersihkan nomor dari karakter non-angka
+    $phone = preg_replace('/[^0-9]/', '', $phone);
+    
+    if (str_starts_with($phone, '0')) {
+        $phone = '62' . substr($phone, 1);
+    }
+
+    $pesan = "Halo kak *{$validatedData['fullname']}*,\n\nTerima kasih telah mengajukan pemasangan baru di CSMNET. Data pendaftaran Anda sudah kami terima dan saat ini berstatus *Menunggu Validasi*.\n\nMohon kesediaannya untuk menunggu ya kak, Admin kami akan segera memproses pendaftaran dan menghubungi kakak secepatnya. 🙏";
+
+    try {
+    $apiUrl = rtrim($domain, '/') . "/api/v2/send-message";
+
+    $response = Http::withoutVerifying()->withHeaders([
+        'Authorization' => $token,
+        'Accept'        => 'application/json',
+    ])->post($apiUrl, [
+        'data' => [ // <--- Wablas minta dibungkus array 'data'
+            [
+                'phone'   => $phone,
+                'message' => $pesan,
+                'isGroup' => 'false',
+            ]
+        ]
+    ]);
+
+    if ($response->failed()) {
+        Log::error('Wablas API Error: ' . $response->body());
+    } else {
+        Log::info('WA Berhasil Terkirim: ' . $response->body());
+    }
+
+} catch (\Exception $e) {
+    Log::error('Wablas Exception: ' . $e->getMessage());
+}
+}
 
         return redirect()->route('client-portal')->with('success', 'Registrasi Berhasil! Menunggu persetujuan admin.');
     }

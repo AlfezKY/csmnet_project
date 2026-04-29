@@ -126,6 +126,43 @@ class DashboardController extends Controller
             ->orderBy('jatuh_tempo', 'asc')
             ->get();
 
+            // ==========================================
+        // 9. CHART KOMPLAIN PER KATEGORI (BAR CHART)
+        // ==========================================
+        $komplainFilter = $request->input('komplain_month', $today->format('Y-m'));
+        $komplainYear = Carbon::parse($komplainFilter)->year;
+        $komplainMonth = Carbon::parse($komplainFilter)->month;
+
+        $komplainsRaw = Komplain::whereYear('tanggal', $komplainYear)
+                             ->whereMonth('tanggal', $komplainMonth)
+                             ->get();
+
+        // Daftar kategori (sesuai dengan KomplainController)
+        $kategoriList = ['Kabel Putus', 'Modem LOS Merah', 'Internet Lambat/RTO', 'Ganti Password WiFi', 'Pembayaran/Tagihan', 'Lain-lain', 'Belum Diatur'];
+
+        // Inisialisasi total 0 untuk setiap kategori
+        $komplainSeriesData = array_fill_keys($kategoriList, 0);
+
+        // Hitung total akumulasi per kategori dalam bulan tersebut
+        foreach ($komplainsRaw as $k) {
+            $kat = $k->kategori ?: 'Belum Diatur';
+            if (isset($komplainSeriesData[$kat])) {
+                $komplainSeriesData[$kat]++;
+            } else {
+                $komplainSeriesData['Lain-lain']++;
+            }
+        }
+
+        // Format untuk ApexCharts Bar Chart (Hanya ambil yang ada komplainnya)
+        $komplainChartLabels = [];
+        $komplainChartData = [];
+        foreach ($komplainSeriesData as $name => $total) {
+            if ($total > 0) {
+                $komplainChartLabels[] = $name;
+                $komplainChartData[] = $total;
+            }
+        }
+
         return view('admin.dashboard', compact(
             'kpi',
             'jatuhTempoTerpilih',
@@ -146,7 +183,10 @@ class DashboardController extends Controller
             'trxYear',
             'trxPerHariLabel',
             'trxPerHariData',
-            'pelangganOverdue'
+            'pelangganOverdue',
+            'komplainFilter',
+            'komplainChartLabels',
+            'komplainChartData'
         ));
     }
 }

@@ -251,33 +251,33 @@
     </div>
 </div>
 
-{{-- ROW 3: OMZET PER PAKET & PIE CHART --}}
+{{-- ROW 3: TOTAL KOMPLAIN & PIE CHART --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 relative z-0 animate-fade-up delay-400">
     
-    {{-- CHART KIRI (Pendapatan) --}}
-    <div class="lg:col-span-2 relative group">
-        <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <span class="w-3 h-8 rounded-full bg-emerald-500"></span>
-                    Pendapatan Berdasarkan Paket
-                </h4>
-                
-                <form method="GET">
-                    @foreach(request()->except('omzet_month') as $key => $value) <input type="hidden" name="{{ $key }}" value="{{ $value }}"> @endforeach
-                    <input type="month" name="omzet_month" value="{{ $omzetFilter }}" onchange="this.form.submit()" class="text-sm px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-emerald-500 text-gray-600 shadow-sm transition-all hover:bg-gray-50">
-                </form>
-            </div>
+    {{-- CHART KIRI (Komplain Gantikan Pendapatan Paket) --}}
+    <div class="lg:col-span-2 glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-3 h-8 rounded-full bg-rose-500"></span>
+                Total Komplain per Kategori
+            </h4>
             
-            @if(empty($omzetPaketData))
-                <div class="flex-1 flex flex-col items-center justify-center min-h-[250px] border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
-                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 12H4m16 0a8 8 0 11-16 0 8 8 0 0116 0z"></path></svg>
-                    <p class="text-sm font-bold text-gray-400">Belum ada data pemasukan di bulan ini.</p>
-                </div>
-            @else
-                <div id="chartOmzetPaket" class="w-full flex-1 min-h-[250px]"></div>
-            @endif
+            <form method="GET">
+                @foreach(request()->except('komplain_month') as $key => $value) 
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}"> 
+                @endforeach
+                <input type="month" name="komplain_month" value="{{ $komplainFilter }}" onchange="this.form.submit()" class="text-sm px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-rose-500 text-gray-600 shadow-sm transition-all hover:bg-gray-50">
+            </form>
         </div>
+        
+        @if(empty($komplainChartData))
+            <div class="flex-1 flex flex-col items-center justify-center min-h-[250px] border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
+                <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-sm font-bold text-gray-400">Aman! Belum ada laporan komplain di bulan ini.</p>
+            </div>
+        @else
+            <div id="chartKomplainKategori" class="w-full flex-1 min-h-[250px]"></div>
+        @endif
     </div>
 
     {{-- CHART KANAN (Kuantitas Pie) --}}
@@ -385,28 +385,39 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     new ApexCharts(document.querySelector("#chartPelangganBaru"), optionsPelanggan).render();
 
-    // 2. CHART PENDAPATAN PER PAKET (HORIZONTAL BAR)
-    @if(!empty($omzetPaketData))
-    const optionsOmzet = {
-        series: [{ name: 'Total Omzet', data: @json($omzetPaketData) }],
-        chart: { type: 'bar', height: '100%', minHeight: 250, toolbar: { show: false }, fontFamily: fontFamily },
-        colors: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], 
+    // 2. CHART TOTAL KOMPLAIN PER KATEGORI (HORIZONTAL BAR) Gantikan Omzet
+    @if(!empty($komplainChartData))
+    const optionsKomplain = {
+        series: [{ name: 'Total Laporan', data: @json($komplainChartData) }],
+        chart: { 
+            type: 'bar', 
+            height: '100%', 
+            minHeight: 250, 
+            toolbar: { show: false }, 
+            fontFamily: fontFamily 
+        },
+        colors: ['#f43f5e', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#64748b', '#0ea5e9'],
         plotOptions: { 
-            bar: { horizontal: true, distributed: true, borderRadius: 8, barHeight: '55%' } 
+            bar: { horizontal: true, distributed: true, borderRadius: 8, barHeight: '60%' } 
         },
         dataLabels: { 
-            enabled: true, 
-            formatter: function(val) { return formatRupiah(val); },
-            style: { fontSize: '12px', fontWeight: 800, colors: ['#fff'] }, 
-            dropShadow: { enabled: true, top: 1, left: 1, blur: 1, color: '#000', opacity: 0.2 } 
+            enabled: true,
+            formatter: function (val) { return val + " Laporan"; },
+            style: { fontSize: '12px', fontWeight: 800 }
         },
-        xaxis: { categories: @json($omzetPaketLabels), labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { colors: '#475569', fontWeight: 700, fontSize: '13px' } } },
-        grid: { show: false }, 
-        tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return formatRupiah(val); } } }, 
+        xaxis: { 
+            categories: @json($komplainChartLabels),
+            labels: { show: false },
+            axisBorder: { show: false }
+        },
+        yaxis: { 
+            labels: { style: { colors: '#475569', fontWeight: 700, fontSize: '13px' } } 
+        },
+        grid: { show: false },
+        tooltip: { theme: 'light' },
         legend: { show: false }
     };
-    new ApexCharts(document.querySelector("#chartOmzetPaket"), optionsOmzet).render();
+    new ApexCharts(document.querySelector("#chartKomplainKategori"), optionsKomplain).render();
     @endif
 
     // 3. PIE CHART DISTRIBUSI PAKET
@@ -438,7 +449,6 @@ document.addEventListener('DOMContentLoaded', function () {
     new ApexCharts(document.querySelector("#chartPieISP"), optionsPie).render();
 
     // 4. CHART TOTAL TRANSAKSI PER HARI (AREA CHART PREMIUM)
-    // 4. CHART TOTAL TRANSAKSI PER HARI (AREA CHART PREMIUM)
     // Ambil bulan dan tahun dari filter (Bulan dipaksa jadi 2 digit, misal: 4 jadi 04)
     const trxSelectedMonth = '{{ str_pad($trxMonth, 2, "0", STR_PAD_LEFT) }}';
     const trxSelectedYear = '{{ $trxYear }}';
@@ -446,12 +456,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const optionsTrx = {
         series: [{ name: 'Transaksi', data: @json($trxPerHariData) }],
         chart: { type: 'area', height: '100%', minHeight: 300, toolbar: { show: true , tools: {
-                    download: false, // Sembunyikan tombol download kalau tidak perlu
+                    download: false, 
                     selection: true,
                     zoom: false,
                     zoomin: false,
                     zoomout: false,
-                    pan: true, // Tombol tangan untuk geser kiri-kanan
+                    pan: true, 
                     reset: false
                 },}, fontFamily: fontFamily },
         colors: ['#8b5cf6'], 
@@ -475,7 +485,6 @@ document.addEventListener('DOMContentLoaded', function () {
             style: { fontSize: '13px', fontFamily: fontFamily },
             x: {
                 formatter: function(val) {
-                    // Tambahin '0' di depan angka satuan (misal 8 jadi 08)
                     let day = val.toString().padStart(2, '0');
                     return `${day}/${trxSelectedMonth}/${trxSelectedYear}`;
                 }
@@ -484,6 +493,7 @@ document.addEventListener('DOMContentLoaded', function () {
         markers: { size: 0, hover: { size: 6, sizeOffset: 3, colors: ['#fff'], strokeColors: '#8b5cf6', strokeWidth: 3 } }
     };
     new ApexCharts(document.querySelector("#chartTransaksiPerHari"), optionsTrx).render();
+
 });
 </script>
 @endpush

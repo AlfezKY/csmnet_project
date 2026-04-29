@@ -152,7 +152,8 @@
                     <input type="hidden" name="omzet_month" value="{{ request('omzet_month') }}">
                     <input type="hidden" name="pengeluaran_month" value="{{ request('pengeluaran_month') }}">
                     
-                    <input type="month" name="komplain_month" value="{{ request('komplain_month', date('Y-m')) }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-orange-500 text-gray-600 shadow-sm transition-all hover:bg-white">
+                    {{-- PERBAIKAN DI SINI: Menggunakan $komplainFilter agar sinkron --}}
+                    <input type="month" name="komplain_month" value="{{ $komplainFilter }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-orange-500 text-gray-600 shadow-sm transition-all hover:bg-white">
                 </form>
             </div>
             
@@ -257,7 +258,6 @@
                 </form>
             </div>
             
-            {{-- Menggunakan totalPengeluaranChart untuk mengecek ada/tidaknya data di chart spesifik ini --}}
             @if($totalPengeluaranChart > 0)
                 <div id="expenseChart" class="w-full flex-1 flex justify-center min-h-[280px]"></div>
             @else
