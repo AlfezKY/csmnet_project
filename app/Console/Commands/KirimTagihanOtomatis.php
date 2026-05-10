@@ -4,64 +4,99 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Pelanggan;
+use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Mail\TagihanMail;
+use App\Mail\NotificationMail; // Buat ngirim email suspend yang umum
 
 class KirimTagihanOtomatis extends Command
 {
-    // Nama perintah yang nanti dijalankan (php artisan tagihan:kirim-otomatis)
+    // Nama command dan deskripsinya
     protected $signature = 'tagihan:kirim-otomatis';
-    protected $description = 'Kirim pengingat WhatsApp otomatis untuk pelanggan yang jatuh tempo hari ini';
+    protected $description = 'Kirim email pengingat (H-3 s/d H-1) dan suspend otomatis pada Hari H jatuh tempo';
 
     public function handle()
     {
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
-        // 1. Ambil pelanggan aktif yang belum lunas dan jatuh temponya HARI INI
+        // Kita butuh tanggal H-3, H-2, H-1 dari hari ini.
+        // Karena reminder dikirim SEBELUM jatuh tempo, berarti kita cari yang 
+        // jatuh temponya 1, 2, atau 3 hari KE DEPAN.
+        $h1 = $today->copy()->addDay()->format('Y-m-d');
+        $h2 = $today->copy()->addDays(2)->format('Y-m-d');
+        $h3 = $today->copy()->addDays(3)->format('Y-m-d');
+
+        $todayFormatted = $today->format('Y-m-d');
+
+        // AMBIL SEMUA PELANGGAN AKTIF YANG BELUM LUNAS
         $pelanggans = Pelanggan::with('paket')
             ->where('status', 'Active')
             ->where('status_pembayaran', 'Belum Lunas')
-            ->whereDate('jatuh_tempo', $today)
             ->get();
 
         if ($pelanggans->isEmpty()) {
-            $this->info("Tidak ada tagihan jatuh tempo hari ini ({$today}).");
+            $this->info("Tidak ada tagihan yang perlu diproses hari ini.");
             return;
         }
 
-        $domain = env('WABLAS_DOMAIN');
-        $token = env('WABLAS_TOKEN');
+        $countReminder = 0;
+        $countSuspend = 0;
 
         foreach ($pelanggans as $plg) {
-            // Format Nomor HP
-            $phone = $plg->no_wa;
-            if (str_starts_with($phone, '0')) {
-                $phone = '62' . substr($phone, 1);
+            if (!$plg->jatuh_tempo || !$plg->email) continue;
+
+            $jatuhTempo = $plg->jatuh_tempo;
+
+            // ==========================================
+            // LOGIC 1: PENGINGAT (H-3, H-2, H-1)
+            // ==========================================
+            if (in_array($jatuhTempo, [$h1, $h2, $h3])) {
+                $harga = $plg->paket->harga ?? 0;
+                $paket = $plg->paket->nama_paket ?? 'Internet';
+
+                try {
+                    Mail::to($plg->email)->send(new TagihanMail(
+                        $plg->nama_pelanggan,
+                        $paket,
+                        $harga,
+                        $jatuhTempo
+                    ));
+                    $countReminder++;
+                    $this->info("Pengingat (H-" . Carbon::parse($jatuhTempo)->diffInDays($today) . ") dikirim ke: {$plg->nama_pelanggan}");
+                } catch (\Exception $e) {
+                    Log::error("Gagal kirim email reminder ke {$plg->nama_pelanggan}: " . $e->getMessage());
+                }
             }
 
-            $harga = number_format($plg->paket->harga ?? 0, 0, ',', '.');
-            $paket = $plg->paket->nama_paket ?? 'Internet';
+            // ==========================================
+            // LOGIC 2: SUSPEND OTOMATIS (HARI H JATUH TEMPO)
+            // ==========================================
+            elseif ($jatuhTempo === $todayFormatted || $jatuhTempo < $todayFormatted) {
+                // Suspend Pelanggan
+                $plg->status = 'Non Active';
+                // Status pembayaran biarkan tetap Belum Lunas biar nanti admin masih bisa nagih
+                $plg->save();
 
-            $pesan = "Halo kak *{$plg->nama_pelanggan}*, ini adalah pengingat otomatis. Tagihan internet CSMNET paket *{$paket}* sebesar *Rp {$harga}* jatuh tempo pada hari ini. Mohon segera melakukan pembayaran. Terima kasih 🙏";
-
-            try {
-                $response = Http::withHeaders(['Authorization' => $token])
-                    ->post("{$domain}/api/send-message", [
-                        'phone'   => $phone,
-                        'message' => $pesan,
-                    ]);
-
-                if ($response->successful()) {
-                    $this->info("Berhasil mengirim ke: {$plg->nama_pelanggan}");
-                } else {
-                    Log::error("Gagal mengirim WA ke {$plg->nama_pelanggan}: " . $response->body());
+                // Suspend User Login (jika ada) biar dia nggak bisa akses Client Portal
+                if ($plg->user_id) {
+                    User::where('id', $plg->user_id)->update(['status' => 'Non Active']);
                 }
-            } catch (\Exception $e) {
-                Log::error("Error sistem WA: " . $e->getMessage());
+
+                // Kirim Notifikasi Penangguhan (pakai NotificationMail biasa, bukan struk TagihanMail)
+                $pesanSuspend = "Halo kak **{$plg->nama_pelanggan}**,\n\nMohon maaf, layanan internet CSMNET dan akses akun Anda saat ini kami **Tangguhkan Sementara (Non Aktif)** karena telah melewati batas waktu pembayaran jatuh tempo pada tanggal " . Carbon::parse($jatuhTempo)->translatedFormat('d F Y') . ".\n\nMohon segera melunasi tagihan agar layanan dapat kembali diaktifkan.";
+
+                try {
+                    Mail::to($plg->email)->send(new NotificationMail($pesanSuspend));
+                    $countSuspend++;
+                    $this->info("Akun disuspend otomatis: {$plg->nama_pelanggan}");
+                } catch (\Exception $e) {
+                    Log::error("Gagal kirim email suspend ke {$plg->nama_pelanggan}: " . $e->getMessage());
+                }
             }
         }
 
-        $this->info("Proses pengiriman otomatis selesai.");
+        $this->info("Proses selesai. {$countReminder} Reminder dikirim, {$countSuspend} Akun disuspend.");
     }
 }

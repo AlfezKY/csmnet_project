@@ -8,6 +8,8 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TagihanMail;
 
 class TagihanController extends Controller
 {
@@ -186,43 +188,29 @@ class TagihanController extends Controller
     {
         $pelanggan = Pelanggan::with('paket')->findOrFail($id);
 
-        $domain = env('WABLAS_DOMAIN');
-        $token = env('WABLAS_TOKEN');
+        $email = $pelanggan->email;
 
-        if (!$domain || !$token) {
-            return back()->with('error', 'API WhatsApp Wablas belum disetting dengan benar di .env!');
+        if (!$email) {
+            return back()->with('error', "Gagal: Pelanggan {$pelanggan->nama_pelanggan} tidak memiliki alamat email!");
         }
 
-        // Format nomor HP (Ubah awalan 0 jadi 62)
-        $phone = $pelanggan->no_wa;
-        if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
-        }
-
-        $harga = number_format($pelanggan->paket->harga ?? 0, 0, ',', '.');
+        $harga = $pelanggan->paket->harga ?? 0;
         $paket = $pelanggan->paket->nama_paket ?? 'Internet';
         $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
 
         $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk paket *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*.\n\nMohon segera melakukan pembayaran agar layanan tetap aktif. Terima kasih 🙏";
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => $token,
-            ])->post("{$domain}/api/send-message", [
-                'phone'   => $phone,
-                'message' => $pesan,
-            ]);
+            Mail::to($email)->send(new TagihanMail(
+                $pelanggan->nama_pelanggan,
+                $paket,
+                $harga,
+                $tgl
+            ));
 
-            $result = $response->json();
-
-            if ($response->successful() && isset($result['status']) && $result['status'] === true) {
-                return back()->with('success', "Pesan pengingat WhatsApp berhasil dikirim ke {$pelanggan->nama_pelanggan}!");
-            } else {
-                $errorMessage = $result['message'] ?? 'Gagal mengirim pesan ke WhatsApp.';
-                return back()->with('error', "WaBlas Error: {$errorMessage}");
-            }
+            return back()->with('success', "Email pengingat berhasil dikirim ke {$email}!");
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan jaringan saat menghubungi server Wablas.');
+            return back()->with('error', 'Terjadi kesalahan saat mengirim email: ' . $e->getMessage());
         }
     }
 
@@ -234,51 +222,41 @@ class TagihanController extends Controller
 
         $pelanggans = Pelanggan::with('paket')->whereIn('id', $request->ids)->get();
 
-        $domain = env('WABLAS_DOMAIN');
-        $token = env('WABLAS_TOKEN');
-
-        if (!$domain || !$token) {
-            return back()->with('error', 'API WhatsApp Wablas belum disetting dengan benar di .env!');
-        }
-
         $berhasil = 0;
         $gagal = 0;
 
         foreach ($pelanggans as $pelanggan) {
-            $phone = $pelanggan->no_wa;
-            if (str_starts_with($phone, '0')) {
-                $phone = '62' . substr($phone, 1);
+            $email = $pelanggan->email;
+
+            // Kalau email kosong, skip orang ini dan catat sebagai gagal
+            if (!$email) {
+                $gagal++;
+                continue;
             }
 
-            $harga = number_format($pelanggan->paket->harga ?? 0, 0, ',', '.');
+            $harga = $pelanggan->paket->harga ?? 0;
             $paket = $pelanggan->paket->nama_paket ?? 'Internet';
             $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
 
             $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk paket *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*.\n\nMohon segera melakukan pembayaran agar layanan tetap aktif. Terima kasih 🙏";
 
             try {
-                $response = Http::withHeaders([
-                    'Authorization' => $token,
-                ])->post("{$domain}/api/send-message", [
-                    'phone'   => $phone,
-                    'message' => $pesan,
-                ]);
-
-                $result = $response->json();
-                if ($response->successful() && isset($result['status']) && $result['status'] === true) {
-                    $berhasil++;
-                } else {
-                    $gagal++;
-                }
+                Mail::to($email)->send(new TagihanMail(
+                    $pelanggan->nama_pelanggan,
+                    $paket,
+                    $harga,
+                    $tgl
+                ));
+                $berhasil++;
             } catch (\Exception $e) {
                 $gagal++;
             }
         }
 
         if ($gagal > 0) {
-            return back()->with('success', "Proses selesai: {$berhasil} pesan berhasil terkirim, {$gagal} gagal dikirim.");
+            return back()->with('success', "Proses selesai: {$berhasil} email berhasil terkirim, {$gagal} gagal dikirim (mungkin tidak ada email/error jaringan).");
         }
 
-        return back()->with('success', "Berhasil mengirim {$berhasil} pesan WA pengingat secara massal!");
+        return back()->with('success', "Berhasil mengirim {$berhasil} email pengingat secara massal!");
     }
 }

@@ -113,8 +113,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Aktif (Opsional)</label>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="email@contoh.com" class="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-medium transition-all @error('email') border-red-500 @enderror">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Aktif</label>
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="email@contoh.com" class="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-medium transition-all @error('email') border-red-500 @enderror" required>
                 </div>
             </div>
 

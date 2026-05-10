@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RegisterMail;
 
 class RegisterController extends Controller
 {
@@ -26,9 +28,10 @@ class RegisterController extends Controller
         $validatedData = $request->validate([
             'fullname' => 'required|string|max:255',
             'username' => 'required|string|min:4|max:20|unique:users',
-            'email'    => 'nullable|email|unique:users',
+            'email'    => 'required|email|unique:users',
             'no_wa'    => 'required|string|max:20',
             'alamat'   => 'required|string',
+            
             'password' => [
                 'required',
                 'min:8',
@@ -62,6 +65,7 @@ class RegisterController extends Controller
                 'nama_pelanggan'    => $validatedData['fullname'],
                 'alamat'            => $validatedData['alamat'],
                 'no_wa'             => $validatedData['no_wa'],
+                'email'             => $validatedData['email'],
                 'jatuh_tempo'       => null,
                 'status_pembayaran' => 'Belum Lunas',
                 'status'            => 'Pending',
@@ -72,48 +76,19 @@ class RegisterController extends Controller
         });
 
         // ==========================================
-// 3. FITUR KIRIM WA OTOMATIS WABLAS (UPDATED)
-// ==========================================
-$domain = env('WABLAS_DOMAIN'); 
-$token  = env('WABLAS_TOKEN');  
+        // 3. FITUR KIRIM EMAIL OTOMATIS (REGISTER MAIL)
+        // ==========================================
+        try {
+            // Kita langsung passing $validatedData ke emailnya
+            Mail::to($validatedData['email'])->send(new RegisterMail($validatedData));
+            Log::info('Email Pendaftaran Berhasil Terkirim ke: ' . $validatedData['email']);
 
-if ($domain && $token) {
-    $phone = $validatedData['no_wa'];
-    // Bersihkan nomor dari karakter non-angka
-    $phone = preg_replace('/[^0-9]/', '', $phone);
-    
-    if (str_starts_with($phone, '0')) {
-        $phone = '62' . substr($phone, 1);
-    }
+            return redirect()->route('client-portal')->with('success', 'Registrasi Berhasil! Email informasi telah dikirim.');
+        } catch (\Exception $e) {
+            Log::error('Email Exception: ' . $e->getMessage());
 
-    $pesan = "Halo kak *{$validatedData['fullname']}*,\n\nTerima kasih telah mengajukan pemasangan baru di CSMNET. Data pendaftaran Anda sudah kami terima dan saat ini berstatus *Menunggu Validasi*.\n\nMohon kesediaannya untuk menunggu ya kak, Admin kami akan segera memproses pendaftaran dan menghubungi kakak secepatnya. 🙏";
-
-    try {
-    $apiUrl = rtrim($domain, '/') . "/api/v2/send-message";
-
-    $response = Http::withoutVerifying()->withHeaders([
-        'Authorization' => $token,
-        'Accept'        => 'application/json',
-    ])->post($apiUrl, [
-        'data' => [ // <--- Wablas minta dibungkus array 'data'
-            [
-                'phone'   => $phone,
-                'message' => $pesan,
-                'isGroup' => 'false',
-            ]
-        ]
-    ]);
-
-    if ($response->failed()) {
-        Log::error('Wablas API Error: ' . $response->body());
-    } else {
-        Log::info('WA Berhasil Terkirim: ' . $response->body());
-    }
-
-} catch (\Exception $e) {
-    Log::error('Wablas Exception: ' . $e->getMessage());
-}
-}
+            return redirect()->route('client-portal')->with('error', 'Registrasi berhasil, tapi sistem gagal mengirim email notifikasi: ' . $e->getMessage());
+        }
 
         return redirect()->route('client-portal')->with('success', 'Registrasi Berhasil! Menunggu persetujuan admin.');
     }

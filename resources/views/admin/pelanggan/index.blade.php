@@ -439,7 +439,7 @@
                             <input type="text" name="username" placeholder="Cth: budi123" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email (Opsional)</label>
+                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email Aktif</label>
                             <input type="email" name="email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                         </div>
                         <div>
@@ -555,8 +555,8 @@
                             <input type="text" name="username" x-model="editData.user_username" placeholder="Cth: budi123" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email (Opsional)</label>
-                            <input type="email" name="email" x-model="editData.user_email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email Aktif (Opsional)</label>
+                            <input type="email" name="email" x-model="editData.email" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Password</label>

@@ -116,6 +116,7 @@ class DatabaseSeeder extends Seeder
                 'user_id'           => $user->id,
                 'paket_id'          => $paketId,
                 'nama_pelanggan'    => $nama,
+                'email'             => $user->email,
                 'alamat'            => $faker->streetAddress . ', ' . $faker->city,
                 'no_wa'             => '08' . mt_rand(11, 99) . mt_rand(1000000, 9999999),
                 'jatuh_tempo'       => $jatuhTempo ? $jatuhTempo->format('Y-m-d') : null,

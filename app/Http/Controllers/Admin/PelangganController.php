@@ -118,6 +118,7 @@ class PelangganController extends Controller
     {
         $rules = [
             'nama_pelanggan' => 'required|string|max:255',
+            'email'          => 'required|email',
             'no_wa'          => 'required|string|max:20',
             'paket_id'       => 'nullable|exists:pakets,id',
             'jatuh_tempo'    => 'nullable|date',
@@ -141,7 +142,7 @@ class PelangganController extends Controller
                 $user = User::create([
                     'fullname'   => $data['nama_pelanggan'],
                     'username'   => $data['username'],
-                    'email'      => $data['email'] ?? null,
+                    'email'      => $data['email'],
                     'password'   => Hash::make($data['password']),
                     'role'       => 'Pelanggan',
                     'status'     => $data['user_status'],
@@ -156,6 +157,7 @@ class PelangganController extends Controller
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
+                'email'             => $data['email'],
                 'jatuh_tempo'       => empty($data['jatuh_tempo']) ? null : $data['jatuh_tempo'],
                 'status_pembayaran' => 'Belum Lunas',
                 'status'            => $data['status'],
@@ -171,6 +173,7 @@ class PelangganController extends Controller
         $rules = [
             'nama_pelanggan'    => 'required|string|max:255',
             'no_wa'             => 'required|string|max:20',
+            'email'             => 'required|email',
             'paket_id'          => 'nullable|exists:pakets,id',
             'jatuh_tempo'       => 'nullable|date',
             'status_pembayaran' => 'required|in:Lunas,Belum Lunas',
@@ -204,7 +207,7 @@ class PelangganController extends Controller
                 $user = User::find($pelanggan->user_id);
                 if ($user) {
                     $user->username = $data['username'];
-                    $user->email    = $data['email'] ?? null;
+                    $user->email    = $data['email'];
                     $user->status   = $data['user_status'];
                     if ($request->filled('password')) {
                         $user->password = Hash::make($data['password']);
@@ -216,7 +219,7 @@ class PelangganController extends Controller
                 $user = User::create([
                     'fullname'   => $data['nama_pelanggan'],
                     'username'   => $data['username'],
-                    'email'      => $data['email'] ?? null,
+                    'email'             => $data['email'],
                     'password'   => Hash::make($data['password']),
                     'role'       => 'Pelanggan',
                     'status'     => $data['user_status'],
@@ -231,6 +234,7 @@ class PelangganController extends Controller
                 'nama_pelanggan'    => $data['nama_pelanggan'],
                 'alamat'            => $data['alamat'],
                 'no_wa'             => $data['no_wa'],
+                'email'             => $data['email'],
                 'jatuh_tempo'       => empty($data['jatuh_tempo']) ? null : $data['jatuh_tempo'],
                 'status_pembayaran' => $data['status_pembayaran'],
                 'status'            => $data['status'],

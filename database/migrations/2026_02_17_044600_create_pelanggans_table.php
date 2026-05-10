@@ -17,11 +17,11 @@ return new class extends Migration
             $table->foreignUuid('paket_id')->nullable()->constrained('pakets');
             $table->string('nama_pelanggan');
             $table->text('alamat');
-            $table->string('no_wa');
+            $table->string('no_wa')->nullable();;
             $table->date('jatuh_tempo')->nullable();
             $table->enum('status_pembayaran', ['Lunas', 'Belum Lunas'])->default('Belum Lunas');
             $table->enum('status', ['Active', 'Non Active', 'Pending'])->default('Pending');
-
+            $table->string('email');
             $table->string('created_by')->default('SYSTEM');
             $table->string('updated_by')->nullable();
             $table->timestamp('created_at')->useCurrent();

@@ -94,4 +94,23 @@ Route::middleware('auth')->group(function () {
         })->name('komplain.form');
         Route::post('/komplain/kirim', [App\Http\Controllers\Admin\KomplainController::class, 'store'])->name('komplain.store');
     });
+
+    // ROUTE KHUSUS BUAT TRACE ERROR
+    Route::get('/trace-error', function () {
+        $logFile = storage_path('logs/laravel.log');
+
+        if (!file_exists($logFile)) {
+            return '<h2 style="font-family:sans-serif; text-align:center; margin-top:50px;">Aman Bang! Belum ada error.</h2>';
+        }
+
+        // Ambil isi file log
+        $content = file_get_contents($logFile);
+
+        return '
+            <body style="background:#1e1e1e; color: #ffffff; padding:20px; font-family:monospace; line-height:1.5;">
+                <h2>Laravel Log - CSMNET</h2>
+                <hr style="border-color:#333;">
+                <pre style="white-space: pre-wrap; word-wrap: break-word;">' . htmlspecialchars($content) . '</pre>
+            </body>';
+    })->name('trace-error');
 });

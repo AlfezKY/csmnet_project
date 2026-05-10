@@ -11,17 +11,20 @@ class UpdateStatusTagihan extends Command
 {
     // Nama perintah untuk dijalankan di terminal
     protected $signature = 'tagihan:update-status';
-    protected $description = 'Otomatis ubah status Lunas menjadi Belum Lunas jika sudah masuk tanggal jatuh tempo';
+    protected $description = 'Otomatis ubah status Lunas menjadi Belum Lunas pada H-3 jatuh tempo';
 
     public function handle()
     {
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today();
 
-        // Cari pelanggan aktif & lunas, yang jatuh temponya HARI INI atau SEBELUM HARI INI
-        // (Pakai '<=' buat jaga-jaga kalau kemarin server sempet mati, jadi nggak kelewat)
+        // Kita cari tanggal H+3 dari hari ini.
+        // Karena kita mau nagih di H-3, berarti kita buka gerbang tagihannya 3 hari sebelum jatuh tempo.
+        $h3 = $today->copy()->addDays(3)->format('Y-m-d');
+
+        // Cari pelanggan aktif & lunas, yang jatuh temponya 3 hari lagi (atau kurang dari itu)
         $pelanggans = Pelanggan::where('status', 'Active')
             ->where('status_pembayaran', 'Lunas')
-            ->whereDate('jatuh_tempo', '<=', $today)
+            ->whereDate('jatuh_tempo', '<=', $h3)
             ->get();
 
         $count = 0;
@@ -35,10 +38,10 @@ class UpdateStatusTagihan extends Command
         }
 
         if ($count > 0) {
-            $this->info("Berhasil mengubah {$count} pelanggan menjadi Belum Lunas.");
-            Log::info("CRON UPDATE TAGIHAN: {$count} pelanggan diubah ke Belum Lunas pada {$today}");
+            $this->info("Berhasil membuka tagihan untuk {$count} pelanggan (H-3 Jatuh Tempo).");
+            Log::info("CRON UPDATE TAGIHAN: {$count} pelanggan diubah ke Belum Lunas (Masuk list tagihan H-3)");
         } else {
-            $this->info("Aman. Tidak ada pelanggan yang memasuki jatuh tempo hari ini.");
+            $this->info("Aman. Tidak ada pelanggan yang memasuki H-3 jatuh tempo hari ini.");
         }
     }
 }
