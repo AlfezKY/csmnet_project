@@ -10,20 +10,51 @@
     openEdit: false, 
     openDelete: false, 
     editData: {}, 
-    deleteUrl: '' 
+    deleteUrl: '',
+    selectedIds: [],
+    allIdsNotYet: {{ $komplains->where('status', 'Not Yet')->pluck('id')->toJson() }},
+    get isAllSelected() {
+        return this.selectedIds.length === this.allIdsNotYet.length && this.allIdsNotYet.length > 0;
+    },
+    toggleAll() {
+        if (this.isAllSelected) {
+            this.selectedIds = [];
+        } else {
+            this.selectedIds = [...this.allIdsNotYet];
+        }
+    }
 }">
-    <div class="flex flex-col md:flex-row md:justify-between items-start md:items-end mb-6 px-1 gap-4">
-        <div>
-            <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Daftar Komplain</h3>
-            <p class="text-sm text-gray-500 font-medium mt-1">Pantau progress penanganan keluhan pelanggan</p>
+<div class="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-6 px-1 gap-4">
+    {{-- JUDUL DI KIRI --}}
+    <div>
+        <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Daftar Komplain</h3>
+        <p class="text-sm text-gray-500 font-medium mt-1">Pantau progress penanganan keluhan pelanggan</p>
+    </div>
+    
+    {{-- GRUP TOMBOL DI KANAN --}}
+    <div class="flex flex-wrap items-center gap-3">
+        {{-- BULK ACTION BAR (TAMPIL KALAU ADA YANG DICENTANG) --}}
+        <div x-show="selectedIds.length > 0 && activeTab === 'Not Yet'" x-cloak class="flex items-center gap-2 bg-gray-900 p-1.5 rounded-lg shadow-lg" x-transition>
+            <span class="text-xs text-white font-bold px-2" x-text="selectedIds.length + ' dipilih'"></span>
+            <form action="{{ route('komplain.bulkDone') }}" method="POST" class="m-0">
+                @csrf
+                <template x-for="id in selectedIds" :key="id">
+                    <input type="hidden" name="ids[]" :value="id">
+                </template>
+                <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    Tandai Selesai
+                </button>
+            </form>
         </div>
-        
-        <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2">
+
+        {{-- TOMBOL CATAT MANUAL --}}
+        <button @click="openAdd = true" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center gap-2 shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             Catat Manual
         </button>
     </div>
-
+</div>
     {{-- FLOATING TOAST SUCCESS (SMOOTH ANIMATION) --}}
     @if(session('success'))
         <div x-data="{
@@ -226,13 +257,13 @@
             <span class="ml-1 bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-xs">{{ $komplains->where('status', 'Not Yet')->count() }}</span>
         </button>
         
-        <button @click="activeTab = 'In Progress'" 
+        {{-- <button @click="activeTab = 'In Progress'" 
                 class="px-6 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex items-center gap-2"
                 :class="activeTab === 'In Progress' ? 'border-blue-500 text-blue-600 bg-blue-50/50 rounded-t-lg' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-t-lg'">
             <span class="w-2 h-2 rounded-full" :class="activeTab === 'In Progress' ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'"></span>
             Sedang Diproses
             <span class="ml-1 bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs">{{ $komplains->where('status', 'In Progress')->count() }}</span>
-        </button>
+        </button> --}}
 
         <button @click="activeTab = 'Done'" 
                 class="px-6 py-3 text-sm font-bold border-b-2 transition-all whitespace-nowrap flex items-center gap-2"
@@ -251,6 +282,9 @@
             {{-- THEAD KONSISTEN --}}
             <thead class="text-[11px] text-gray-400 bg-gray-50/50 border-b border-gray-100 uppercase tracking-widest font-black">
                 <tr>
+                    <th class="px-6 py-4 w-10 text-center">
+                        <input type="checkbox" x-show="activeTab === 'Not Yet'" @click="toggleAll" :checked="isAllSelected" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                    </th>
                     <th class="px-6 py-4 w-48">Pelapor</th>
                     <th class="px-6 py-4 w-32 whitespace-nowrap">Tanggal</th>
                     <th class="px-6 py-4 w-40">Kategori</th>
@@ -265,7 +299,9 @@
             <tbody class="divide-y divide-gray-50">
                 @forelse($komplains->where('status', $statusKey) as $kp)
                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                    
+                    <td class="px-6 py-4 text-center">
+                        <input type="checkbox" x-show="activeTab === 'Not Yet'" x-model="selectedIds" value="{{ $kp->id }}" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                    </td>
                     {{-- PELAPOR --}}
                     <td class="px-6 py-4">
                         <div class="flex flex-col">
@@ -316,14 +352,24 @@
                     {{-- AKSI --}}
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            @if($kp->pelanggan)
-                                @php
-                                    $wa = preg_replace('/^0/', '62', $kp->pelanggan->no_wa);
-                                    $pesan = "Halo kak {$kp->pelanggan->nama_pelanggan}, kami dari Tim Teknis CSMNET ingin menindaklanjuti laporan kendala kakak mengenai: \n\n\"{$kp->keluhan}\"\n\n";
-                                @endphp
-                                <a href="https://wa.me/{{ $wa }}?text={{ urlencode($pesan) }}" target="_blank" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Balas via WhatsApp">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                                </a>
+                            {{-- TOMBOL EMAIL KHUSUS STATUS DONE --}}
+                            @if($kp->status == 'Done' && $kp->pelanggan && $kp->pelanggan->email)
+                                <form action="{{ route('komplain.notifyDone', $kp->id) }}" method="POST" class="inline m-0 p-0">
+                                    @csrf
+                                    <button type="submit" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="Kirim Email Selesai (Manual)">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                </form>
+                            @endif
+
+                            {{-- TOMBOL MARK AS DONE SATUAN --}}
+                            @if($kp->status == 'Not Yet')
+                                <form action="{{ route('komplain.markDone', $kp->id) }}" method="POST" class="inline m-0 p-0">
+                                    @csrf @method('PUT')
+                                    <button type="submit" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Tandai Selesai & Kirim Email">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    </button>
+                                </form>
                             @endif
 
                             <button @click="openEdit = true; editData = {{ json_encode($kp) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Update Progress">
@@ -398,7 +444,6 @@
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Progres</label>
                             <select name="status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
                                 <option value="Not Yet" selected>Not Yet (Belum)</option>
-                                <option value="In Progress">In Progress (Proses)</option>
                                 <option value="Done">Done (Selesai)</option>
                             </select>
                         </div>
@@ -455,7 +500,6 @@
                         <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Status Progres</label>
                         <select name="status" x-model="editData.status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-700" required>
                             <option value="Not Yet">Not Yet (Belum Ditangani)</option>
-                            <option value="In Progress">In Progress (Sedang Dikerjakan)</option>
                             <option value="Done">Done (Selesai/Tuntas)</option>
                         </select>
                     </div>

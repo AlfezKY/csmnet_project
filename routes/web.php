@@ -59,6 +59,9 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/komplain/admin-store', [App\Http\Controllers\Admin\KomplainController::class, 'storeAdmin'])->name('komplain.storeAdmin');
         Route::resource('komplain', App\Http\Controllers\Admin\KomplainController::class)->except(['create', 'show', 'store']);
+        Route::post('/komplain/{id}/notify-done', [App\Http\Controllers\Admin\KomplainController::class, 'notifyDone'])->name('komplain.notifyDone');
+        Route::put('/komplain/{id}/mark-done', [App\Http\Controllers\Admin\KomplainController::class, 'markAsDone'])->name('komplain.markDone');
+        Route::post('/komplain/bulk-done', [App\Http\Controllers\Admin\KomplainController::class, 'bulkMarkAsDone'])->name('komplain.bulkDone');
 
         Route::get('/approval', [ApprovalController::class, 'index'])->name('approval.index');
         Route::put('/approval/{id}', [ApprovalController::class, 'action'])->name('approval.action');

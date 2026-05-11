@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\TagihanMail;
+use App\Mail\InvoiceMail;
 
 class TagihanController extends Controller
 {
@@ -19,7 +21,6 @@ class TagihanController extends Controller
             ->where('status', 'Active')
             ->where('status_pembayaran', 'Belum Lunas');
 
-        // 1. Pencarian (Nama / Alamat)
         if ($request->filled('q')) {
             $search = $request->q;
             $query->where(function ($q) use ($search) {
@@ -28,12 +29,10 @@ class TagihanController extends Controller
             });
         }
 
-        // 2. Filter Paket
         if ($request->filled('paket_id')) {
             $query->where('paket_id', $request->paket_id);
         }
 
-        // 3. Filter Rentang Jatuh Tempo
         if ($request->filled('start_date')) {
             $query->whereDate('jatuh_tempo', '>=', $request->start_date);
         }
@@ -43,9 +42,6 @@ class TagihanController extends Controller
 
         $query->orderBy('jatuh_tempo', 'asc');
 
-        // ==========================================
-        // 4. FITUR EXPORT EXCEL (.xls Native)
-        // ==========================================
         if ($request->has('export')) {
             $pelanggans = $query->get();
             $filename = "Data_Tagihan_Belum_Lunas_" . date('Y-m-d') . ".xls";
@@ -89,29 +85,24 @@ class TagihanController extends Controller
         }
 
         $pelanggans = $query->get();
-        // Ambil data paket buat dropdown filter
         $pakets = \App\Models\Paket::where('status', 'Active')->get();
 
         return view('admin.tagihan.index', compact('pelanggans', 'pakets'));
     }
 
-   public function action(Request $request, string $id)
+    public function action(Request $request, string $id)
     {
         $request->validate([
             'jumlah_bulan' => 'required|integer|min:1',
             'diskon'       => 'nullable|numeric|min:0|max:100',
             'biaya_lain'   => 'nullable|numeric|min:0',
-            'paket_id'     => 'required|exists:pakets,id' // <-- UBAH JADI REQUIRED MUTLAK
+            'paket_id'     => 'required|exists:pakets,id'
         ]);
 
         $pelanggan = Pelanggan::with('paket')->findOrFail($id);
 
-        // ==========================================
-        // UPDATE/BINDING PAKET (BARU MAUPUN GANTI PAKET LAMA)
-        // ==========================================
-        // Langsung update paket_id berdasarkan pilihan dropdown di modal
         $pelanggan->update(['paket_id' => $request->paket_id]);
-        $pelanggan->load('paket'); // Refresh relasi paket agar harganya terbaca di perhitungan bawah
+        $pelanggan->load('paket');
 
         $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
         $jatuhTempoBaru = $tanggalSekarang->addMonths($request->jumlah_bulan);
@@ -122,16 +113,25 @@ class TagihanController extends Controller
             'updated_by'        => auth()->user()->username ?? 'SYSTEM'
         ]);
 
+        // LOGIKA PERHITUNGAN BIAYA
         $jumlah_bulan = $request->jumlah_bulan;
         $diskon_persen = $request->diskon ?? 0;
-        $biaya_lain = $request->biaya_lain ?? 0; 
+        $biaya_lain = $request->biaya_lain ?? 0;
 
-        // Harga normal sekarang bakal narik dari paket yang baru di-bind/diubah
-        $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
+        $harga_paket = $pelanggan->paket->harga ?? 0;
+        $harga_normal = $harga_paket * $jumlah_bulan;
         $potongan = $harga_normal * ($diskon_persen / 100);
 
-        // Kalkulasi: Harga Normal - Diskon + Biaya Lain
         $total_bayar = max(0, $harga_normal - $potongan) + $biaya_lain;
+
+        // BUNGKUS RINCIAN UNTUK EMAIL
+        $rincian = [
+            'harga_paket' => $harga_paket,
+            'jumlah_bulan' => $jumlah_bulan,
+            'diskon_nominal' => $potongan,
+            'biaya_lain' => $biaya_lain,
+            'total_bayar' => $total_bayar,
+        ];
 
         Transaksi::create([
             'pelanggan_id' => $pelanggan->id,
@@ -139,6 +139,8 @@ class TagihanController extends Controller
             'jumlah'       => $total_bayar,
             'created_by'   => auth()->user()->username ?? 'SYSTEM'
         ]);
+
+        $this->sendInvoiceEmail($pelanggan, $rincian, $jatuhTempoBaru);
 
         return back()->with('success', "Tagihan {$pelanggan->nama_pelanggan} Lunas & riwayat tercatat di Transaksi!");
     }
@@ -155,7 +157,7 @@ class TagihanController extends Controller
         $pelanggans = Pelanggan::with('paket')->whereIn('id', $request->ids)->get();
         $jumlah_bulan = $request->jumlah_bulan;
         $diskon_persen = $request->diskon ?? 0;
-        $biaya_lain = $request->biaya_lain ?? 0; // Biaya Lain per Pelanggan
+        $biaya_lain = $request->biaya_lain ?? 0;
 
         foreach ($pelanggans as $pelanggan) {
             $tanggalSekarang = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo) : Carbon::now();
@@ -167,11 +169,21 @@ class TagihanController extends Controller
                 'updated_by'        => auth()->user()->username ?? 'SYSTEM'
             ]);
 
-            $harga_normal = ($pelanggan->paket->harga ?? 0) * $jumlah_bulan;
+            // LOGIKA PERHITUNGAN BIAYA MASSAL
+            $harga_paket = $pelanggan->paket->harga ?? 0;
+            $harga_normal = $harga_paket * $jumlah_bulan;
             $potongan = $harga_normal * ($diskon_persen / 100);
 
-            // Diterapkan ke masing-masing transaksi
             $total_bayar = max(0, $harga_normal - $potongan) + $biaya_lain;
+
+            // BUNGKUS RINCIAN UNTUK EMAIL
+            $rincian = [
+                'harga_paket' => $harga_paket,
+                'jumlah_bulan' => $jumlah_bulan,
+                'diskon_nominal' => $potongan,
+                'biaya_lain' => $biaya_lain,
+                'total_bayar' => $total_bayar,
+            ];
 
             Transaksi::create([
                 'pelanggan_id' => $pelanggan->id,
@@ -179,6 +191,8 @@ class TagihanController extends Controller
                 'jumlah'       => $total_bayar,
                 'created_by'   => auth()->user()->username ?? 'SYSTEM'
             ]);
+
+            $this->sendInvoiceEmail($pelanggan, $rincian, $jatuhTempoBaru);
         }
 
         return back()->with('success', count($request->ids) . " Tagihan massal Lunas & riwayat tercatat di Transaksi!");
@@ -187,7 +201,6 @@ class TagihanController extends Controller
     public function ingatkan($id)
     {
         $pelanggan = Pelanggan::with('paket')->findOrFail($id);
-
         $email = $pelanggan->email;
 
         if (!$email) {
@@ -197,8 +210,6 @@ class TagihanController extends Controller
         $harga = $pelanggan->paket->harga ?? 0;
         $paket = $pelanggan->paket->nama_paket ?? 'Internet';
         $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
-
-        $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk paket *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*.\n\nMohon segera melakukan pembayaran agar layanan tetap aktif. Terima kasih 🙏";
 
         try {
             Mail::to($email)->send(new TagihanMail(
@@ -227,8 +238,6 @@ class TagihanController extends Controller
 
         foreach ($pelanggans as $pelanggan) {
             $email = $pelanggan->email;
-
-            // Kalau email kosong, skip orang ini dan catat sebagai gagal
             if (!$email) {
                 $gagal++;
                 continue;
@@ -237,8 +246,6 @@ class TagihanController extends Controller
             $harga = $pelanggan->paket->harga ?? 0;
             $paket = $pelanggan->paket->nama_paket ?? 'Internet';
             $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
-
-            $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*, ini adalah pengingat tagihan internet CSMNET untuk paket *{$paket}* sebesar *Rp {$harga}* yang jatuh tempo pada tanggal *{$tgl}*.\n\nMohon segera melakukan pembayaran agar layanan tetap aktif. Terima kasih 🙏";
 
             try {
                 Mail::to($email)->send(new TagihanMail(
@@ -258,5 +265,29 @@ class TagihanController extends Controller
         }
 
         return back()->with('success', "Berhasil mengirim {$berhasil} email pengingat secara massal!");
+    }
+
+    // ==============================================
+    // PRIVATE HELPER: FUNGSI UNTUK MENGIRIM INVOICE
+    // ==============================================
+    private function sendInvoiceEmail($pelanggan, $rincian, $jatuhTempoBaru)
+    {
+        if (empty($pelanggan->email)) return;
+
+        try {
+            $paket = $pelanggan->paket->nama_paket ?? 'Paket Internet';
+
+            // Kirim variabel array $rincian ke Mailable
+            Mail::to($pelanggan->email)->send(new InvoiceMail(
+                $pelanggan->nama_pelanggan,
+                $paket,
+                $rincian,
+                $jatuhTempoBaru->format('Y-m-d')
+            ));
+
+            Log::info("Email Invoice Lunas terkirim ke: " . $pelanggan->email);
+        } catch (\Exception $e) {
+            Log::error("Gagal kirim Email Invoice ke {$pelanggan->email}: " . $e->getMessage());
+        }
     }
 }

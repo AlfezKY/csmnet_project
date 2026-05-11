@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Komplain;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View; // WAJIB TAMBAH INI
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Mail\KomplainSelesaiMail;
 
 class KomplainController extends Controller
 {
@@ -172,8 +175,15 @@ class KomplainController extends Controller
             'status'   => 'required|in:Not Yet,In Progress,Done',
         ]);
 
+        $oldStatus = $komplain->status; // Simpan status lama
         $data['updated_by'] = auth()->user()->username ?? 'SYSTEM';
+
         $komplain->update($data);
+
+        // Jika status berubah dari selain Done menjadi Done, TRIGGER EMAIL!
+        if ($oldStatus !== 'Done' && $request->status === 'Done') {
+            $this->sendEmailSelesai($komplain);
+        }
 
         return back()->with('success', 'Status & Kategori komplain berhasil diperbarui!');
     }
@@ -183,5 +193,73 @@ class KomplainController extends Controller
     {
         $komplain->delete();
         return back()->with('success', 'Riwayat komplain berhasil dihapus!');
+    }
+
+    // [ADMIN] Tombol Manual Kirim Email Selesai
+    public function notifyDone($id)
+    {
+        $komplain = Komplain::with('pelanggan')->findOrFail($id);
+
+        if ($komplain->status !== 'Done') {
+            return back()->with('error', 'Hanya komplain dengan status Selesai (Done) yang bisa dikirimkan notifikasi.');
+        }
+
+        $this->sendEmailSelesai($komplain);
+        return back()->with('success', 'Email pemberitahuan selesai berhasil dikirim ke pelanggan!');
+    }
+
+    // Private Helper Kirim Email
+    private function sendEmailSelesai($komplain)
+    {
+        $email = $komplain->pelanggan->email ?? null;
+        if ($email) {
+            try {
+                Mail::to($email)->send(new KomplainSelesaiMail($komplain));
+                Log::info("Email Komplain Selesai terkirim ke: " . $email);
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim Email Komplain Selesai ke {$email}: " . $e->getMessage());
+            }
+        }
+    }
+
+    public function markAsDone($id)
+    {
+        $komplain = Komplain::findOrFail($id);
+
+        if ($komplain->status !== 'Done') {
+            $komplain->update([
+                'status' => 'Done',
+                'updated_by' => auth()->user()->username ?? 'SYSTEM'
+            ]);
+
+            // Trigger Email Otomatis ke Pelanggan
+            $this->sendEmailSelesai($komplain);
+        }
+
+        return back()->with('success', 'Komplain berhasil ditandai selesai dan pelanggan telah diberitahu via Email!');
+    }
+
+    // [ADMIN] Bulk Mark As Done (Massal via Checkbox)
+    public function bulkMarkAsDone(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+
+        $komplains = Komplain::with('pelanggan')->whereIn('id', $request->ids)->get();
+        $count = 0;
+
+        foreach ($komplains as $komplain) {
+            if ($komplain->status !== 'Done') {
+                $komplain->update([
+                    'status' => 'Done',
+                    'updated_by' => auth()->user()->username ?? 'SYSTEM'
+                ]);
+
+                // Trigger Email Otomatis ke Pelanggan
+                $this->sendEmailSelesai($komplain);
+                $count++;
+            }
+        }
+
+        return back()->with('success', "{$count} komplain berhasil ditandai selesai secara massal!");
     }
 }

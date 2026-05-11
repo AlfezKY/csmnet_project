@@ -7,8 +7,10 @@ use App\Models\Pelanggan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ApproveMail;
+use App\Mail\RejectMail;
 
 class ApprovalController extends Controller
 {
@@ -27,24 +29,36 @@ class ApprovalController extends Controller
 
     public function action(Request $request, $id)
     {
-        $pelanggan = Pelanggan::findOrFail($id);
+        $pelanggan = Pelanggan::with('user')->findOrFail($id);
         $action = $request->action; // 'approve' atau 'reject'
-        $reason = $request->reason; // Alasan jika reject
+        $reason = $request->reason;
 
+        // 1. KIRIM EMAIL DULUAN
+        $this->sendNotification($pelanggan, $action, $reason);
+
+        // 2. EKSEKUSI DATABASE
         DB::transaction(function () use ($pelanggan, $action) {
             if ($action === 'approve') {
                 $pelanggan->update(['status' => 'Active']);
-                $pelanggan->user->update(['status' => 'Active']);
+                if ($pelanggan->user) {
+                    $pelanggan->user->update(['status' => 'Active']);
+                }
             } else {
-                $pelanggan->update(['status' => 'Rejected']);
-                $pelanggan->user->update(['status' => 'Rejected']);
+                // JIKA REJECT: BERSIHKAN DULU DATA ANAKNYA
+                DB::table('komplains')->where('pelanggan_id', $pelanggan->id)->delete();
+                DB::table('transaksis')->where('pelanggan_id', $pelanggan->id)->delete();
+
+                // BARU HAPUS DATA BAPAKNYA
+                $userId = $pelanggan->user_id;
+                $pelanggan->delete();
+
+                if ($userId) {
+                    User::where('id', $userId)->delete();
+                }
             }
         });
 
-        // Kirim WA
-        $this->sendNotification($pelanggan, $action, $reason);
-
-        return back()->with('success', "Pelanggan berhasil " . ($action === 'approve' ? 'disetujui' : 'ditolak'));
+        return back()->with('success', "Pendaftaran pelanggan berhasil " . ($action === 'approve' ? 'disetujui' : 'ditolak dan dihapus permanen'));
     }
 
     public function bulkAction(Request $request)
@@ -55,21 +69,33 @@ class ApprovalController extends Controller
 
         if (!$ids) return back()->with('error', 'Pilih pelanggan terlebih dahulu');
 
-        $pelanggans = Pelanggan::whereIn('id', $ids)->get();
+        $pelanggans = Pelanggan::with('user')->whereIn('id', $ids)->get();
 
         foreach ($pelanggans as $pelanggan) {
+            // 1. Kirim Email Duluan
+            $this->sendNotification($pelanggan, $action, $reason);
+
+            // 2. Eksekusi Database
             DB::transaction(function () use ($pelanggan, $action) {
                 if ($action === 'approve') {
                     $pelanggan->update(['status' => 'Active']);
-                    $pelanggan->user->update(['status' => 'Active']);
+                    if ($pelanggan->user) {
+                        $pelanggan->user->update(['status' => 'Active']);
+                    }
                 } else {
-                    $pelanggan->update(['status' => 'Rejected']);
-                    $pelanggan->user->update(['status' => 'Rejected']);
+                    // JIKA REJECT: BERSIHKAN DULU DATA ANAKNYA
+                    DB::table('komplains')->where('pelanggan_id', $pelanggan->id)->delete();
+                    DB::table('transaksis')->where('pelanggan_id', $pelanggan->id)->delete();
+
+                    // BARU HAPUS DATA BAPAKNYA
+                    $userId = $pelanggan->user_id;
+                    $pelanggan->delete();
+
+                    if ($userId) {
+                        User::where('id', $userId)->delete();
+                    }
                 }
             });
-
-            // Kirim WA per pelanggan
-            $this->sendNotification($pelanggan, $action, $reason);
         }
 
         return back()->with('success', count($ids) . " data berhasil diproses");
@@ -77,33 +103,26 @@ class ApprovalController extends Controller
 
     private function sendNotification($pelanggan, $action, $reason = null)
     {
-        $domain = env('WABLAS_DOMAIN');
-        $token  = env('WABLAS_TOKEN');
+        if (empty($pelanggan->email)) return;
 
-        if (!$domain || !$token) return;
-
-        // Format No WA
-        $phone = $pelanggan->no_wa;
-        if (str_starts_with($phone, '0')) {
-            $phone = '62' . substr($phone, 1);
-        }
-
-        // Susun Pesan
         if ($action === 'approve') {
-            $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*,\n\nIni dari CSMNET, data pendaftaran kakak telah *DIAKTIFKAN*. Silahkan login ke aplikasi untuk memilih paket internet yang tersedia.\n\nTerima kasih 🙏";
+            try {
+                Mail::to($pelanggan->email)->send(new ApproveMail($pelanggan));
+                Log::info("Email Approval terkirim ke: " . $pelanggan->email);
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim Email Approval ke {$pelanggan->email}: " . $e->getMessage());
+            }
         } else {
-            $pesan = "Halo kak *{$pelanggan->nama_pelanggan}*,\n\nIni dari CSMNET, mohon maaf pendaftaran kakak *DITOLAK*.\n\n*Alasan:* {$reason}\n\nSilahkan melakukan registrasi ulang dengan data yang benar. Terima kasih.";
-        }
+            if (empty($reason)) {
+                $reason = "Data pendaftaran tidak valid atau lokasi pemasangan belum tercover oleh jaringan kami saat ini.";
+            }
 
-        try {
-            Http::withHeaders([
-                'Authorization' => $token,
-            ])->post("{$domain}/api/send-message", [
-                'phone'   => $phone,
-                'message' => $pesan,
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Gagal kirim WA Approval: " . $e->getMessage());
+            try {
+                Mail::to($pelanggan->email)->send(new RejectMail($pelanggan, $reason));
+                Log::info("Email Reject terkirim ke: " . $pelanggan->email);
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim Email Reject ke {$pelanggan->email}: " . $e->getMessage());
+            }
         }
     }
 }

@@ -325,11 +325,11 @@
                 {{-- TAMBAHAN: FORM ALASAN PENOLAKAN SATUAN --}}
                 <template x-if="confirmAction === 'reject'">
                     <div class="mb-6 text-left">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
-                        <textarea name="reason" rows="3" required
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                        <textarea name="reason" rows="3" 
                                   class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 outline-none transition-all" 
-                                  placeholder="Contoh: Lokasi saat ini belum tercover jaringan kami..."></textarea>
-                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan langsung ke WhatsApp pelanggan.</p>
+                                  placeholder="Kosongkan untuk menggunakan alasan default..."></textarea>
+                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan ke Email & WhatsApp pelanggan.</p>
                     </div>
                 </template>
                 
@@ -374,11 +374,11 @@
                 {{-- TAMBAHAN: FORM ALASAN PENOLAKAN MASSAL --}}
                 <template x-if="bulkActionType === 'reject'">
                     <div class="mb-6 text-left">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan Massal <span class="text-red-500">*</span></label>
-                        <textarea name="reason" rows="3" required
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Penolakan Massal <span class="text-gray-400 font-normal">(Opsional)</span></label>
+                        <textarea name="reason" rows="3" 
                                   class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 outline-none transition-all" 
-                                  placeholder="Masukkan alasan penolakan untuk semua data yang dipilih..."></textarea>
-                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan langsung ke WhatsApp semua pelanggan yang ditolak.</p>
+                                  placeholder="Kosongkan untuk menggunakan alasan default..."></textarea>
+                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan ke Email & WhatsApp semua pelanggan yang ditolak.</p>
                     </div>
                 </template>
                 
