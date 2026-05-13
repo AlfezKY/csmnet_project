@@ -11,17 +11,26 @@ class UserController extends Controller
 {
     public function index()
     {
-        // 1. FILTER: HANYA TAMPILKAN ORANG DALAM (Admin & Owner)
+        // 1. PROTEKSI: Hanya Owner yang boleh buka halaman Manajemen Akun
+        if (auth()->user()->role !== 'Owner') {
+            abort(403, 'Akses ditolak. Hanya Owner yang diizinkan mengakses halaman ini.');
+        }
+
         $users = User::whereIn('role', ['Admin', 'Owner'])->latest()->get();
         return view('admin.users.index', compact('users'));
     }
 
     public function store(Request $request)
     {
+        // 2. PROTEKSI: Hanya Owner yang boleh nambah akun internal
+        if (auth()->user()->role !== 'Owner') {
+            abort(403, 'Akses ditolak. Hanya Owner yang diizinkan menambah user baru.');
+        }
+
         $request->validate([
             'fullname' => 'required|string|max:255',
             'username' => 'required|string|min:3|unique:users',
-            'role'     => 'required|in:Admin,Owner', // 2. FILTER: Hapus opsi Pelanggan
+            'role'     => 'required|in:Admin,Owner',
             'password' => [
                 'required',
                 'min:8',
@@ -46,10 +55,19 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        // 3. PROTEKSI: Jika Admin yang login, dia HANYA boleh edit dirinya sendiri
+        if (auth()->user()->role === 'Admin' && auth()->id() !== $user->id) {
+            abort(403, 'Akses ditolak. Anda hanya diizinkan untuk mengubah data profil Anda sendiri.');
+        }
+
         $rules = [
             'fullname' => 'required|string|max:255',
-            'role'     => 'required|in:Admin,Owner', // 3. FILTER: Hapus opsi Pelanggan
         ];
+
+        // 4. PROTEKSI ROLE: Hanya Owner yang boleh ubah hak akses / role
+        if (auth()->user()->role === 'Owner' && $request->has('role')) {
+            $rules['role'] = 'required|in:Admin,Owner';
+        }
 
         if ($request->filled('password')) {
             $rules['password'] = ['min:8', 'regex:/[a-zA-Z]/', 'regex:/[0-9]/'];
@@ -57,18 +75,30 @@ class UserController extends Controller
 
         $request->validate($rules);
 
-        $user->update([
+        // Siapkan data yang akan diupdate (Default Name & Password)
+        $updateData = [
             'fullname'   => $request->fullname,
-            'role'       => $request->role,
             'password'   => $request->filled('password') ? Hash::make($request->password) : $user->password,
             'updated_by' => auth()->user()->username ?? 'SYSTEM',
-        ]);
+        ];
 
-        return back()->with('success', 'Data User internal berhasil diupdate!');
+        // Masukkan perubahan role HANYA JIKA dia Owner
+        if (auth()->user()->role === 'Owner' && $request->filled('role')) {
+            $updateData['role'] = $request->role;
+        }
+
+        $user->update($updateData);
+
+        return back()->with('success', 'Data Profil/User berhasil diupdate!');
     }
 
     public function destroy(User $user)
     {
+        // 5. PROTEKSI: Admin gak boleh hapus siapa-siapa
+        if (auth()->user()->role !== 'Owner') {
+            abort(403, 'Akses ditolak. Hanya Owner yang diizinkan menghapus user.');
+        }
+
         $user->delete();
         return back()->with('success', 'User internal berhasil dihapus!');
     }

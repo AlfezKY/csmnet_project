@@ -92,6 +92,18 @@
                     </div>
                 </div>
 
+                <div>
+                    <div class="flex items-center px-3 mb-4">
+                        <div x-show="!sidebarOpen" class="w-full h-[1px] bg-slate-100"></div>
+                        <p x-show="sidebarOpen" class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em] whitespace-nowrap">MASTER</p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <a href="{{ route('users.index') }}" title="Manajemen Akun" class="group flex items-center gap-3 rounded-xl py-3 px-3.5 text-sm font-semibold sidebar-transition {{ request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600' }}">
+                            <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('users.*') ? 'text-white' : 'text-slate-400 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <span x-show="sidebarOpen" class="whitespace-nowrap">Manajemen Akun</span>
+                        </a>
+                    </div>
+                </div>
                 @elseif(auth()->user()->role == 'Admin')
 
                 <div>
@@ -175,10 +187,6 @@
                             <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('paket.*') ? 'text-white' : 'text-slate-400 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                             <span x-show="sidebarOpen" class="whitespace-nowrap">Paket Internet</span>
                         </a>
-                        <a href="{{ route('users.index') }}" title="Manajemen Akun" class="group flex items-center gap-3 rounded-xl py-3 px-3.5 text-sm font-semibold sidebar-transition {{ request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600' }}">
-                            <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('users.*') ? 'text-white' : 'text-slate-400 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                            <span x-show="sidebarOpen" class="whitespace-nowrap">Manajemen Akun</span>
-                        </a>
                     </div>
                 </div>
                 @endif
@@ -216,11 +224,16 @@
                         </button>
 
                         <div x-show="open" @click.outside="open = false" x-transition.origin.top.right 
-                             class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50">
+                            class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 py-2 z-50">
                             <div class="px-4 py-3 border-b border-slate-50 mb-1 sm:hidden">
                                 <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Akun Saya</p>
                                 <p class="text-sm font-bold text-slate-700 truncate">{{ auth()->user()->fullname }}</p>
                             </div>
+
+                            <button type="button" @click="open = false; $dispatch('open-profile-modal')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-600 font-bold hover:bg-slate-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                Edit Profil
+                            </button>
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 font-bold hover:bg-red-50 transition-colors">
@@ -240,5 +253,70 @@
     </div>
 
     @stack('scripts')
+
+    {{-- MODAL EDIT PROFIL GLOBAL (Bisa dipanggil dari mana saja) --}}
+    <div x-data="{ 
+            openProfile: false,
+            password: '',
+            showPassword: false,
+            get isPasswordValid() {
+                if(this.password.length === 0) return true;
+                return this.password.length >= 8 && /[a-zA-Z]/.test(this.password) && /[0-9]/.test(this.password);
+            }
+         }"
+         @open-profile-modal.window="openProfile = true"
+         x-show="openProfile" 
+         x-cloak 
+         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
+        
+        <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl p-8" @click.away="openProfile = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100">
+            
+            <h4 class="text-xl font-bold text-slate-900 mb-1">Edit Profil Saya</h4>
+            <p class="text-sm font-medium text-slate-500 mb-6">Perbarui informasi nama dan password akun Anda.</p>
+
+            <form action="{{ url('/users/' . auth()->user()->id) }}" method="POST" class="space-y-4" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
+                @csrf @method('PUT')
+                
+                <div>
+                    <label class="block text-[10px] font-black text-slate-700 uppercase tracking-widest mb-1.5 ml-1">Nama Lengkap</label>
+                    <input type="text" name="fullname" value="{{ auth()->user()->fullname }}" class="w-full text-sm p-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-800 transition-all" required>
+                </div>
+                
+                <div class="pt-2">
+                    <label class="block text-[10px] font-black text-slate-700 uppercase tracking-widest mb-1.5 ml-1">Ganti Password (Opsional)</label>
+                    <div class="relative">
+                        <input :type="showPassword ? 'text' : 'password'" name="password" x-model="password" placeholder="Ketik sandi baru jika ingin mengubah..." 
+                               class="w-full text-sm p-3 pr-10 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-bold text-slate-800 transition-all"
+                               :class="(password.length > 0 && !isPasswordValid) ? 'border-red-400 focus:ring-red-500' : 'border-slate-100'">
+                        <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                            <svg x-show="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <svg x-show="showPassword" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.188-1.583c4.477 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
+                        </button>
+                    </div>
+                    <p class="text-[10px] font-medium mt-1.5 ml-1 transition-colors duration-200" :class="(password.length > 0 && !isPasswordValid) ? 'text-red-500' : 'text-slate-400'">
+                        * Kosongkan jika tidak diganti. Jika diisi, minimal 8 karakter (kombinasi huruf & angka).
+                    </p>
+                </div>
+
+                <div class="flex gap-3 pt-6 mt-6 border-t border-slate-100">
+                    <button type="button" @click="openProfile = false" class="flex-1 text-sm font-bold text-slate-500 p-3 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
+                    <button type="submit" x-bind:disabled="!isPasswordValid || isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span x-show="!isSubmitting">Simpan Perubahan</span>
+                        <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @stack('scripts')
+</body>
+</html>
+
 </body>
 </html>

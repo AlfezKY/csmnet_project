@@ -53,7 +53,6 @@ Route::middleware('auth')->group(function () {
     // KHUSUS ADMIN
     // ==========================================
     Route::middleware(['checkRole:Admin'])->group(function () {
-        Route::resource('users', UserController::class);
         Route::resource('pelanggan', PelangganController::class);
         Route::resource('paket', PaketController::class);
 
@@ -80,7 +79,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['checkRole:Owner'])->group(function () {
         Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
-
+        Route::resource('users', UserController::class);
         // Tambahkan baris ini brok:
         Route::get('/cashflow', [App\Http\Controllers\Admin\CashflowController::class, 'index'])->name('cashflow.index');
     });
