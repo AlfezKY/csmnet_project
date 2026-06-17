@@ -77,7 +77,14 @@ class KirimTagihanOtomatis extends Command
             elseif ($jatuhTempo === $todayFormatted || $jatuhTempo < $todayFormatted) {
                 // Suspend Pelanggan
                 $plg->status = 'Non Active';
-                // Status pembayaran biarkan tetap Belum Lunas biar nanti admin masih bisa nagih
+                
+                // Pastikan status pembayaran menjadi Belum Lunas
+                $plg->status_pembayaran = 'Belum Lunas'; 
+                
+                // Unbind paket internet (set null agar kembali ke opsi "-- Pilih Paket Internet --")
+                // Sesuaikan 'paket_id' dengan nama kolom foreign key paket di database kamu
+                $plg->paket_id = null; 
+                
                 $plg->save();
 
                 // Suspend User Login (jika ada) biar dia nggak bisa akses Client Portal
