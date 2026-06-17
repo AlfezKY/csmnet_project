@@ -19,6 +19,7 @@ class KirimTagihanOtomatis extends Command
 
     public function handle()
     {
+        Log::info('Scheduler KirimTagihanOtomatis dijalankan pada ' . Carbon::now()->toDateTimeString());
         $today = Carbon::today();
 
         // Kita butuh tanggal H-3, H-2, H-1 dari hari ini.
