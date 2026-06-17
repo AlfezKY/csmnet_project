@@ -13,10 +13,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('tagihan:kirim-otomatis')
-            ->dailyAt('15.06')
+            ->dailyAt('15:25')
             ->timezone('Asia/Jakarta');
 
-        $schedule->command('tagihan:update-status')->everyMinute();
+        $schedule->command('tagihan:update-status')
+            ->dailyAt('15:25')
+            ->timezone('Asia/Jakarta');
     }
 
     /**
