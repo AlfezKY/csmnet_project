@@ -201,7 +201,7 @@
                         Mulai Berlangganan
                         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
-                    <a href="https://wa.me/6281234567890" target="_blank" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:border-brand-300 hover:-translate-y-1 transition-all duration-300 shadow-sm">
+                    <a href="https://wa.me/6289612838236" target="_blank" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:border-brand-300 hover:-translate-y-1 transition-all duration-300 shadow-sm">
                         WhatsApp Kami
                     </a>
                 </div>
@@ -326,7 +326,7 @@
                                                          . "Nama: " . $pelanggan->nama_pelanggan . "\n"
                                                          . "Alamat: " . $pelanggan->alamat . "\n"
                                                          . "Paket Pilihan: " . $paket->nama_paket;
-                                                $linkWa = "https://wa.me/6281234567890?text=" . urlencode($pesanWa);
+                                                $linkWa = "https://wa.me/6289612838236?text=" . urlencode($pesanWa);
                                             @endphp
                                             <a href="{{ $linkWa }}" target="_blank" rel="noopener noreferrer" class="relative z-10 w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold hover:shadow-glow hover:scale-[1.02] transition-all duration-300 text-center mt-auto">Pilih Paket Ini</a>
                                         @endif
@@ -371,7 +371,7 @@
                                                          . "Nama: " . $pelanggan->nama_pelanggan . "\n"
                                                          . "Alamat: " . $pelanggan->alamat . "\n"
                                                          . "Paket Pilihan: " . $paket->nama_paket;
-                                                $linkWa = "https://wa.me/6281234567890?text=" . urlencode($pesanWa);
+                                                $linkWa = "https://wa.me/6289612838236?text=" . urlencode($pesanWa);
                                             @endphp
                                             <a href="{{ $linkWa }}" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl bg-slate-50 text-slate-800 font-bold hover:bg-brand-50 hover:text-brand-600 hover:scale-[1.02] hover:border-brand-200 transition-all duration-300 text-center mt-auto border border-slate-200">Pilih Paket</a>
                                         @endif
