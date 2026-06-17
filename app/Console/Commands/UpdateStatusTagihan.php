@@ -16,7 +16,7 @@ class UpdateStatusTagihan extends Command
     public function handle()
     {
         $today = Carbon::today();
-
+        Log::info('WOY CRON JALAN NIH BROK!');
         // Kita cari tanggal H+3 dari hari ini.
         // Karena kita mau nagih di H-3, berarti kita buka gerbang tagihannya 3 hari sebelum jatuh tempo.
         $h3 = $today->copy()->addDays(3)->format('Y-m-d');

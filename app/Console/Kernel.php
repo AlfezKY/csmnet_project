@@ -16,9 +16,7 @@ class Kernel extends ConsoleKernel
             ->dailyAt('15.06')
             ->timezone('Asia/Jakarta');
 
-        $schedule->command('tagihan:update-status')
-            ->dailyAt('15.05')
-            ->timezone('Asia/Jakarta');
+        $schedule->command('tagihan:update-status')->everyMinute();
     }
 
     /**
