@@ -43,26 +43,26 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 relative z-10">
     
     {{-- KARTU PEMASUKAN --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-100/60 p-6 rounded-3xl border border-emerald-100 flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-green-100/60 px-3 py-5 sm:px-4 rounded-3xl border border-emerald-100 flex items-center gap-2.5 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-emerald-200/50 to-green-300/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-emerald-600 relative z-10 border border-white/50">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
+        <div class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm flex flex-shrink-0 items-center justify-center text-emerald-600 relative z-10 border border-white/50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
         </div>
-        <div class="relative z-10 w-full">
-            <p class="text-[10px] text-emerald-800/70 font-bold uppercase tracking-widest mb-1">Pemasukan</p>
-            <h4 class="text-xl lg:text-2xl font-black text-emerald-950 truncate">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h4>
+        <div class="relative z-10 flex-1 min-w-0">
+            <p class="text-[10px] text-emerald-800/70 font-bold uppercase tracking-widest mb-0.5">Pemasukan</p>
+            <h4 class="text-lg sm:text-xl xl:text-[15px] 2xl:text-xl font-black text-emerald-950 whitespace-nowrap">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h4>
         </div>
     </div>
 
     {{-- KARTU PENGELUARAN --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-red-100/60 p-6 rounded-3xl border border-rose-100 flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br from-rose-50 to-red-100/60 px-3 py-5 sm:px-4 rounded-3xl border border-rose-100 flex items-center gap-2.5 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-rose-200/50 to-red-300/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-rose-600 relative z-10 border border-white/50">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181" /></svg>
+        <div class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm flex flex-shrink-0 items-center justify-center text-rose-600 relative z-10 border border-white/50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51 l-5.511-3.181" /></svg>
         </div>
-        <div class="relative z-10 w-full">
-            <p class="text-[10px] text-rose-800/70 font-bold uppercase tracking-widest mb-1">Pengeluaran</p>
-            <h4 class="text-xl lg:text-2xl font-black text-rose-950 truncate">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h4>
+        <div class="relative z-10 flex-1 min-w-0">
+            <p class="text-[10px] text-rose-800/70 font-bold uppercase tracking-widest mb-0.5">Pengeluaran</p>
+            <h4 class="text-lg sm:text-xl xl:text-[15px] 2xl:text-xl font-black text-rose-950 whitespace-nowrap">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h4>
         </div>
     </div>
 
@@ -75,26 +75,26 @@
         $textColor = $isProfit ? 'text-blue-950' : 'text-orange-950';
         $labelColor = $isProfit ? 'text-blue-800/70' : 'text-orange-800/70';
     @endphp
-    <div class="relative overflow-hidden bg-gradient-to-br {{ $bgClass }} p-6 rounded-3xl border flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br {{ $bgClass }} px-3 py-5 sm:px-4 rounded-3xl border flex items-center gap-2.5 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br {{ $blobClass }} rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center {{ $iconColor }} relative z-10 border border-white/50">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg>
+        <div class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm flex flex-shrink-0 items-center justify-center {{ $iconColor }} relative z-10 border border-white/50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" /></svg>
         </div>
-        <div class="relative z-10 w-full">
-            <p class="text-[10px] {{ $labelColor }} font-bold uppercase tracking-widest mb-1">Laba Bersih</p>
-            <h4 class="text-xl lg:text-2xl font-black {{ $textColor }} truncate">Rp {{ number_format($labaBersih, 0, ',', '.') }}</h4>
+        <div class="relative z-10 flex-1 min-w-0">
+            <p class="text-[10px] {{ $labelColor }} font-bold uppercase tracking-widest mb-0.5">Laba Bersih</p>
+            <h4 class="text-lg sm:text-xl xl:text-[15px] 2xl:text-xl font-black {{ $textColor }} whitespace-nowrap">Rp {{ number_format($labaBersih, 0, ',', '.') }}</h4>
         </div>
     </div>
 
     {{-- KARTU PIUTANG (UANG MENGENDAP) --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-100/60 p-6 rounded-3xl border border-amber-100 flex items-center gap-4 group transition-all duration-300 hover:shadow-md">
+    <div class="relative overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-100/60 px-3 py-5 sm:px-4 rounded-3xl border border-amber-100 flex items-center gap-2.5 group transition-all duration-300 hover:shadow-md">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br from-amber-200/50 to-yellow-300/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-        <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm flex flex-shrink-0 items-center justify-center text-amber-600 relative z-10 border border-white/50">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <div class="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm flex flex-shrink-0 items-center justify-center text-amber-600 relative z-10 border border-white/50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>
-        <div class="relative z-10 w-full" title="Total tunggakan pelanggan aktif saat ini (Real-time)">
-            <p class="text-[10px] text-amber-800/70 font-bold uppercase tracking-widest mb-1 flex items-center gap-1">Total Piutang</p>
-            <h4 class="text-xl lg:text-2xl font-black text-amber-950 truncate">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</h4>
+        <div class="relative z-10 flex-1 min-w-0" title="Total tunggakan pelanggan aktif saat ini (Real-time)">
+            <p class="text-[10px] text-amber-800/70 font-bold uppercase tracking-widest mb-0.5 flex items-center gap-1">Total Piutang</p>
+            <h4 class="text-lg sm:text-xl xl:text-[15px] 2xl:text-xl font-black text-amber-950 whitespace-nowrap">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</h4>
         </div>
     </div>
 </div>
@@ -152,7 +152,6 @@
                     <input type="hidden" name="omzet_month" value="{{ request('omzet_month') }}">
                     <input type="hidden" name="pengeluaran_month" value="{{ request('pengeluaran_month') }}">
                     
-                    {{-- PERBAIKAN DI SINI: Menggunakan $komplainFilter agar sinkron --}}
                     <input type="month" name="komplain_month" value="{{ $komplainFilter }}" onchange="this.form.submit()" class="text-[11px] px-2 py-1.5 bg-white/60 backdrop-blur-md border border-gray-200/50 rounded-lg font-bold cursor-pointer outline-none focus:ring-2 focus:ring-orange-500 text-gray-600 shadow-sm transition-all hover:bg-white">
                 </form>
             </div>
@@ -189,7 +188,7 @@
                 </div>
             </div>
 
-            <div id="complaintChart" class="w-full flex-grow relative z-10 min-h-[160px] -ml-2 mt-2"></div>
+            <div id="complaintChart" class="w-full flex-grow relative z-10 min-h-[160px] mt-2"></div>
         </div>
     </div>
 </div>
@@ -259,7 +258,9 @@
             </div>
             
             @if($totalPengeluaranChart > 0)
-                <div id="expenseChart" class="w-full flex-1 flex justify-center min-h-[280px]"></div>
+                <div class="w-full flex-1 flex justify-center items-center min-h-[320px]">
+                    <div id="expenseChart" class="w-full"></div>
+                </div>
             @else
                 <div class="w-full flex-1 flex flex-col items-center justify-center text-center min-h-[280px]">
                     <div class="w-16 h-16 bg-slate-100/50 rounded-full flex items-center justify-center mb-3 border border-slate-200/50">
@@ -322,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
     @if(!empty($omzetPaketData))
     const optionsOmzet = {
         series: [{ name: 'Total Omzet', data: @json($omzetPaketData) }],
-        chart: { type: 'bar', height: '100%', minHeight: 280, toolbar: { show: false }, fontFamily: fontFamily },
+        chart: { type: 'bar', height: 320, toolbar: { show: false }, fontFamily: fontFamily },
         colors: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'], 
         plotOptions: { 
             bar: { horizontal: true, distributed: true, borderRadius: 8, barHeight: '55%' } 
@@ -336,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
         xaxis: { categories: @json($omzetPaketLabels), labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
         yaxis: { labels: { style: { colors: '#475569', fontWeight: 700, fontSize: '13px' } } },
         grid: { show: false }, 
-        tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return formatRupiah(val); } } }, 
+        tooltip: { theme: 'light', style: { fontSize: '13px', fontFamily: fontFamily }, y: { formatter: function(val) { return val + " Rp" } } }, 
         legend: { show: false }
     };
     new ApexCharts(document.querySelector("#chartOmzetPaket"), optionsOmzet).render();
@@ -349,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.querySelector("#expenseChart") && expenseData.length > 0) {
         const expenseOptions = {
             series: expenseData.map(item => Number(item.total)),
-            chart: { type: 'donut', height: '100%', minHeight: 280, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
+            chart: { type: 'donut', height: 320, fontFamily: fontFamily, dropShadow: { enabled: true, color: '#111827', top: 2, left: 0, blur: 4, opacity: 0.05 } },
             labels: expenseData.map(item => item.kategori || 'Lain-lain'),
             colors: [
                 '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', 
@@ -368,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             value: { 
                                 fontSize: '20px', fontFamily: fontFamily, fontWeight: 'bold', color: '#111827', 
                                 formatter: function (val) { return formatRupiah(val); } 
-                            }, 
+                             }, 
                             total: { 
                                 show: true, showAlways: true, 
                                 label: 'Total', 
@@ -387,6 +388,10 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         new ApexCharts(document.querySelector("#expenseChart"), expenseOptions).render();
     }
+
+    setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, 150);
 
 });
 </script>

@@ -153,7 +153,7 @@
                         <a href="{{ route('komplain.index') }}" title="Komplain Pelanggan" class="relative group flex items-center gap-3 rounded-xl py-3 px-3.5 text-sm font-semibold sidebar-transition {{ request()->routeIs('komplain.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-100' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600' }}">
                             <svg class="w-5 h-5 flex-shrink-0 {{ request()->routeIs('komplain.*') ? 'text-white' : 'text-slate-400 group-hover:text-blue-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.8L3 20l1.8-3.6A7.5 7.5 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                             <span x-show="sidebarOpen" class="whitespace-nowrap">Komplain Pelanggan</span>
-                            @php $komplainCount = \App\Models\Komplain::whereIn('status', ['Not Yet', 'In Progress'])->count(); @endphp
+                            @php $komplainCount = \App\Models\Komplain::where('status', 'Not Yet')->count(); @endphp
                             @if($komplainCount > 0)
                                 <span x-show="sidebarOpen" class="ml-auto bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $komplainCount }}</span>
                                 <span x-show="!sidebarOpen" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>

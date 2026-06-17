@@ -71,7 +71,7 @@
         .delay-300 { transition-delay: 300ms; }
     </style>
 </head>
-<body class="text-slate-800 antialiased selection:bg-[#6b46ff] selection:text-white relative overflow-x-hidden">
+<body class="text-slate-800 antialiased selection:bg-brand-600 selection:text-white relative overflow-x-hidden">
 
     {{-- Background Dinamis --}}
     <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[#F8FAFC]">
@@ -84,22 +84,22 @@
     <nav class="fixed w-full top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="{{ url('/') }}" class="text-2xl font-black tracking-tighter text-slate-900 transition-transform hover:scale-105">
-                CSM<span class="text-transparent bg-clip-text bg-gradient-to-r from-[#6b46ff] to-[#b05aff]">.Net</span>
+                CSM<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">.Net</span>
             </a>
 
             <div class="hidden md:flex items-center gap-10">
-                <a href="{{ url('/') }}" class="text-sm font-semibold text-slate-500 hover:text-[#6b46ff] transition-colors">Beranda</a>
-                <a href="{{ url('/about') }}" class="text-sm font-semibold text-[#6b46ff] relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-[#6b46ff] after:rounded-full transition-colors">Tentang</a>
-                <a href="{{ url('/') }}#paket" class="text-sm font-semibold text-slate-500 hover:text-[#6b46ff] transition-colors">Paket Layanan</a>
+                <a href="{{ url('/') }}" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Beranda</a>
+                <a href="{{ url('/about') }}" class="text-sm font-semibold text-brand-600 relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-brand-600 after:rounded-full transition-colors">Tentang</a>
+                <a href="{{ url('/') }}#paket" class="text-sm font-semibold text-slate-500 hover:text-brand-600 transition-colors">Paket Layanan</a>
             </div>
 
             <div class="hidden md:flex items-center gap-4">
                 @auth
                     @if(Auth::user()->role === 'Pelanggan')
-                        <span class="text-sm font-bold text-slate-700 mr-2 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Halo, {{ explode(' ', Auth::user()->fullname)[0] }}
-                        </span>
+                        <a href="{{ route('client-portal') }}" class="text-sm font-bold text-slate-700 hover:text-brand-600 transition-colors mr-2 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Client Portal
+                        </a>
                         <form action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="px-5 py-2 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-full transition-colors">Logout</button>
@@ -108,14 +108,37 @@
                         <a href="{{ route('dashboard') }}" class="px-6 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-full hover:bg-slate-800 transition shadow-lg">Dashboard Admin</a>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" class="text-sm font-semibold text-slate-700 hover:text-[#6b46ff] transition-colors">Login</a>
-                    <a href="{{ url('/register') }}" class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#6b46ff] to-[#b05aff] rounded-full hover:shadow-[0_0_15px_rgba(107,70,255,0.4)] hover:-translate-y-0.5 transition-all duration-300">Daftar</a>
+                    <a href="{{ route('login') }}" class="text-sm font-semibold text-slate-700 hover:text-brand-600 transition-colors">Login</a>
+                    <a href="{{ url('/register') }}" class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-brand-600 to-indigo-600 rounded-full hover:shadow-glow hover:-translate-y-0.5 transition-all duration-300">Daftar</a>
                 @endauth
             </div>
 
             <button class="md:hidden p-2 text-slate-900" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
+        </div>
+
+        {{-- Mobile Menu (Responsive Dropdown) --}}
+        <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-white border-t border-slate-100 p-6 flex flex-col gap-4 shadow-xl md:hidden">
+            <a href="{{ url('/') }}" class="block py-2 text-base font-semibold text-slate-600">Beranda</a>
+            <a href="{{ url('/about') }}" class="block py-2 text-base font-semibold text-brand-600">Tentang</a>
+            <a href="{{ url('/') }}#paket" class="block py-2 text-base font-semibold text-slate-600">Paket Layanan</a>
+            <hr class="border-slate-100">
+            
+            @auth
+                @if(Auth::user()->role === 'Pelanggan')
+                    <a href="{{ route('client-portal') }}" class="block w-full py-3 text-center border border-brand-200 text-brand-600 rounded-xl font-bold bg-brand-50 mb-2">Buka Client Portal</a>
+                    <form action="{{ route('logout') }}" method="POST" class="w-full">
+                        @csrf
+                        <button type="submit" class="w-full py-3 text-center bg-red-50 text-red-600 rounded-xl font-bold">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('dashboard') }}" class="block w-full py-3 text-center bg-slate-900 text-white rounded-xl font-bold">Dashboard Admin</a>
+                @endif
+            @else
+                <a href="{{ route('login') }}" class="block w-full py-3 text-center border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50">Login</a>
+                <a href="{{ url('/register') }}" class="block w-full py-3 text-center bg-gradient-to-r from-brand-600 to-indigo-600 text-white rounded-xl font-bold shadow-md">Daftar Sekarang</a>
+            @endauth
         </div>
     </nav>
 
@@ -136,7 +159,7 @@
                         
                         <h1 class="text-4xl lg:text-[3.5rem] font-black text-slate-900 leading-[1.1] mb-6 tracking-tight">
                             Lebih dari sekadar <br>
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#6b46ff] to-[#b05aff]">Koneksi Internet.</span>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">Koneksi Internet.</span>
                         </h1>
                         
                         <p class="text-lg text-slate-500 font-medium leading-relaxed max-w-lg mb-8">
@@ -173,7 +196,6 @@
                             <div class="absolute inset-0 bg-brand-900/10 "></div>
                         </div>
 
-                        
                         {{-- Floating Badge Status --}}
                         <div class="absolute top-8 left-4 lg:-left-6 z-30 bg-white/95 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4 animate-float">
                             <div class="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600">
@@ -212,7 +234,6 @@
                     
                     {{-- Logo Indosat --}}
                     <div class="group relative flex justify-center items-center cursor-pointer">
-                        {{-- Efek cahaya tambahan saat di-hover --}}
                         <div class="absolute inset-0 bg-brand-500/15 rounded-full blur-2xl scale-0 group-hover:scale-150 transition-transform duration-500"></div>
                         
                         <img width="220" height="80" 
@@ -223,7 +244,6 @@
 
                     {{-- Logo Lintasarta --}}
                     <div class="group relative flex justify-center items-center cursor-pointer">
-                        {{-- Efek cahaya tambahan saat di-hover --}}
                         <div class="absolute inset-0 bg-brand-500/15 rounded-full blur-2xl scale-0 group-hover:scale-150 transition-transform duration-500"></div>
                         
                         <img width="220" height="80" 
@@ -345,7 +365,7 @@
                         <div class="flex items-center justify-center w-12 h-12 rounded-full bg-white border-4 border-brand-100 group-hover:border-brand-500 group-hover:scale-110 shadow-sm absolute left-0 md:left-1/2 md:-translate-x-1/2 transition-all duration-300 z-10">
                             <div class="w-4 h-4 bg-brand-600 rounded-full group-hover:animate-ping"></div>
                         </div>
-                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ml-14 md:ml-0 p-8 bg-gradient-to-br from-[#6b46ff] to-[#b05aff] rounded-[2rem] border border-brand-500 shadow-glow group-hover:-translate-y-1 transition-all duration-300 text-white">
+                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] ml-14 md:ml-0 p-8 bg-gradient-to-br from-brand-600 to-indigo-600 rounded-[2rem] border border-brand-500 shadow-glow group-hover:-translate-y-1 transition-all duration-300 text-white">
                             <span class="inline-block px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full mb-4 backdrop-blur-sm">Masa Depan</span>
                             <h3 class="text-2xl font-bold mb-3">Terus Berkembang</h3>
                             <p class="text-white/80 leading-relaxed font-medium">Kini melayani ribuan pelanggan, mengekspansi jaringan, dan terus berkomitmen memberikan inovasi pelayanan paling asik untuk Anda.</p>
@@ -395,8 +415,7 @@
                 <div class="col-span-2 lg:col-span-2">
                     <a href="{{ url('/') }}" class="text-2xl font-black text-white tracking-tighter">CSM<span class="text-white/80">.Net</span></a>
                     <p class="mt-4 text-white/80 text-sm font-medium leading-relaxed max-w-xs">
-                        Ps. Melayu, 
-                        Jl. Ahmad Marzuki No.100  Kec. Sambas, Kabupaten Sambas, Kalimantan Barat 79462
+                        Ps. Melayu, Jl. Ahmad Marzuki No.100 Kec. Sambas, Kabupaten Sambas, Kalimantan Barat 79462
                     </p>
                 </div>
                 

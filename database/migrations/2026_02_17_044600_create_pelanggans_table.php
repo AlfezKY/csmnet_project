@@ -19,8 +19,8 @@ return new class extends Migration
             $table->text('alamat');
             $table->string('no_wa')->nullable();;
             $table->date('jatuh_tempo')->nullable();
-            $table->enum('status_pembayaran', ['Lunas', 'Belum Lunas'])->default('Belum Lunas');
-            $table->enum('status', ['Active', 'Non Active', 'Pending'])->default('Pending');
+            $table->enum('status_pembayaran', ['Lunas', 'Belum Lunas'])->nullable();
+            $table->enum('status', ['Active', 'Non Active', 'Pending'])->default('Active');
             $table->string('email');
             $table->string('created_by')->default('SYSTEM');
             $table->string('updated_by')->nullable();

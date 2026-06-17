@@ -74,7 +74,7 @@
     <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-2xl border-t-4 border-indigo-600">
         
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Daftar CSM<span class="text-indigo-600">.TV</span></h2>
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Daftar CSM<span class="text-indigo-600">.Net</span></h2>
             <p class="text-sm text-slate-500 mt-2">Isi data diri untuk pemasangan internet rumah Anda.</p>
         </div>
         

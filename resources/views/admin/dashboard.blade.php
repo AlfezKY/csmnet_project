@@ -44,7 +44,7 @@
 {{-- ROW 1: 6 KPI CARDS (PREMIUM FLOATING STYLE) --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-5 mb-8 relative z-10">
     
-    {{-- 1. Pelanggan (Ke halaman semua pelanggan) --}}
+    {{-- 1. Pelanggan --}}
     <a href="{{ route('pelanggan.index') }}" class="block relative group animate-fade-up delay-100 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
@@ -60,7 +60,7 @@
         </div>
     </a>
 
-    {{-- 2. Paket ISP (Ke halaman semua paket) --}}
+    {{-- 2. Paket ISP --}}
     <a href="{{ route('paket.index') }}" class="block relative group animate-fade-up delay-100 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-fuchsia-400 to-pink-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
@@ -76,7 +76,7 @@
         </div>
     </a>
 
-    {{-- 3. Komplain (Difilter Hari Ini) --}}
+    {{-- 3. Komplain --}}
     <a href="{{ route('komplain.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-200 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-rose-400 to-red-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
@@ -93,7 +93,7 @@
         </div>
     </a>
 
-    {{-- 4. Tagihan (Difilter Jatuh Tempo Hari Ini) --}}
+    {{-- 4. Tagihan --}}
     <a href="{{ route('tagihan.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-200 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
@@ -110,7 +110,7 @@
         </div>
     </a>
 
-    {{-- 5. Pengeluaran (Difilter Hari Ini) --}}
+    {{-- 5. Pengeluaran --}}
     <a href="{{ route('pengeluaran.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-300 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-slate-400 to-gray-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
@@ -118,7 +118,6 @@
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-600 to-gray-800 text-white flex items-center justify-center shadow-lg shadow-slate-500/30">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 6L9 12.75l4.286-4.286a11.948 11.948 0 014.306 6.43l.776 2.898m0 0l3.182-5.511m-3.182 5.51l-5.511-3.181"></path></svg>
                 </div>
-                {{-- Tag Hari Ini Warna Slate --}}
                 <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-lg">Hari Ini</span>
             </div>
             <div>
@@ -128,7 +127,7 @@
         </div>
     </a>
 
-    {{-- 6. Omzet / Transaksi Masuk (Difilter Hari Ini) --}}
+    {{-- 6. Omzet / Transaksi Masuk --}}
     <a href="{{ route('transaksi.index', ['start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d')]) }}" class="block relative group animate-fade-up delay-300 outline-none">
         <div class="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col justify-between h-full hover:-translate-y-1.5 transition-transform duration-500">
@@ -136,7 +135,6 @@
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"></path></svg>
                 </div>
-                {{-- Tag Hari Ini Warna Emerald --}}
                 <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-lg">Hari Ini</span>
             </div>
             <div>
@@ -151,8 +149,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 relative z-0 animate-fade-up delay-300">
     
     {{-- CHART KIRI (Pertumbuhan Pelanggan) --}}
-    <div class="lg:col-span-2 relative group">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-100/40 to-indigo-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
+    <div class="lg:col-span-2 relative group min-w-0"> <div class="absolute inset-0 bg-gradient-to-br from-blue-100/40 to-indigo-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
         <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -171,12 +168,14 @@
                     </select>
                 </form>
             </div>
-            <div id="chartPelangganBaru" class="w-full flex-1 min-h-[250px]"></div>
+            <div class="w-full relative h-[300px]">
+                <div id="chartPelangganBaru" class="absolute inset-0"></div>
+            </div>
         </div>
     </div>
 
     {{-- KALENDER & LIST KANAN --}}
-    <div class="lg:col-span-1 relative group">
+    <div class="lg:col-span-1 relative group min-w-0">
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
             <h4 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
                 <span class="w-2.5 h-6 rounded-full bg-amber-500"></span>
@@ -254,9 +253,8 @@
 {{-- ROW 3: TOTAL KOMPLAIN & PIE CHART --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 relative z-0 animate-fade-up delay-400">
     
-    {{-- CHART KIRI (Komplain Gantikan Pendapatan Paket) --}}
-    <div class="lg:col-span-2 glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    {{-- CHART KIRI (Komplain) --}}
+    <div class="lg:col-span-2 glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md min-w-0"> <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <span class="w-3 h-8 rounded-full bg-rose-500"></span>
                 Total Komplain per Kategori
@@ -271,23 +269,26 @@
         </div>
         
         @if(empty($komplainChartData))
-            <div class="flex-1 flex flex-col items-center justify-center min-h-[250px] border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
+            <div class="flex-1 flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
                 <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <p class="text-sm font-bold text-gray-400">Aman! Belum ada laporan komplain di bulan ini.</p>
             </div>
         @else
-            <div id="chartKomplainKategori" class="w-full flex-1 min-h-[250px]"></div>
+            <div class="w-full relative h-[300px]">
+                <div id="chartKomplainKategori" class="absolute inset-0"></div>
+            </div>
         @endif
     </div>
 
     {{-- CHART KANAN (Kuantitas Pie) --}}
-    <div class="relative group">
-        <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col justify-center h-full transition-all duration-300 hover:shadow-md">
+    <div class="relative group min-w-0"> <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col justify-center h-full transition-all duration-300 hover:shadow-md">
             <h4 class="text-lg font-bold text-gray-900 mb-6 flex items-center justify-center gap-2">
                 <span class="w-2.5 h-6 rounded-full bg-fuchsia-500"></span>
                 Kuantitas Pemakaian ISP
             </h4>
-            <div id="chartPieISP" class="w-full h-64 flex justify-center drop-shadow-md"></div>
+            <div class="w-full relative h-[300px] flex justify-center drop-shadow-md">
+                <div id="chartPieISP" class="absolute inset-0 flex justify-center items-center"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -296,8 +297,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-0 animate-fade-up delay-400">
     
     {{-- CHART KIRI (Aktivitas Transaksi) --}}
-    <div class="lg:col-span-2 relative group">
-        <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
+    <div class="lg:col-span-2 relative group min-w-0"> <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <span class="w-3 h-8 rounded-full bg-purple-500"></span>
@@ -309,12 +309,14 @@
                     <input type="month" name="trx_month" value="{{ $trxFilter }}" onchange="this.form.submit()" class="text-sm px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-purple-500 text-gray-600 shadow-sm transition-all hover:bg-gray-50">
                 </form>
             </div>
-            <div id="chartTransaksiPerHari" class="w-full flex-1 min-h-[300px]"></div>
+            <div class="w-full relative h-[300px]">
+                <div id="chartTransaksiPerHari" class="absolute inset-0"></div>
+            </div>
         </div>
     </div>
 
     {{-- LIST KANAN (Pelanggan Menunggak > 3 Hari) --}}
-    <div class="relative group">
+    <div class="relative group min-w-0">
         <div class="absolute inset-0 bg-gradient-to-br from-red-100/40 to-rose-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-red-500">
             <h4 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
@@ -363,11 +365,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const fontFamily = 'Instrument Sans, sans-serif';
     const formatRupiah = (value) => "Rp " + value.toLocaleString('id-ID');
 
+    // Mencegah double render dengan mengosongkan container terlebih dahulu
+    document.querySelector("#chartPelangganBaru").innerHTML = "";
+    document.querySelector("#chartKomplainKategori") ? document.querySelector("#chartKomplainKategori").innerHTML = "" : null;
+    document.querySelector("#chartPieISP").innerHTML = "";
+    document.querySelector("#chartTransaksiPerHari").innerHTML = "";
+
     // 1. CHART PELANGGAN BARU (BAR)
     const optionsPelanggan = {
         series: [{ name: 'Pelanggan Baru', data: @json($pelangganBaru) }],
         chart: { 
-            type: 'bar', height: '100%', minHeight: 250, toolbar: { show: false }, fontFamily: fontFamily,
+            type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: fontFamily, // Set height ke 100%
             animations: { enabled: true, easing: 'easeinout', speed: 800 }
         },
         colors: ['#3b82f6'],
@@ -391,8 +399,7 @@ document.addEventListener('DOMContentLoaded', function () {
         series: [{ name: 'Total Laporan', data: @json($komplainChartData) }],
         chart: { 
             type: 'bar', 
-            height: '100%', 
-            minHeight: 250, 
+            height: '100%', // Set height ke 100%
             toolbar: { show: false }, 
             fontFamily: fontFamily 
         },
@@ -426,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const optionsPie = {
         series: pieData.length > 0 ? pieData : [1], 
         labels: pieLabels.length > 0 ? pieLabels : ['Belum Ada Data'],
-        chart: { type: 'donut', height: 300, fontFamily: fontFamily },
+        chart: { type: 'donut', height: '100%', fontFamily: fontFamily }, // Set height ke 100%
         colors: ['#8b5cf6', '#3b82f6', '#0ea5e9', '#10b981', '#f59e0b', '#f43f5e'],
         dataLabels: { enabled: false }, 
         stroke: { show: true, colors: '#ffffff', width: 3 },
@@ -449,20 +456,13 @@ document.addEventListener('DOMContentLoaded', function () {
     new ApexCharts(document.querySelector("#chartPieISP"), optionsPie).render();
 
     // 4. CHART TOTAL TRANSAKSI PER HARI (AREA CHART PREMIUM)
-    // Ambil bulan dan tahun dari filter (Bulan dipaksa jadi 2 digit, misal: 4 jadi 04)
     const trxSelectedMonth = '{{ str_pad($trxMonth, 2, "0", STR_PAD_LEFT) }}';
     const trxSelectedYear = '{{ $trxYear }}';
 
     const optionsTrx = {
         series: [{ name: 'Transaksi', data: @json($trxPerHariData) }],
-        chart: { type: 'area', height: '100%', minHeight: 300, toolbar: { show: true , tools: {
-                    download: false, 
-                    selection: true,
-                    zoom: false,
-                    zoomin: false,
-                    zoomout: false,
-                    pan: true, 
-                    reset: false
+        chart: { type: 'area', height: '100%', toolbar: { show: true , tools: {
+                    download: false, selection: true, zoom: false, zoomin: false, zoomout: false, pan: true, reset: false
                 },}, fontFamily: fontFamily },
         colors: ['#8b5cf6'], 
         stroke: { curve: 'smooth', width: 4 },

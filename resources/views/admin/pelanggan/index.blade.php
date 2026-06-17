@@ -395,24 +395,10 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Tgl Jatuh Tempo</label>
-                            <input type="date" name="jatuh_tempo" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 transition-all cursor-pointer">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Status Pembayaran</label>
-                            <select name="status_pembayaran" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 transition-all cursor-pointer">
-                                <option value="Belum Lunas">Belum Lunas</option>
-                                <option value="Lunas">Lunas</option>
-                            </select>
-                        </div>
-                        <div>
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Status Layanan Internet</label>
                             <select name="status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 transition-all cursor-pointer">
+                                <option value="Active" selected>Active</option>
                                 <option value="Pending">Pending</option>
-                                <option value="Active">Active</option>
                                 <option value="Non Active">Non Active</option>
                             </select>
                         </div>
