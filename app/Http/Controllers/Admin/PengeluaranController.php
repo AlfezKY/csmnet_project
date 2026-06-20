@@ -7,6 +7,7 @@ use App\Models\Pengeluaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class PengeluaranController extends Controller
 {
@@ -112,8 +113,9 @@ class PengeluaranController extends Controller
         if ($request->hasFile('bukti_bayar')) {
             $file = $request->file('bukti_bayar');
             $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('UploadFiles'), $fileName);
-            $filePath = 'UploadFiles/' . $fileName;
+
+            // Simpan ke S3
+            $filePath = $file->storeAs('UploadFiles', $fileName, 's3');
         }
 
         Pengeluaran::create([
@@ -141,16 +143,15 @@ class PengeluaranController extends Controller
         $filePath = $pengeluaran->bukti_bayar;
 
         if ($request->hasFile('bukti_bayar')) {
-            // Hapus file lama jika ada
-            if ($filePath && File::exists(public_path($filePath))) {
-                File::delete(public_path($filePath));
+            // Hapus file lama di S3
+            if ($pengeluaran->bukti_bayar) {
+                Storage::disk('s3')->delete($pengeluaran->bukti_bayar);
             }
 
-            // Upload file baru
+            // Upload file baru ke S3
             $file = $request->file('bukti_bayar');
             $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('UploadFiles'), $fileName);
-            $filePath = 'UploadFiles/' . $fileName;
+            $filePath = $file->storeAs('UploadFiles', $fileName, 's3');
         }
 
         $pengeluaran->update([
@@ -167,9 +168,8 @@ class PengeluaranController extends Controller
 
     public function destroy(Pengeluaran $pengeluaran)
     {
-        // Hapus file fisik sebelum hapus database
-        if ($pengeluaran->bukti_bayar && File::exists(public_path($pengeluaran->bukti_bayar))) {
-            File::delete(public_path($pengeluaran->bukti_bayar));
+        if ($pengeluaran->bukti_bayar) {
+            Storage::disk('s3')->delete($pengeluaran->bukti_bayar);
         }
 
         $pengeluaran->delete();

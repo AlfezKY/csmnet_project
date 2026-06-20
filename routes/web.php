@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\PengeluaranController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Client\ClientController;
 
+use Illuminate\Support\Facades\Storage;
+
 // --- 1. PUBLIC ROUTES ---
 Route::get('/', function () {
     $pakets = Paket::where('is_show', true)->take(4)->get();
@@ -115,4 +117,15 @@ Route::middleware('auth')->group(function () {
                 <pre style="white-space: pre-wrap; word-wrap: break-word;">' . htmlspecialchars($content) . '</pre>
             </body>';
     })->name('trace-error');
+
+
+    Route::get('/test-s3', function () {
+        try {
+            // Coba upload file dummy
+            Storage::disk('s3')->put('test.txt', 'Halo Supabase!');
+            return "Berhasil upload!";
+        } catch (\Exception $e) {
+            return "Gagal: " . $e->getMessage();
+        }
+    });
 });
