@@ -7,6 +7,7 @@ use App\Models\Pengeluaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage; // Wajib dipanggil biar bisa konek S3
 
 class PengeluaranController extends Controller
 {
@@ -110,10 +111,8 @@ class PengeluaranController extends Controller
         $filePath = null;
 
         if ($request->hasFile('bukti_bayar')) {
-            $file = $request->file('bukti_bayar');
-            $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('UploadFiles'), $fileName);
-            $filePath = 'UploadFiles/' . $fileName;
+            // Langsung dilempar ke S3 (Supabase)
+            $filePath = $request->file('bukti_bayar')->store('UploadFiles', 's3');
         }
 
         Pengeluaran::create([
@@ -141,16 +140,13 @@ class PengeluaranController extends Controller
         $filePath = $pengeluaran->bukti_bayar;
 
         if ($request->hasFile('bukti_bayar')) {
-            // Hapus file lama jika ada
-            if ($filePath && File::exists(public_path($filePath))) {
-                File::delete(public_path($filePath));
+            // Hapus file lama di S3 jika ada
+            if ($filePath && Storage::disk('s3')->exists($filePath)) {
+                Storage::disk('s3')->delete($filePath);
             }
 
-            // Upload file baru
-            $file = $request->file('bukti_bayar');
-            $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('UploadFiles'), $fileName);
-            $filePath = 'UploadFiles/' . $fileName;
+            // Upload file baru ke S3 (Supabase)
+            $filePath = $request->file('bukti_bayar')->store('UploadFiles', 's3');
         }
 
         $pengeluaran->update([
@@ -167,9 +163,9 @@ class PengeluaranController extends Controller
 
     public function destroy(Pengeluaran $pengeluaran)
     {
-        // Hapus file fisik sebelum hapus database
-        if ($pengeluaran->bukti_bayar && File::exists(public_path($pengeluaran->bukti_bayar))) {
-            File::delete(public_path($pengeluaran->bukti_bayar));
+        // Hapus file fisik di S3 sebelum hapus data dari database
+        if ($pengeluaran->bukti_bayar && Storage::disk('s3')->exists($pengeluaran->bukti_bayar)) {
+            Storage::disk('s3')->delete($pengeluaran->bukti_bayar);
         }
 
         $pengeluaran->delete();
