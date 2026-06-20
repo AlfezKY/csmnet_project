@@ -339,8 +339,13 @@
                             <button @click="openEdit = true; editData = { ...{{ json_encode($plg) }}, user_username: '{{ $plg->user->username ?? '' }}', user_email: '{{ $plg->user->email ?? '' }}', user_status: '{{ $plg->user->status ?? 'Active' }}' }; document.dispatchEvent(new CustomEvent('reset-edit-form'))" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Edit Data">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
-                            <button @click="openDelete = true; deleteUrl = '{{ route('pelanggan.destroy', $plg->id) }}'" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Hapus Pelanggan">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <button @click="openDelete = true; deleteUrl = '{{ route('pelanggan.destroy', $plg->id) }}'" 
+                                    class="p-2 text-amber-500 hover:bg-amber-50 rounded-lg transition-all" 
+                                    title="Nonaktifkan Pelanggan">
+                                    {{-- Ikon User Minus (Representasi Non-Aktif) --}}
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path>
+                                </svg>
                             </button>
                         </div>
                     </td>
@@ -578,29 +583,36 @@
         </div>
     </div>
 
-    {{-- MODAL DELETE --}}
-    <div x-show="openDelete" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openDelete = false">
-            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </div>
-            <h4 class="text-xl font-bold text-gray-900 mb-2">Hapus Data Pelanggan?</h4>
-            <p class="text-sm text-gray-500 leading-relaxed mb-8 px-4">
-                Data pelanggan ini dan semua riwayat tagihannya akan terhapus. Yakin ingin melanjutkan?
-            </p>
-            <form :action="deleteUrl" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
-                @csrf @method('DELETE')
-                <div class="flex gap-3">
-                    <button type="button" @click="openDelete = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batalkan</button>
-                    <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-red-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
-                        <span x-show="!isSubmitting">Ya, Hapus</span>
-                        <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        </span>
-                    </button>
-                </div>
-            </form>
+    {{-- MODAL DELETE / NON-AKTIFKAN --}}
+<div x-show="openDelete" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" @click.away="openDelete = false">
+        
+        {{-- Lingkaran Ikon Diubah Jadi Amber/Orange dengan Ikon User Minus --}}
+        <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path>
+            </svg>
         </div>
+        
+        <h4 class="text-xl font-bold text-gray-900 mb-2">Nonaktifkan Data Pelanggan?</h4>
+        <p class="text-sm text-gray-500 leading-relaxed mb-8 px-4">
+            Status data pelanggan ini akan diubah menjadi Non Active. Histori transaksi dan komplain masa lalu akan tetap aman di sistem.
+        </p>
+        
+        <form :action="deleteUrl" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
+            @csrf @method('DELETE')
+            <div class="flex gap-3">
+                <button type="button" @click="openDelete = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batalkan</button>
+                
+                {{-- Tombol diubah jadi bg-amber-600 dan teksnya jadi "Ya, Nonaktifkan" --}}
+                <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-amber-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
+                    <span x-show="!isSubmitting">Ya, Nonaktifkan</span>
+                    <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

@@ -245,24 +245,24 @@ class PelangganController extends Controller
         return back()->with('success', 'Data pelanggan berhasil diperbarui!');
     }
 
-    public function destroy(Pelanggan $pelanggan)
+   public function destroy(Pelanggan $pelanggan)
     {
         DB::transaction(function () use ($pelanggan) {
-            $userId = $pelanggan->user_id;
+            // 1. Ubah status pelanggan menjadi Non Active
+            $pelanggan->update([
+                'status'     => 'Non Active',
+                'updated_by' => auth()->user()->username ?? 'SYSTEM',
+            ]);
 
-            // 1. Hapus semua data transaksi yang berelasi dengan pelanggan ini
-            // Menggunakan query builder jika model Transaksi belum di-import atau belum direlasikan
-            DB::table('transaksis')->where('pelanggan_id', $pelanggan->id)->delete();
-
-            // 2. Hapus data pelanggan (anak dari user, tapi parent dari transaksi)
-            $pelanggan->delete();
-
-            // 3. Terakhir, hapus data user yang terhubung (parent utama)
-            if ($userId) {
-                User::find($userId)?->delete();
+            // 2. Non-aktifkan juga akun User-nya (jika ada) agar pelanggan tidak bisa login lagi
+            if ($pelanggan->user_id) {
+                User::where('id', $pelanggan->user_id)->update([
+                    'status'     => 'Non Active', // Pastikan enum di tabel users juga pakai 'Non Active'
+                    'updated_by' => auth()->user()->username ?? 'SYSTEM',
+                ]);
             }
         });
 
-        return back()->with('success', 'Pelanggan beserta seluruh transaksinya berhasil dihapus!');
+        return back()->with('success', 'Pelanggan berhasil dinonaktifkan! Histori transaksi dan komplain tetap aman.');
     }
 }

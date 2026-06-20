@@ -53,7 +53,7 @@ class ClientController extends Controller
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
-        $user->save(); // Garis merahnya pasti hilang sekarang!
+        $user->save(); 
 
         // 2. Update data Detail Pelanggan (jika akun sudah ditautkan oleh admin)
         if ($pelanggan) {
