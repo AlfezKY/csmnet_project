@@ -31,7 +31,7 @@
         aside::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 font-sans antialiased">
+<body class="bg-[#f8fafc] text-slate-900 font-sans antialiased">                
 
     <div x-data="{ sidebarOpen: true }" class="flex h-screen overflow-hidden">
         

@@ -120,7 +120,7 @@ class DashboardController extends Controller
         // ==========================================
         $tigaHariLalu = Carbon::today()->subDays(3);
         $pelangganOverdue = Pelanggan::with('paket')
-            ->where('status', 'Active')
+            ->where('status', 'Active',)
             ->where('status_pembayaran', 'Belum Lunas')
             ->whereDate('jatuh_tempo', '<=', $tigaHariLalu)
             ->orderBy('jatuh_tempo', 'asc')
