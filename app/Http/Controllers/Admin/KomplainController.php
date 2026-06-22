@@ -13,7 +13,7 @@ use App\Mail\KomplainSelesaiMail;
 
 class KomplainController extends Controller
 {
-    // List Kategori Dummy (Taruh sini biar gampang dipanggil di Index)
+    // List Kategori (Taruh sini biar gampang dipanggil di Index)
     protected $kategoriList = [
         'Kabel Putus',
         'Modem LOS Merah',
@@ -29,8 +29,7 @@ class KomplainController extends Controller
         View::share('kategoriList', $this->kategoriList);
     }
 
-    // [ADMIN] Nampilin Semua Komplain
-    // [ADMIN] Nampilin Semua Komplain
+   
     public function index(Request $request)
     {
         $query = Komplain::with(['pelanggan', 'pelanggan.paket']);

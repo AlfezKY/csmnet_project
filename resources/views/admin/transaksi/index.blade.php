@@ -245,7 +245,9 @@
                     <th class="px-6 py-4 whitespace-nowrap">Paket ISP</th>
                     <th class="px-6 py-4 text-center whitespace-nowrap">Jumlah Nominal</th>
                     <th class="px-6 py-4 text-center whitespace-nowrap">Dibuat Pada</th>
-                    <th class="px-6 py-4 text-right whitespace-nowrap">Aksi</th>
+                    @if(auth()->user()->role == 'Owner')
+                        <th class="px-6 py-4 text-right whitespace-nowrap">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -283,6 +285,7 @@
                     </td>
 
                     {{-- 6. Aksi --}}
+                    @if(auth()->user()->role == 'Owner')
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">                    
                             {{-- Tombol Edit --}}
@@ -296,10 +299,11 @@
                             </button>
                         </div>
                     </td>
+                    @endif
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
+                    <td colspan="{{ auth()->user()->role == 'Owner' ? 6 : 5 }}" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center text-gray-400">
                             <svg class="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <span class="text-sm font-bold">Belum ada riwayat pembayaran.</span>
@@ -311,6 +315,42 @@
         </table>
     </div>
 
+    //modal edit
+    <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8" @click.away="openEdit = false">
+            <h4 class="text-xl font-bold text-gray-900 mb-6">Edit Transaksi</h4>
+            
+            <form :action="'{{ url('transaksi') }}/' + editData.id" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true">
+                @csrf 
+                @method('PUT')
+                
+                <div class="space-y-4">
+                    <input type="hidden" name="pelanggan_id" x-model="editData.pelanggan_id">
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Tanggal Bayar</label>
+                        <input type="date" name="tanggal" x-model="editData.tanggal ? editData.tanggal.substring(0, 10) : ''" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all cursor-pointer" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Total Nominal (Rp)</label>
+                        <input type="number" name="jumlah" x-model="editData.jumlah" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 transition-all" required>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-6 mt-6 border-t border-slate-100">
+                    <button type="button" @click="openEdit = false" class="flex-1 text-sm font-bold text-gray-600 p-3 hover:bg-gray-100 rounded-xl transition-all">Batal</button>
+                    <button type="submit" x-bind:disabled="isSubmitting" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl p-3 shadow-lg shadow-blue-100 transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span x-show="!isSubmitting">Simpan Perubahan</span>
+                        <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     {{-- MODAL TAMBAH (DIPERBARUI ROUNDED-2XL) --}}
     <div x-show="openAdd" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8" @click.away="openAdd = false">

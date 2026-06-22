@@ -15,7 +15,7 @@ class PelangganController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pelanggan::with(['paket', 'user'])
+        $query = Pelanggan::with(['paket', 'user',])
             ->orderByRaw("CASE WHEN status = 'Active' THEN 0 ELSE 1 END") // 1. Prioritas utama: Status Active di atas
             ->orderByRaw("jatuh_tempo IS NULL ASC")                       // 2. Data tanpa tanggal jatuh tempo taruh paling bawah
             ->orderByRaw("CASE WHEN jatuh_tempo >= CURRENT_DATE THEN 0 ELSE 1 END") // 3. Tanggal >= Hari ini naik ke atas, yang sudah lewat turun ke bawah
