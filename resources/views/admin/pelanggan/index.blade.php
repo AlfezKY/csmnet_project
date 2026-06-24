@@ -389,6 +389,12 @@
                         </div>
                     </div>
 
+                    {{-- Kolom Email Dipindah ke Sini (Full Width) --}}
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email Aktif</label>
+                        <input type="email" name="email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Pilih Paket</label>
@@ -430,10 +436,6 @@
                             <input type="text" name="username" placeholder="Cth: budi123" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email Aktif</label>
-                            <input type="email" name="email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
-                        </div>
-                        <div>
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Password</label>
                             <div class="relative">
                                 <input :type="showPassword ? 'text' : 'password'" name="password" placeholder="Min. 8 Karakter" class="w-full text-sm p-3 pr-10 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
@@ -443,7 +445,9 @@
                                 </button>
                             </div>
                         </div>
-                        <div>
+                        
+                        {{-- Tambahkan class md:col-span-2 di div bawah ini --}}
+                        <div class="md:col-span-2">
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Status Akun</label>
                             <select name="user_status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 transition-all cursor-pointer">
                                 <option value="Active">Active (Bisa Login)</option>
@@ -491,6 +495,12 @@
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">No. WhatsApp</label>
                             <input type="text" name="no_wa" x-model="editData.no_wa" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all" required>
                         </div>
+                    </div>
+
+                    {{-- Kolom Email Dipindah ke Sini (Full Width) --}}
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email Aktif</label>
+                        <input type="email" name="email" x-model="editData.email" placeholder="budi@email.com" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -546,10 +556,6 @@
                             <input type="text" name="username" x-model="editData.user_username" placeholder="Cth: budi123" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Email Aktif (Opsional)</label>
-                            <input type="email" name="email" x-model="editData.email" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
-                        </div>
-                        <div>
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Password</label>
                             <div class="relative">
                                 <input :type="showPasswordEdit ? 'text' : 'password'" name="password" :placeholder="editData.user_id ? 'Kosongkan jika tdk diganti' : 'Min. 8 Karakter'" class="w-full text-sm p-3 pr-10 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-medium transition-all">
@@ -559,7 +565,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div>
+                        <div class="md:col-span-2">
                             <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Status Akun</label>
                             <select name="user_status" x-model="editData.user_status" class="w-full text-sm p-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-600 transition-all cursor-pointer">
                                 <option value="Active">Active (Bisa Login)</option>
