@@ -19,16 +19,19 @@ class DatabaseSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
-        // Rentang waktu: 1 Agustus 2025 - 31 Agustus 2026
-        $startDate = Carbon::create(2025, 8, 1, 0, 0, 0);
-        $endDate = Carbon::create(2026, 8, 31, 23, 59, 59);
+        // ==========================================
+        // RENTANG WAKTU BARU: 1 Juni 2025 - 30 Juni 2026
+        // ==========================================
+        $startDate = Carbon::create(2025, 6, 1, 0, 0, 0);
+        $endDate = Carbon::create(2026, 6, 30, 23, 59, 59);
         $cutoffDate = Carbon::create(2026, 4, 21, 0, 0, 0); // Batas tanggal untuk status lunas
 
+        // Tanggal admin dibuat sedikit sebelum pelanggan pertama masuk (Akhir Mei 2025)
+        $tglAdmin = Carbon::create(2025, 5, 25, 8, 0, 0);
+        
         // ==========================================
         // 1. SEEDING ADMIN & OWNER
         // ==========================================
-        $tglAdmin = Carbon::create(2025, 7, 25, 8, 0, 0);
-        
         User::create([
             'fullname'   => 'Super Administrator',
             'username'   => 'admin',
@@ -50,7 +53,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ==========================================
-        // 2. SEEDING PAKET INTERNET (Sesuai Referensi)
+        // 2. SEEDING PAKET INTERNET
         // ==========================================
         $pakets = [
             Paket::create(['nama_paket' => 'Paket Hemat', 'kecepatan' => '5 Mbps', 'harga' => 165000, 'status' => 'Active', 'is_show' => true, 'keypoint' => 'Cocok untuk 1-2 perangkat, Browsing & Sosmed lancar', 'created_at' => $tglAdmin]),
@@ -60,13 +63,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         // ==========================================
-        // 3. SEEDING PELANGGAN (Angka Acak 150 - 250 Data)
+        // 3. SEEDING PELANGGAN (Juni 2025 - Juni 2026)
         // ==========================================
         $pelanggans = [];
         $jumlahPelanggan = mt_rand(150, 250);
 
         for ($i = 0; $i < $jumlahPelanggan; $i++) {
-            // Tanggal daftar acak antara Agustus 2025 - Agustus 2026
             $randomTimestamp = mt_rand($startDate->timestamp, $endDate->timestamp);
             $tglDaftar = Carbon::createFromTimestamp($randomTimestamp);
 
@@ -82,7 +84,6 @@ class DatabaseSeeder extends Seeder
                 $statusAkun = 'Pending'; 
             }
 
-            // Sync User status enum: Active / Non Active (Pending dipetakan ke Active sementara, di Pelanggan baru Pending)
             $userStatus = ($statusAkun == 'Pending') ? 'Active' : $statusAkun;
 
             $user = User::create([
@@ -98,14 +99,16 @@ class DatabaseSeeder extends Seeder
 
             $paketId = $pakets[mt_rand(0, 3)]->id;
             
-            // Set Jatuh Tempo 1 Bulan setelah daftar (Jika tidak Pending)
             $jatuhTempo = null;
             if ($statusAkun != 'Pending') {
-                // Jatuh tempo diacak untuk bulan berjalan
                 $jatuhTempo = $tglDaftar->copy()->addMonths(mt_rand(1, 6)); 
+                
+                // PAGAR 1: Biar tanggal jatuh tempo gak melompat lewat dari Juni 2026
+                if ($jatuhTempo->greaterThan($endDate)) {
+                    $jatuhTempo = $endDate->copy()->startOfDay();
+                }
             }
 
-            // LOGIKA LUNAS: Jika jatuh tempo di atas 21 April 2026, WAJIB LUNAS
             if ($jatuhTempo && $jatuhTempo->greaterThan($cutoffDate)) {
                 $statusPembayaran = 'Lunas';
             } else {
@@ -131,7 +134,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // ==========================================
-        // 4. SEEDING TRANSAKSI PEMASUKAN (Banyak Data agar Untung!)
+        // 4. SEEDING TRANSAKSI PEMASUKAN
         // ==========================================
         foreach ($pelanggans as $plg) {
             if ($plg->status == 'Pending') continue;
@@ -139,24 +142,32 @@ class DatabaseSeeder extends Seeder
             $startBulan = Carbon::parse($plg->created_at)->startOfMonth();
             $endBulan = $plg->jatuh_tempo ? Carbon::parse($plg->jatuh_tempo)->startOfMonth() : $tglDaftar->copy()->addMonths(3)->startOfMonth();
             
-            // Generate pembayaran untuk tiap bulan aktifnya (Membengkakkan Pemasukan)
+            // PAGAR 2: Batasi perulangan transaksi agar tidak menembus Juni 2026
+            if ($endBulan->greaterThan($endDate)) {
+                $endBulan = $endDate->copy()->startOfMonth();
+            }
+            
             while ($startBulan->lessThanOrEqualTo($endBulan)) {
-                if (mt_rand(1, 100) <= 95) { // 95% chance bayar
+                if (mt_rand(1, 100) <= 95) { 
                     $tglBayar = $startBulan->copy()->addDays(mt_rand(1, 20));
-                    Transaksi::create([
-                        'pelanggan_id' => $plg->id,
-                        'tanggal'      => $tglBayar->format('Y-m-d'),
-                        'jumlah'       => $plg->paket->harga ?? 165000,
-                        'created_by'   => 'admin',
-                        'created_at'   => $tglBayar,
-                    ]);
+                    
+                    // Dobel proteksi agar tanggal bayar murni mentok di Juni 2026
+                    if ($tglBayar->lessThanOrEqualTo($endDate)) {
+                        Transaksi::create([
+                            'pelanggan_id' => $plg->id,
+                            'tanggal'      => $tglBayar->format('Y-m-d'),
+                            'jumlah'       => $plg->paket->harga ?? 165000,
+                            'created_by'   => 'admin',
+                            'created_at'   => $tglBayar,
+                        ]);
+                    }
                 }
                 $startBulan->addMonth();
             }
         }
 
         // ==========================================
-        // 5. SEEDING PENGELUARAN (120 - 180 Data, Dibuat Irit agar Cashflow Positif)
+        // 5. SEEDING PENGELUARAN (Otomatis Juni 2025 - Juni 2026)
         // ==========================================
         $kategoriList = [
             'Langganan ISP Induk', 'Pembelian Perangkat (Router, Modem, Kabel)', 
@@ -171,11 +182,10 @@ class DatabaseSeeder extends Seeder
             $tglAcak = Carbon::createFromTimestamp($randomTimestamp);
             $kategori = $kategoriList[array_rand($kategoriList)];
 
-            // Setup Pengeluaran dibuat jauh lebih kecil dari total Pemasukan Transaksi (agar profit)
             if ($kategori == 'Langganan ISP Induk' || $kategori == 'Gaji Karyawan / Teknisi') {
-                $nominal = mt_rand(10, 25) * 100000; // Cuma 1jt - 2.5jt
+                $nominal = mt_rand(10, 25) * 100000; 
             } else {
-                $nominal = mt_rand(1, 20) * 10000; // Cuma 10rb - 200rb
+                $nominal = mt_rand(1, 20) * 10000; 
             }
 
             Pengeluaran::create([
@@ -189,11 +199,10 @@ class DatabaseSeeder extends Seeder
         }
 
         // ==========================================
-        // 6. SEEDING KOMPLAIN (Angka Acak 100 - 250 Data)
+        // 6. SEEDING KOMPLAIN (Otomatis Juni 2025 - Juni 2026)
         // ==========================================
         $kategoriKomplain = ['Kabel Putus', 'Modem LOS Merah', 'Internet Lambat/RTO', 'Ganti Password WiFi', 'Pembayaran/Tagihan', 'Lain-lain'];
         $priorityKomplain = ['Low', 'Medium', 'High'];
-        $statusKomplain = ['Not Yet', 'In Progress', 'Done'];
 
         $jumlahKomplain = mt_rand(100, 250);
 
@@ -201,7 +210,6 @@ class DatabaseSeeder extends Seeder
             $randomTimestamp = mt_rand($startDate->timestamp, $endDate->timestamp);
             $tglKomplain = Carbon::createFromTimestamp($randomTimestamp);
 
-            // Kebanyakan diset 'Done' biar KPI dashboardnya kelihatan bagus
             $randStatus = mt_rand(1, 100);
             if ($randStatus <= 80) {
                 $status = 'Done';
@@ -209,6 +217,12 @@ class DatabaseSeeder extends Seeder
                 $status = 'In Progress';
             } else {
                 $status = 'Not Yet';
+            }
+
+            // PAGAR 3: Biar tanggal selesai komplain (updated_at) gak lompat ke Juli 2026
+            $tglSelesaiKomplain = $tglKomplain->copy()->addHours(mt_rand(1, 48));
+            if ($tglSelesaiKomplain->greaterThan($endDate)) {
+                $tglSelesaiKomplain = $endDate->copy();
             }
 
             Komplain::create([
@@ -220,7 +234,7 @@ class DatabaseSeeder extends Seeder
                 'status'       => $status,
                 'created_by'   => 'client',
                 'created_at'   => $tglKomplain,
-                'updated_at'   => $status == 'Done' ? $tglKomplain->copy()->addHours(mt_rand(1, 48)) : $tglKomplain
+                'updated_at'   => $status == 'Done' ? $tglSelesaiKomplain : $tglKomplain
             ]);
         }
     }
