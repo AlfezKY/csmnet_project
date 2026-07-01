@@ -222,12 +222,7 @@
                     <th class="px-6 py-4 whitespace-nowrap">Tanggal</th>
                     <th class="px-6 py-4 whitespace-nowrap">Kategori</th>
                     <th class="px-6 py-4 w-1/3">Deskripsi</th>
-                    
-                    {{-- Sembunyikan Header Jumlah (Rp) untuk Admin --}}
-                    @if(auth()->user()->role == 'Owner')
                     <th class="px-6 py-4 text-right whitespace-nowrap">Jumlah (Rp)</th>
-                    @endif
-                    
                     <th class="px-6 py-4 text-center whitespace-nowrap">Bukti</th>
                     <th class="px-6 py-4 text-right whitespace-nowrap">Aksi</th>
                 </tr>
@@ -249,14 +244,18 @@
                         <p class="text-sm text-gray-600 font-medium whitespace-pre-wrap leading-relaxed">{{ $out->deskripsi ?? '-' }}</p>
                     </td>
                     
-                    {{-- Sembunyikan Isi Nominal Jumlah (Rp) untuk Admin --}}
-                    @if(auth()->user()->role == 'Owner')
+                    {{-- Kondisi: Tampilkan nominal utuh jika Owner ATAU Data ini milik dia pribadi --}}
                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                        <span class="text-sm font-black text-gray-900">
-                            Rp {{ number_format($out->jumlah, 0, ',', '.') }}
-                        </span>
+                        @if(auth()->user()->role === 'Owner' || $out->created_by === auth()->user()->username)
+                            <span class="text-sm font-black text-gray-900">
+                                Rp {{ number_format($out->jumlah, 0, ',', '.') }}
+                            </span>
+                        @else
+                            <span class="text-sm font-black text-gray-400 tracking-widest" title="Hanya pemilik data / Owner yang dapat melihat nominal">
+                                ---
+                            </span>
+                        @endif
                     </td>
-                    @endif
                     
                     <td class="px-6 py-4 text-center whitespace-nowrap">
                         @if($out->bukti_bayar)
@@ -281,7 +280,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="{{ auth()->user()->role == 'Owner' ? '6' : '5' }}" class="px-6 py-12 text-center">
+                    <td colspan="6" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center text-gray-400">
                             <div class="w-12 h-12 bg-gray-50/50 text-gray-300 rounded-full flex items-center justify-center mb-3">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -334,8 +333,7 @@
                         </div>
                     </div>
 
-                    {{-- SOLUSI: Menggunakan Hidden Input untuk Bypass Validasi Jika Admin --}}
-                    @if(auth()->user()->role === 'Owner')
+                    {{-- Semua user dapat mengisi nominal pengeluaran baru --}}
                     <div>
                         <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Total Pengeluaran (Rp)</label>
                         <div class="relative">
@@ -343,10 +341,6 @@
                             <input type="number" name="jumlah" min="0" placeholder="50000" class="w-full text-sm p-3 pl-10 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all" required>
                         </div>
                     </div>
-                    @else
-                        {{-- Admin mengisi default 0 secara tersembunyi agar form tidak di-reject sistem --}}
-                        <input type="hidden" name="jumlah" value="0">
-                    @endif
 
                     <div>
                         <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Bukti Bayar (Opsional)</label>
@@ -415,19 +409,24 @@
                         </div>
                     </div>
 
-                    {{-- SOLUSI: Menggunakan Hidden Input untuk Bypass Validasi Jika Admin --}}
-                    @if(auth()->user()->role === 'Owner')
+                    {{-- Dinamis Input Nominal Berdasarkan Kepemilikan Data --}}
                     <div>
                         <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Total Pengeluaran (Rp)</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold text-sm">Rp</span>
-                            <input type="number" name="jumlah" x-model="editData.jumlah" min="0" class="w-full text-sm p-3 pl-10 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all" required>
+                            
+                            {{-- Case A: User berhak edit (Owner ATAU Pemilik Data) --}}
+                            <div x-show="'{{ auth()->user()->role }}' === 'Owner' || editData.created_by === '{{ auth()->user()->username }}'">
+                                <input type="number" name="jumlah" x-model="editData.jumlah" :disabled="!('{{ auth()->user()->role }}' === 'Owner' || editData.created_by === '{{ auth()->user()->username }}')" min="0" class="w-full text-sm p-3 pl-10 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 transition-all">
+                            </div>
+                            
+                            {{-- Case B: User tidak berhak (Disamarkan dan diproteksi dengan hidden input nilai asli) --}}
+                            <div x-show="'{{ auth()->user()->role }}' !== 'Owner' && editData.created_by !== '{{ auth()->user()->username }}'">
+                                <input type="text" value="---" disabled class="w-full text-sm p-3 pl-10 bg-gray-100 border border-gray-100 rounded-xl outline-none font-bold text-gray-400 cursor-not-allowed transition-all">
+                                <input type="hidden" name="jumlah" :value="editData.jumlah" :disabled="'{{ auth()->user()->role }}' === 'Owner' || editData.created_by === '{{ auth()->user()->username }}'">
+                            </div>
                         </div>
                     </div>
-                    @else
-                        {{-- Admin mengirim nominal asli yang di-fetch secara tersembunyi agar data tidak hilang --}}
-                        <input type="hidden" name="jumlah" :value="editData.jumlah ?? 0">
-                    @endif
 
                     <div>
                         <label class="block text-[10px] font-black text-gray-700 uppercase tracking-widest mb-1.5 ml-1">Update Bukti Bayar</label>

@@ -66,11 +66,17 @@ class PengeluaranController extends Controller
 
                 foreach ($data as $row) {
                     $tanggal = \Carbon\Carbon::parse($row->tanggal)->format('d/m/Y');
+                    
+                    // Proteksi File Excel: Masking nominal jika bukan Owner dan bukan miliknya
+                    $jumlahTampil = (auth()->user()->role === 'Owner' || $row->created_by === auth()->user()->username) 
+                                    ? $row->jumlah 
+                                    : '***';
+
                     echo "<tr>
                             <td>{$tanggal}</td>
                             <td>{$row->kategori}</td>
                             <td>{$row->deskripsi}</td>
-                            <td>{$row->jumlah}</td>
+                            <td>{$jumlahTampil}</td>
                             <td>{$row->created_by}</td>
                           </tr>";
                 }
@@ -136,6 +142,11 @@ class PengeluaranController extends Controller
             'jumlah'      => 'required|integer|min:0',
             'bukti_bayar' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        // Backend Protection: Jika bukan Owner dan bukan pembuat data asli, paksa nilai nominal kembali ke nilai asli database
+        if (auth()->user()->role !== 'Owner' && $pengeluaran->created_by !== auth()->user()->username) {
+            $request->merge(['jumlah' => $pengeluaran->jumlah]);
+        }
 
         $filePath = $pengeluaran->bukti_bayar;
 
