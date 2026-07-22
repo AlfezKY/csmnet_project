@@ -287,15 +287,21 @@
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-gray-900 whitespace-nowrap">{{ $plg->nama_pelanggan }}</span>
                             <span class="text-[11px] text-gray-500 font-medium truncate max-w-[200px]" title="{{ $plg->alamat }}">{{ $plg->alamat }}</span>
-                            
-                            @if($plg->user_id)
-                                <span class="text-[10px] text-emerald-600 font-bold mt-1.5 flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> Akun: {{ $plg->user->status ?? 'Active' }}
+                            @if($plg->status == 'Non Active' && $plg->suspended_at)
+                                <span class="text-[10px] text-red-500 font-bold mt-1.5 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> 
+                                    Suspended By : {{ $plg->suspended_by }} At : {{ \Carbon\Carbon::parse($plg->suspended_at)->format('d-m-Y') }}
                                 </span>
                             @else
-                                <span class="text-[10px] text-orange-500 font-bold mt-1.5 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Tanpa Akun
-                                </span>
+                                @if($plg->user_id)
+                                    <span class="text-[10px] text-emerald-600 font-bold mt-1.5 flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> Akun: {{ $plg->user->status ?? 'Active' }}
+                                    </span>
+                                @else
+                                    <span class="text-[10px] text-orange-500 font-bold mt-1.5 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Tanpa Akun
+                                    </span>
+                                @endif
                             @endif
                         </div>
                     </td>

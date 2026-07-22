@@ -239,6 +239,8 @@ class PelangganController extends Controller
                 'status_pembayaran' => $data['status_pembayaran'],
                 'status'            => $data['status'],
                 'updated_by'        => auth()->user()->username ?? 'SYSTEM',
+                'suspended_by' => auth()->user()->username ?? 'SYSTEM',
+                'suspended_at' => now(),
             ]);
         });
 
@@ -252,6 +254,8 @@ class PelangganController extends Controller
             $pelanggan->update([
                 'status'     => 'Non Active',
                 'updated_by' => auth()->user()->username ?? 'SYSTEM',
+                'suspended_by' => auth()->user()->username ?? 'SYSTEM',
+                'suspended_at' => now(),
             ]);
 
             // 2. Non-aktifkan juga akun User-nya (jika ada) agar pelanggan tidak bisa login lagi

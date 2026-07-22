@@ -137,6 +137,19 @@ class DashboardController extends Controller
             ->whereMonth('tanggal', $komplainMonth)
             ->get();
 
+        $pelangganSuspended = \App\Models\Pelanggan::where('status', 'Non Active')
+            ->where('status_pembayaran', 'Belum Lunas')
+            ->whereNotNull('suspended_at')
+            ->where('suspended_at', '>=', now()->subDays(7))
+            ->orderBy('suspended_at', 'desc')
+            ->get();
+
+        $pelangganLunasNonActive = \App\Models\Pelanggan::with('paket')
+            ->where('status_pembayaran', 'Lunas')
+            ->where('status', 'Non Active')
+            ->orderBy('updated_at', 'desc') // Urutin dari yang paling baru di-update
+            ->get();
+
         // Daftar kategori (sesuai dengan KomplainController)
         $kategoriList = ['Kabel Putus', 'Modem LOS Merah', 'Internet Lambat/RTO', 'Ganti Password WiFi', 'Pembayaran/Tagihan', 'Lain-lain', 'Belum Diatur'];
 
@@ -183,10 +196,12 @@ class DashboardController extends Controller
             'trxYear',
             'trxPerHariLabel',
             'trxPerHariData',
-            'pelangganBaruPutus', // <--- Udah gue ganti variabelnya di sini
+            'pelangganBaruPutus',
             'komplainFilter',
             'komplainChartLabels',
-            'komplainChartData'
+            'komplainChartData',
+            'pelangganSuspended',
+            'pelangganLunasNonActive'
         ));
     }
 }

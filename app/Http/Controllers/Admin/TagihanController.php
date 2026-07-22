@@ -18,7 +18,7 @@ class TagihanController extends Controller
     public function index(Request $request)
     {
         $query = Pelanggan::with('paket')
-            ->where('status', 'Active')
+            ->where('status', '!=', 'Pending')
             ->where('status_pembayaran', 'Belum Lunas');
 
         if ($request->filled('q')) {

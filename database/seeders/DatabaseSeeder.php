@@ -79,9 +79,9 @@ class DatabaseSeeder extends Seeder
             if ($randStatus <= 70) {
                 $statusAkun = 'Active';
             } elseif ($randStatus <= 90) {
-                $statusAkun = 'Non Active'; 
+                $statusAkun = 'Non Active';
             } else {
-                $statusAkun = 'Pending'; 
+                $statusAkun = 'Pending';
             }
 
             $userStatus = ($statusAkun == 'Pending') ? 'Active' : $statusAkun;
@@ -98,21 +98,39 @@ class DatabaseSeeder extends Seeder
             ]);
 
             $paketId = $pakets[mt_rand(0, 3)]->id;
-            
+
             $jatuhTempo = null;
+            $suspendedBy = null;
+            $suspendedAt = null;
+
             if ($statusAkun != 'Pending') {
-                $jatuhTempo = $tglDaftar->copy()->addMonths(mt_rand(1, 6)); 
-                
+                $jatuhTempo = $tglDaftar->copy()->addMonths(mt_rand(1, 6));
+
                 // PAGAR 1: Biar tanggal jatuh tempo gak melompat lewat dari Juni 2026
                 if ($jatuhTempo->greaterThan($endDate)) {
                     $jatuhTempo = $endDate->copy()->startOfDay();
                 }
             }
 
-            if ($jatuhTempo && $jatuhTempo->greaterThan($cutoffDate)) {
-                $statusPembayaran = 'Lunas';
+            // 👇 LOGIC BARU: Custom Seeder untuk akun Non Active (Suspend)
+            if ($statusAkun == 'Non Active') {
+                $statusPembayaran = 'Belum Lunas';
+                $suspendedBy = 'admin'; // Data dummy yang nge-suspend
+
+                // Range Suspend: 01 Juli 2025 - 25 Juli 2026
+                $startSuspend = Carbon::create(2025, 7, 1, 0, 0, 0)->timestamp;
+                $endSuspend = Carbon::create(2026, 7, 25, 23, 59, 59)->timestamp;
+
+                // Pastikan tanggal suspend selalu terjadi SETELAH tanggal daftar
+                $minSuspend = max($tglDaftar->timestamp, $startSuspend);
+                $suspendedAt = Carbon::createFromTimestamp(mt_rand($minSuspend, $endSuspend));
             } else {
-                $statusPembayaran = ($statusAkun == 'Active' && mt_rand(1, 100) > 20) ? 'Lunas' : 'Belum Lunas';
+                // Logic lama untuk Active & Pending
+                if ($jatuhTempo && $jatuhTempo->greaterThan($cutoffDate)) {
+                    $statusPembayaran = 'Lunas';
+                } else {
+                    $statusPembayaran = ($statusAkun == 'Active' && mt_rand(1, 100) > 20) ? 'Lunas' : 'Belum Lunas';
+                }
             }
 
             $pelanggan = Pelanggan::create([
@@ -126,8 +144,11 @@ class DatabaseSeeder extends Seeder
                 'status_pembayaran' => $statusPembayaran,
                 'status'            => $statusAkun,
                 'created_by'        => 'SYSTEM',
+                // Masukin field suspend ke database
+                'suspended_by'      => $suspendedBy,
+                'suspended_at'      => $suspendedAt,
                 'created_at'        => $tglDaftar,
-                'updated_at'        => $tglDaftar,
+                'updated_at'        => $suspendedAt ?? $tglDaftar, // Biar logis, updated_at ngikutin waktu disuspend
             ]);
 
             $pelanggans[] = $pelanggan;

@@ -293,8 +293,88 @@
     </div>
 </div>
 
-{{-- ROW 4: AKTIVITAS TRANSAKSI & PELANGGAN MENUNGGAK --}}
-<div class="grid grid-cols-1 gap-6 mb-6 animate-fade-up delay-300">
+{{-- ROW 4: PELANGGAN DISUSPEND & LUNAS NON-ACTIVE (RESPONSIF) --}}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 relative z-0 animate-fade-up delay-400">
+
+    {{-- CARD KIRI (Pelanggan Disuspend 7 Hari Terakhir) --}}
+    <div class="relative group min-w-0">
+        <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-rose-500">
+            <div class="flex items-center justify-between mb-5">
+                <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span class="w-2.5 h-6 rounded-full bg-rose-500"></span>
+                    Disuspend (7 Hari)
+                </h4>
+                <span class="text-xs font-black text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">{{ $pelangganSuspended->count() }} Orang</span>
+            </div>
+            
+            <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2 max-h-[380px]">
+                @forelse($pelangganSuspended as $plg)
+                {{-- 👇 Diubah jadi tag <a> dan ditambahin route ke index pelanggan bawa parameter 'q' --}}
+                <a href="{{ route('pelanggan.index', ['q' => $plg->nama_pelanggan]) }}" class="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group/list block">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-100 to-red-100 text-red-600 flex items-center justify-center shrink-0 shadow-inner border border-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-gray-900 group-hover/list:text-rose-600 transition-colors truncate">{{ $plg->nama_pelanggan }}</p>
+                            <p class="text-[11px] text-gray-500 font-medium mt-0.5 truncate">Oleh: <span class="font-bold text-gray-700">{{ $plg->suspended_by }}</span></p>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0 ml-3">
+                        <p class="text-xs font-bold text-gray-700">{{ \Carbon\Carbon::parse($plg->suspended_at)->translatedFormat('d M') }}</p>
+                    </div>
+                </a>
+                @empty
+                <div class="text-center p-6 h-[250px] flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-sm font-bold text-gray-400">Aman! Gak ada yang disuspend.</span>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    {{-- CARD KANAN (Lunas Tapi Non-Active) --}}
+    <div class="relative group min-w-0">
+        <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-amber-500">
+            <div class="flex items-center justify-between mb-5">
+                <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span class="w-2.5 h-6 rounded-full bg-amber-500"></span>
+                    Lunas & Non-Active
+                </h4>
+                <span class="text-xs font-black text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg">{{ $pelangganLunasNonActive->count() }} Orang</span>
+            </div>
+            
+            <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2 max-h-[380px]">
+                @forelse($pelangganLunasNonActive as $plg)
+                {{-- 👇 Diubah jadi tag <a> juga --}}
+                <a href="{{ route('pelanggan.index', ['q' => $plg->nama_pelanggan]) }}" class="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all cursor-pointer group/list block">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 text-amber-600 flex items-center justify-center shrink-0 shadow-inner border border-white">
+                            {{-- Ikon Alert --}}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-gray-900 group-hover/list:text-amber-600 transition-colors truncate">{{ $plg->nama_pelanggan }}</p>
+                            <p class="text-[11px] text-gray-500 font-medium mt-0.5 truncate">{{ $plg->paket->nama_paket ?? 'Tanpa Paket' }}</p>
+                        </div>
+                    </div>
+                </a>
+                @empty
+                <div class="text-center p-6 h-[250px] flex flex-col items-center justify-center gap-3 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="text-sm font-bold text-gray-400">Tidak ada data.</span>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ROW 5: AKTIVITAS TRANSAKSI --}}
+<div class="grid grid-cols-1 gap-6 mb-6 relative z-0 animate-fade-up delay-300">
+    
+    {{-- CHART (Aktivitas Transaksi FULL WIDTH) --}}
     <div class="relative group min-w-0">
         <div class="absolute inset-0 bg-gradient-to-br from-violet-100/40 to-purple-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
         <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-violet-500">
@@ -303,18 +383,18 @@
                 <div>
                     <h4 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
                         <span class="w-2.5 h-6 rounded-full bg-violet-500"></span>
-                        Aktivitas Transaksi Harian
+                        Aktivitas Transaksi
                     </h4>
-                    <p class="text-[11px] text-gray-500 font-medium">Grafik real-time jumlah transaksi yang terjadi setiap hari.</p>
+                    <p class="text-[11px] text-gray-500 font-medium">Grafik real-time jumlah transaksi harian.</p>
                 </div>
                 
                 <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl border border-gray-100 shadow-inner">
-                    <input type="hidden" name="pelanggan_year" value="{{ $pelangganYear }}">
-                    <input type="hidden" name="omzet_month" value="{{ $omzetFilter }}">
-                    <input type="hidden" name="calendar_date" value="{{ $selectedDate->format('Y-m-d') }}">
-                    <input type="hidden" name="komplain_month" value="{{ $komplainFilter }}">
+                    <input type="hidden" name="pelanggan_year" value="{{ $pelangganYear ?? '' }}">
+                    <input type="hidden" name="omzet_month" value="{{ $omzetFilter ?? '' }}">
+                    <input type="hidden" name="calendar_date" value="{{ isset($selectedDate) ? $selectedDate->format('Y-m-d') : '' }}">
+                    <input type="hidden" name="komplain_month" value="{{ $komplainFilter ?? '' }}">
                     
-                    <input type="month" name="trx_month" value="{{ $trxFilter }}" onchange="this.form.submit()"
+                    <input type="month" name="trx_month" value="{{ $trxFilter ?? '' }}" onchange="this.form.submit()"
                            class="bg-white text-xs font-bold text-gray-700 px-3 py-1.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 cursor-pointer transition-all">
                 </form>
             </div>
@@ -326,8 +406,8 @@
         </div>
     </div>
 </div>
-    {{-- LIST KANAN (Pelanggan Menunggak > 3 Hari) --}}
-    
+
+
 
 @endsection
 

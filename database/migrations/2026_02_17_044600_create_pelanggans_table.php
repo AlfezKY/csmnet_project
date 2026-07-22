@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('email');
             $table->string('created_by')->default('SYSTEM');
             $table->string('updated_by')->nullable();
+            $table->string('suspended_by')->nullable();
+            $table->timestamp('suspended_at')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable();
         });
