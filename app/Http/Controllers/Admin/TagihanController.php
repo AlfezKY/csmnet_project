@@ -209,7 +209,7 @@ class TagihanController extends Controller
 
         $harga = $pelanggan->paket->harga ?? 0;
         $paket = $pelanggan->paket->nama_paket ?? 'Internet';
-        $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'segera';
+        $tgl = $pelanggan->jatuh_tempo ? Carbon::parse($pelanggan->jatuh_tempo)->translatedFormat('d M Y') : 'Belum Ada Jatuh Tempo';
 
         try {
             Mail::to($email)->send(new TagihanMail(

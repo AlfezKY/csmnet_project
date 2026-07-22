@@ -46,8 +46,8 @@ class DashboardController extends Controller
         // 2. DATA KPI (6 KOTAK ATAS)
         // ==========================================
         $kpi = [
-            'totalPelanggan'     => Pelanggan::count(),
-            'totalPaket'         => Paket::count(),
+            'totalPelanggan'     => Pelanggan::where('status', 'Active')->count(),
+            'totalPaket'         => Paket::where('status', 'Active')->count(),
             'komplainHariIni'    => Komplain::whereDate('tanggal', $today)->count(),
             'tagihanHariIni'     => Pelanggan::whereDate('jatuh_tempo', $today)->count(),
             'pengeluaranHariIni' => Pengeluaran::whereDate('tanggal', $today)->sum('jumlah'),
@@ -92,6 +92,7 @@ class DashboardController extends Controller
         // 6. CHART PIE PAKET ISP (Kuantitas Pelanggan)
         // ==========================================
         $paketAktif = Pelanggan::whereNotNull('paket_id')
+            ->where('status', 'Active') // <--- Kuncinya di sini, blay!
             ->select('paket_id', DB::raw('count(*) as total'))
             ->groupBy('paket_id')
             ->with('paket')
@@ -116,17 +117,16 @@ class DashboardController extends Controller
         }
 
         // ==========================================
-        // 8. LIST PELANGGAN MENUNGGAK (> 3 HARI)
+        // 8. LIST PELANGGAN NON ACTIVE (< 3 HARI)
         // ==========================================
         $tigaHariLalu = Carbon::today()->subDays(3);
-        $pelangganOverdue = Pelanggan::with('paket')
-            ->where('status', 'Active',)
-            ->where('status_pembayaran', 'Belum Lunas')
-            ->whereDate('jatuh_tempo', '<=', $tigaHariLalu)
-            ->orderBy('jatuh_tempo', 'asc')
+        $pelangganBaruPutus = Pelanggan::with('paket')
+            ->where('status', 'Non Active')
+            ->whereDate('updated_at', '>=', $tigaHariLalu)
+            ->orderBy('updated_at', 'desc')
             ->get();
 
-            // ==========================================
+        // ==========================================
         // 9. CHART KOMPLAIN PER KATEGORI (BAR CHART)
         // ==========================================
         $komplainFilter = $request->input('komplain_month', $today->format('Y-m'));
@@ -134,8 +134,8 @@ class DashboardController extends Controller
         $komplainMonth = Carbon::parse($komplainFilter)->month;
 
         $komplainsRaw = Komplain::whereYear('tanggal', $komplainYear)
-                             ->whereMonth('tanggal', $komplainMonth)
-                             ->get();
+            ->whereMonth('tanggal', $komplainMonth)
+            ->get();
 
         // Daftar kategori (sesuai dengan KomplainController)
         $kategoriList = ['Kabel Putus', 'Modem LOS Merah', 'Internet Lambat/RTO', 'Ganti Password WiFi', 'Pembayaran/Tagihan', 'Lain-lain', 'Belum Diatur'];
@@ -183,7 +183,7 @@ class DashboardController extends Controller
             'trxYear',
             'trxPerHariLabel',
             'trxPerHariData',
-            'pelangganOverdue',
+            'pelangganBaruPutus', // <--- Udah gue ganti variabelnya di sini
             'komplainFilter',
             'komplainChartLabels',
             'komplainChartData'

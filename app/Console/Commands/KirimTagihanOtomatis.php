@@ -93,7 +93,10 @@ class KirimTagihanOtomatis extends Command
                 }
 
                 // Kirim Notifikasi Penangguhan (pakai NotificationMail biasa, bukan struk TagihanMail)
-                $pesanSuspend = "Halo kak **{$plg->nama_pelanggan}**,\n\nMohon maaf, layanan internet CSMNET dan akses akun Anda saat ini kami **Tangguhkan Sementara (Non Aktif)** karena telah melewati batas waktu pembayaran jatuh tempo pada tanggal " . Carbon::parse($jatuhTempo)->translatedFormat('d F Y') . ".\n\nMohon segera melunasi tagihan agar layanan dapat kembali diaktifkan.";
+                $pesanSuspend = "Halo kak **{$plg->nama_pelanggan}**,\n\nMohon maaf, layanan internet CSMNET dan akses akun Anda saat ini kami *
+                *Tangguhkan Sementara (Non Aktif)** karena telah melewati batas waktu pembayaran jatuh tempo pada tanggal " .
+                Carbon::parse($jatuhTempo)->translatedFormat('d F Y') . ".\n\nMohon segera melunasi tagihan agar layanan dapat
+                kembali diaktifkan.";
 
                 try {
                     Mail::to($plg->email)->send(new NotificationMail($pesanSuspend));

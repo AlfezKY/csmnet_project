@@ -329,7 +329,7 @@
                         <textarea name="reason" rows="3" 
                                   class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 outline-none transition-all" 
                                   placeholder="Kosongkan untuk menggunakan alasan default..."></textarea>
-                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan ke Email & WhatsApp pelanggan.</p>
+                        <p class="text-[11px] text-gray-500 mt-1">Alasan ini akan dikirimkan ke Email Pelanggan.</p>
                     </div>
                 </template>
                 

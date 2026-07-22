@@ -294,66 +294,40 @@
 </div>
 
 {{-- ROW 4: AKTIVITAS TRANSAKSI & PELANGGAN MENUNGGAK --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-0 animate-fade-up delay-400">
-    
-    {{-- CHART KIRI (Aktivitas Transaksi) --}}
-    <div class="lg:col-span-2 relative group min-w-0"> <div class="glass-card relative p-7 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md">
+<div class="grid grid-cols-1 gap-6 mb-6 animate-fade-up delay-300">
+    <div class="relative group min-w-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-violet-100/40 to-purple-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
+        <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-violet-500">
+            
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <h4 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <span class="w-3 h-8 rounded-full bg-purple-500"></span>
-                    Aktivitas Transaksi Harian
-                </h4>
+                <div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+                        <span class="w-2.5 h-6 rounded-full bg-violet-500"></span>
+                        Aktivitas Transaksi Harian
+                    </h4>
+                    <p class="text-[11px] text-gray-500 font-medium">Grafik real-time jumlah transaksi yang terjadi setiap hari.</p>
+                </div>
                 
-                <form method="GET">
-                    @foreach(request()->except('trx_month') as $key => $value) <input type="hidden" name="{{ $key }}" value="{{ $value }}"> @endforeach
-                    <input type="month" name="trx_month" value="{{ $trxFilter }}" onchange="this.form.submit()" class="text-sm px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold cursor-pointer outline-none focus:ring-2 focus:ring-purple-500 text-gray-600 shadow-sm transition-all hover:bg-gray-50">
+                <form method="GET" action="{{ route('dashboard') }}" class="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl border border-gray-100 shadow-inner">
+                    <input type="hidden" name="pelanggan_year" value="{{ $pelangganYear }}">
+                    <input type="hidden" name="omzet_month" value="{{ $omzetFilter }}">
+                    <input type="hidden" name="calendar_date" value="{{ $selectedDate->format('Y-m-d') }}">
+                    <input type="hidden" name="komplain_month" value="{{ $komplainFilter }}">
+                    
+                    <input type="month" name="trx_month" value="{{ $trxFilter }}" onchange="this.form.submit()"
+                           class="bg-white text-xs font-bold text-gray-700 px-3 py-1.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 cursor-pointer transition-all">
                 </form>
             </div>
-            <div class="w-full relative h-[300px]">
-                <div id="chartTransaksiPerHari" class="absolute inset-0"></div>
-            </div>
-        </div>
-    </div>
 
-    {{-- LIST KANAN (Pelanggan Menunggak > 3 Hari) --}}
-    <div class="relative group min-w-0">
-        <div class="absolute inset-0 bg-gradient-to-br from-red-100/40 to-rose-100/20 rounded-3xl blur-2xl group-hover:opacity-70 transition-opacity duration-700 pointer-events-none"></div>
-        <div class="glass-card relative p-6 rounded-3xl shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-md border-t-4 border-red-500">
-            <h4 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
-                <span class="w-2.5 h-6 rounded-full bg-red-500"></span>
-                Peringatan Tunggakan
-            </h4>
-            <p class="text-[11px] text-gray-500 font-medium mb-5">Telat lebih dari 3 hari, perlu ditindaklanjuti.</p>
-
-            <div class="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-1 max-h-[300px]">
-                @forelse($pelangganOverdue as $plg)
-                    @php
-                        $telatHari = \Carbon\Carbon::parse($plg->jatuh_tempo)->diffInDays(\Carbon\Carbon::now());
-                    @endphp
-                    <div class="flex justify-between items-center bg-red-50/50 p-3 rounded-2xl border border-red-100 shadow-sm hover:bg-red-50 transition-all">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-xs font-black shadow-inner border border-white">
-                                {{ $telatHari }}H
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-900">{{ $plg->nama_pelanggan }}</p>
-                                <p class="text-[10px] text-red-500 font-bold mt-0.5">{{ $plg->paket->nama_paket ?? 'Tanpa Paket' }}</p>
-                            </div>
-                        </div>
-                        <a href="{{ route('pelanggan.index', ['q' => $plg->nama_pelanggan]) }}" class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg font-bold transition-colors shadow-md shadow-red-200" title="Cek & Isolir Pelanggan">
-                            Cek
-                        </a>
-                    </div>
-                @empty
-                    <div class="text-center p-6 text-xs font-bold text-emerald-600 border-2 border-dashed border-emerald-200 rounded-2xl bg-emerald-50/50 flex flex-col items-center justify-center gap-2 h-full min-h-[200px]">
-                        <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <span>Mantap! Tidak ada yang menunggak.</span>
-                    </div>
-                @endforelse
+            <div class="flex-1 w-full min-h-[280px] flex items-center justify-center">
+                <div id="chartTransaksiPerHari" class="w-full h-full"></div>
             </div>
+
         </div>
     </div>
 </div>
+    {{-- LIST KANAN (Pelanggan Menunggak > 3 Hari) --}}
+    
 
 @endsection
 

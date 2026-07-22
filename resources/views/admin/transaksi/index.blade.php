@@ -315,7 +315,7 @@
         </table>
     </div>
 
-    //modal edit
+    
     <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8" @click.away="openEdit = false">
             <h4 class="text-xl font-bold text-gray-900 mb-6">Edit Transaksi</h4>
